@@ -31,10 +31,13 @@ function getDBPassword() {
 
 async function ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp) {
     const client = await pool.connect();
-    console.log("test");
     try {
-        console.log("insert");
+        let res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
+        if (res.rows.length > 0) {
+            return false;
+        }
         await client.query("INSERT INTO utilisateur (nom, prenom, date_de_naissance, pseudo, email, mot_de_passe) VALUES ($1, $2, $3, $4, $5, $6)", [nom, prenom, date, pseudo, email, mdp]);
+        return true;
     } catch (err) {
         console.error(err);
     } finally {
@@ -46,13 +49,10 @@ async function recupererUtilisateur(email_co, mdp_co) {
     const client = await pool.connect();
     try {
         let res = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND mot_de_passe = $2", [email_co, mdp_co]);
-        if (res.rows.length > 0) {
-            console.log("BON EMAIL ET MDP");
-        } else {
-            console.log("NOP");
-        }
+        return res.rows.length > 0;
     } catch (err) {
         console.error(err);
+        return false;
     } finally {
         client.release();
     }
@@ -63,7 +63,8 @@ server.get('/index', function (req, res) {
         title: "Connection - Planify", 
         mode: "connection", 
         email_co: "",
-        mdp_co: ""
+        mdp_co: "",
+        erreur: ""
      });
 });
 
@@ -72,7 +73,8 @@ server.get('/connection', function (req, res) {
         title: "Connection - Planify", 
         mode: "connection", 
         email_co: "",
-        mdp_co: ""
+        mdp_co: "",
+        erreur: "" 
     });
 });
 
@@ -85,29 +87,55 @@ server.get('/inscription', function (req, res) {
         date: "",
         pseudo: "",
         email: "",
-        mdp: ""
+        mdp: "",
+        erreur: ""
     });
 });
 
-// faut juste pas mettre index donc j'ai mis /
-server.post('/', async (req, res) => {
+server.post('/connection', async (req, res) => {
     const { email_co, mdp_co } = req.body;
     if (email_co && mdp_co) {
-        await recupererUtilisateur(email_co, mdp_co);
+        if (await recupererUtilisateur(email_co, mdp_co)) {
+            res.render('index');
+        } else {
+            res.render('authentification', { 
+                title: "Connection - Planify",
+                mode: "connection",
+                email_co, 
+                mdp_co,
+                erreur: "Email ou mot de passe incorrect."
+            });
+        }
     } else {
         res.render('authentification', { 
             title: "Connection - Planify",
             mode: "connection",
             email_co, 
-            mdp_co
+            mdp_co,
+            erreur: ""
         });
     }
 });
 
-server.post('/connection', async (req, res) => {
+server.post('/inscription', async (req, res) => {
     const { nom, prenom, date, pseudo, email, mdp } = req.body;
     if (nom && prenom && date && pseudo && email && mdp) {
-        await ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp);
+        if (await ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp)) {
+            res.render('index');
+        } else {
+            res.render('authentification', { 
+                title: "Inscription - Planify",
+                mode: "inscription",
+                nom, 
+                prenom, 
+                date, 
+                pseudo, 
+                email, 
+                mdp,
+                erreur: "Cet email a déjà été utilisé.",
+                step: 2
+            });
+        }
     } else {
         res.render('authentification', { 
             title: "Inscription - Planify",
@@ -117,13 +145,10 @@ server.post('/connection', async (req, res) => {
             date, 
             pseudo, 
             email, 
-            mdp 
+            mdp,
+            erreur: ""
         });
     }
-});
-
-server.post('/index', async(req, res) => {
-    res.render('index');
 });
 
 server.listen(port, hostname, () => {

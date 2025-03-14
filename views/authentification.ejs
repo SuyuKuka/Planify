@@ -9,7 +9,7 @@
 </head>
 <body>
     <% if (mode === "connection") { %>  
-        <form action="/index" method="POST">
+        <form action="/connection" method="POST">
             <header>
                 <h2>Connection</h2>
             </header>
@@ -24,6 +24,11 @@
             <div class="error_connection" style="display: none;">
                 <label class="error">Veuillez remplir les champs en rouge</label>
             </div>
+            <% if (erreur !== "") { %>
+                <div class="error_message">
+                    <label class="error"><%= erreur %></label>
+                </div>
+            <% } %>
             <div>
                 <input type="submit" id="connection" value="Connection">
             </div>
@@ -33,7 +38,7 @@
             </div>
         </form>
     <% } else if (mode === "inscription") { %>  
-        <form action="/index" method="POST">
+        <form action="/inscription" method="POST">
             <header>
                 <h2>Inscription</h2>
             </header>
@@ -52,7 +57,7 @@
                     <input type="date" name="date" id="date" value="<%= date %>" required/>
                 </div>
                 <div class="error_inscription" style="display: none;">
-                    <label class="error">Veuillez remplir les champs en rouge</label>
+                    <label class="error">Veuillez remplir tous les champs.</label>
                 </div>
                 <div>
                     <button type="button" id="suivant">Suivant</button>
@@ -80,9 +85,18 @@
                     <input type ="checkbox" name="afficher"/>
                     <label>Afficher le mot de passe</label>
                 </div>
+                <% if (erreur !== "" && step === 2 && typeof step !== 'undefined') { %>
+                    <script>
+                        document.getElementById('step1').style.display = 'none';
+                        document.getElementById('step2').style.display = 'block';
+                    </script>
+                    <div class="error_message">
+                        <label class="error"><%= erreur %></label>
+                    </div>
+                <% } %>
                 <div class="error_inscription2" style="display: none;">
-                    <label class="error">Veuillez remplir les champs en rouge</label>
-                </div>
+                    <label class="error">Veuillez remplir tous les champs.</label>
+                </div> 
                 <div>
                     <button type="button" id="retour">Retour</button>
                     <input type="submit" id="inscription" value="Inscription">
@@ -99,23 +113,30 @@
         let champs_inscription2 = $("input[name='pseudo'], input[name='email'], input[name='mdp']");
         let champs_connection = $("input[name='email_co'], input[name='mdp_co']");
 
-        function couleurChamps(champs) {
+        function couleurChamps(champs, mode) {
+            let empty = false;
             champs.each(function() {
                 let input = $(this);
                 if (input.val() === "") {
+                    empty = true;
                     input.css("border", "2px solid red");
                     input.prev("label").css("color", "red");
+                    erreur(mode);
                 } else {
                     input.css("border", "");
                     input.prev("label").css("color", "");
+                    if (!empty) {
+                        erreur("");
+                    }
                 }
             });
+            return empty;
         }
 
         function updateCouleur(champs) {
             $(champs).on('input', function() {
-            let input = $(this);
-            if (input.val() !== "") {
+                let input = $(this);
+                if (input.val() !== "") {
                     input.css("border", "");
                     input.prev("label").css("color", "");
                 }
@@ -124,11 +145,15 @@
 
         function erreur(step) {
             if (step === "inscription") {
-                $(".error_inscription").css("display", "block");
+                $(".error_inscription").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
             } else if (step === "inscription2") {
-                $(".error_inscription2").css("display", "block");
+                $(".error_inscription2").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+            } else if (step === "connection") {
+                $(".error_connection").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
             } else {
-                $(".error_connection").css("display", "block");
+                $(".error_inscription").css("display", "none");
+                $(".error_inscription2").css("display", "none");
+                $(".error_connection").css("display", "none");
             }
         }
 
@@ -137,34 +162,22 @@
         updateCouleur(champs_connection);
 
         $("#suivant").click(function() {
-            let empty = false;
-            champs_inscription.each(function() {
-                let input = $(this);
-                if (input.val() === "") {
-                    empty = true;
-                    couleurChamps(champs_inscription);
-                    erreur("inscription");
-                }
-            });
-
+            let empty = couleurChamps(champs_inscription, "inscription");
             if (!empty) {
                 showStep(2);
             }
         });
-
 
         $("#retour").click(function() {
             showStep(1);
         });
         
         $("#inscription").click(function() {
-            couleurChamps(champs_inscription2);
-            erreur("inscription2");
+            couleurChamps(champs_inscription2, "inscription2");
         });
 
         $("#connection").click(function() {
-            couleurChamps(champs_connection);
-            erreur("connection");
+            couleurChamps(champs_connection, "connection");
         });
 
         function showStep(step) {
@@ -181,14 +194,16 @@
         $("input[type = 'checkbox']").on("change" ,function() {
             if ($(this).is(":checked")) {
                 $("input[name = 'mdp']").prop("type", "text");
+                $("input[name = 'mdp_co']").prop("type", "text");
             } else {
                 $("input[name = 'mdp']").prop("type", "password");
+                $("input[name = 'mdp_co']").prop("type", "password");
             }
         });
 
         let today = new Date();
         let dd = String(today.getDate()).padStart(2, '0');
-        let mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        let mm = String(today.getMonth() + 1).padStart(2, '0');
         let yyyy = today.getFullYear();
         let yyyy_min = today.getFullYear() - 100;
 
