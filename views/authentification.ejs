@@ -9,7 +9,7 @@
 </head>
 <body>
     <% if (mode === "connection") { %>  
-        <form action="/connection" method="POST">
+        <form action="/index" method="POST">
             <header>
                 <h2>Connection</h2>
             </header>
@@ -21,10 +21,14 @@
                 <label for="mdp_co">Mot de passe :</label><br>
                 <input type="password" name="mdp_co" id="mdp_co" value="<%= mdp_co %>" required/>
             </div>
+            <div class="afficher">
+                <input type ="checkbox" name="afficher"/>
+                <label>Afficher le mot de passe</label>
+            </div>
             <div class="error_connection" style="display: none;">
                 <label class="error">Veuillez remplir les champs en rouge</label>
             </div>
-            <% if (erreur !== "") { %>
+            <% if (typeof erreur !== 'undefined') { %>
                 <div class="error_message">
                     <label class="error"><%= erreur %></label>
                 </div>
@@ -38,7 +42,7 @@
             </div>
         </form>
     <% } else if (mode === "inscription") { %>  
-        <form action="/inscription" method="POST">
+        <form action="/connection" method="POST">
             <header>
                 <h2>Inscription</h2>
             </header>
@@ -85,7 +89,7 @@
                     <input type ="checkbox" name="afficher"/>
                     <label>Afficher le mot de passe</label>
                 </div>
-                <% if (erreur !== "" && step === 2 && typeof step !== 'undefined') { %>
+                <% if (typeof erreur !== 'undefined' && step === 2 && typeof step !== 'undefined') { %>
                     <script>
                         document.getElementById('step1').style.display = 'none';
                         document.getElementById('step2').style.display = 'block';

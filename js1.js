@@ -59,13 +59,7 @@ async function recupererUtilisateur(email_co, mdp_co) {
 }
 
 server.get('/index', function (req, res) {
-    res.render('authentification', { 
-        title: "Connection - Planify", 
-        mode: "connection", 
-        email_co: "",
-        mdp_co: "",
-        erreur: ""
-     });
+    res.render('index');
 });
 
 server.get('/connection', function (req, res) {
@@ -73,8 +67,7 @@ server.get('/connection', function (req, res) {
         title: "Connection - Planify", 
         mode: "connection", 
         email_co: "",
-        mdp_co: "",
-        erreur: "" 
+        mdp_co: ""
     });
 });
 
@@ -87,12 +80,11 @@ server.get('/inscription', function (req, res) {
         date: "",
         pseudo: "",
         email: "",
-        mdp: "",
-        erreur: ""
+        mdp: ""
     });
 });
 
-server.post('/connection', async (req, res) => {
+server.post('/index', async (req, res) => {
     const { email_co, mdp_co } = req.body;
     if (email_co && mdp_co) {
         if (await recupererUtilisateur(email_co, mdp_co)) {
@@ -106,22 +98,19 @@ server.post('/connection', async (req, res) => {
                 erreur: "Email ou mot de passe incorrect."
             });
         }
-    } else {
-        res.render('authentification', { 
-            title: "Connection - Planify",
-            mode: "connection",
-            email_co, 
-            mdp_co,
-            erreur: ""
-        });
-    }
+    } 
 });
 
-server.post('/inscription', async (req, res) => {
+server.post('/connection', async (req, res) => {
     const { nom, prenom, date, pseudo, email, mdp } = req.body;
     if (nom && prenom && date && pseudo && email && mdp) {
         if (await ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp)) {
-            res.render('index');
+            res.render('authentification', {
+                title: "Connection - Planify",
+                mode: "connection",
+                email_co: email,
+                mdp_co:""
+            });
         } else {
             res.render('authentification', { 
                 title: "Inscription - Planify",
@@ -136,18 +125,6 @@ server.post('/inscription', async (req, res) => {
                 step: 2
             });
         }
-    } else {
-        res.render('authentification', { 
-            title: "Inscription - Planify",
-            mode: "inscription",
-            nom, 
-            prenom, 
-            date, 
-            pseudo, 
-            email, 
-            mdp,
-            erreur: ""
-        });
     }
 });
 
