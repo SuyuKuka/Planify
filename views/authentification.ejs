@@ -15,7 +15,7 @@
             </header>
             <div>
                 <label for="email_co">Adresse e-mail :</label><br>
-                <input type="text" name="email_co" id="email_co" value="<%= email_co %>" required/>
+                <input type="email" name="email_co" id="email_co" value="<%= email_co %>" required/>
             </div>
             <div>
                 <label for="mdp_co">Mot de passe :</label><br>
@@ -26,7 +26,7 @@
                 <label>Afficher le mot de passe</label>
             </div>
             <div class="error_connection" style="display: none;">
-                <label class="error">Veuillez remplir les champs en rouge</label>
+                <label class="error">Veuillez remplir tous les champs.</label>
             </div>
             <% if (typeof erreur !== 'undefined') { %>
                 <div class="error_message">
@@ -111,11 +111,68 @@
                 </div>
             </div>
         </form>
+    <% } else if (mode === "mot_de_passe_oublie") { %>
+        <form action="/mot_de_passe_oublie" method="POST">
+            <header>
+                <h2>Mot de passe oublié</h2>
+            </header>
+            <div>
+                <label for="email_oublie">Adresse e-mail :</label><br>
+                <input type="email" name="email_oublie" id="email_oublie" value="<%= email_oublie %>" required/>
+            </div>
+            <div class="error_oublie" style="display: none;">
+                <label class="error">Veuillez remplir tous les champs.</label>
+            </div>
+            <% if (typeof erreur !== 'undefined') { %>
+                <div class="error_message">
+                    <label class="error"><%= erreur %></label>
+                </div>
+            <% } %>
+            <div>
+                <input type="submit" id="oublie" value="Envoyer">
+            </div>
+            <div>
+                <a href="/connection">Deja inscrit ?</a>
+                <a href="/inscription">Pas encore inscrit ?</a>
+            </div>
+        </form>
+    <% } else if (mode === "reinitialisation") { %>
+        <form action="/reinitialisation" method="POST">
+            <header>
+                <h2>Réinitialiser son mot de passe</h2>
+            </header>
+            <input type="hidden" name="token" value="<%= token %>"/>
+            <div>
+                <label for="mdp_re">Mot de passe :</label><br>
+                <input type="password" name="mdp_re" id="mdp_re" value="<%= mdp_re %>" required/>
+            </div>
+            <div>
+                <label for="mdp_re2">Confirmer le mot de passe :</label><br>
+                <input type="password" name="mdp_re2" id="mdp_re2" value="<%= mdp_re2 %>" required/>
+            </div>
+            <div class="afficher">
+                <input type ="checkbox" name="afficher"/>
+                <label>Afficher le mot de passe</label>
+            </div>
+            <div class="error_reinitialisation" style="display: none;">
+                <label class="error">Veuillez remplir tous les champs.</label>
+            </div>
+            <% if (typeof erreur !== 'undefined') { %>
+                <div class="error_message">
+                    <label class="error"><%= erreur %></label>
+                </div>
+            <% } %>
+            <div>
+                <input type="submit" id="reinitialisation" value="Envoyer">
+            </div>
+        </form>
     <% } %>
     <script>
         let champs_inscription = $("input[name='nom'], input[name='prenom'], input[name='date']");
         let champs_inscription2 = $("input[name='pseudo'], input[name='email'], input[name='mdp']");
         let champs_connection = $("input[name='email_co'], input[name='mdp_co']");
+        let champs_oublie = $("input[name='email_oublie']");
+        let champs_reinitialisation = $("input[name='mdp_re'], input[name='mdp_re2']");
 
         function couleurChamps(champs, mode) {
             let empty = false;
@@ -147,23 +204,31 @@
             });
         }
 
-        function erreur(step) {
-            if (step === "inscription") {
+        function erreur(mode) {
+            if (mode === "inscription") {
                 $(".error_inscription").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
-            } else if (step === "inscription2") {
+            } else if (mode === "inscription2") {
                 $(".error_inscription2").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
-            } else if (step === "connection") {
+            } else if (mode === "connection") {
                 $(".error_connection").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+            } else if (mode === "oublie") {
+                $(".error_oublie").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+            } else if (mode === "reinitialisation") {
+                $(".error_reinitialisation").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
             } else {
                 $(".error_inscription").css("display", "none");
                 $(".error_inscription2").css("display", "none");
                 $(".error_connection").css("display", "none");
+                $(".error_oublie").css("display", "none");
+                $(".error_reinitialisation").css("display", "none");
             }
         }
 
         updateCouleur(champs_inscription);
         updateCouleur(champs_inscription2);
         updateCouleur(champs_connection);
+        updateCouleur(champs_oublie);
+        updateCouleur(champs_reinitialisation);
 
         $("#suivant").click(function() {
             let empty = couleurChamps(champs_inscription, "inscription");
@@ -184,6 +249,14 @@
             couleurChamps(champs_connection, "connection");
         });
 
+        $("#oublie").click(function() {
+            couleurChamps(champs_oublie, "oublie");
+        });
+
+        $("#reinitialisation").click(function() {
+            couleurChamps(champs_reinitialisation, "reinitialisation");
+        });
+
         function showStep(step) {
             if (step === 1) {
                 document.getElementById('step1').style.display = 'block';
@@ -199,9 +272,11 @@
             if ($(this).is(":checked")) {
                 $("input[name = 'mdp']").prop("type", "text");
                 $("input[name = 'mdp_co']").prop("type", "text");
+                $("input[name = 'mdp_re'], input[name = 'mdp_re2']").prop("type", "text");
             } else {
                 $("input[name = 'mdp']").prop("type", "password");
                 $("input[name = 'mdp_co']").prop("type", "password");
+                $("input[name = 'mdp_re'], input[name = 'mdp_re2']").prop("type", "password");
             }
         });
 
