@@ -1,3 +1,4 @@
+// DEPENDANCES
 const express = require('express');
 const fs = require('fs');
 const pg = require('pg');
@@ -5,6 +6,10 @@ const { titre } = require('process');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+
+
+// VARIABLES
+
 
 const server = express();
 const router = express.Router();
@@ -31,6 +36,10 @@ server.use(express.urlencoded({ extended: true }));
 server.set('view engine', 'ejs');
 server.use(express.static(path.join(__dirname, 'public')));
 
+
+// FONCTIONS
+
+
 function getDBPassword() {
     try {
         return fs.readFileSync('password.txt', 'utf8').trim();
@@ -38,27 +47,6 @@ function getDBPassword() {
         console.error('Error: no such file or directory');
         return "0";
     }
-}
-
-function generateToken() {
-    return crypto.randomBytes(20).toString('hex');
-}
-
-async function saveResetToken(email) {
-    const token = generateToken();
-    const expirationDate = new Date(Date.now() + 60 * 60 * 1000);
-
-    const client = await pool.connect();
-    try {
-        await client.query(
-            "INSERT INTO token (email, token, expire_at) VALUES ($1, $2, $3)", [email, token, expirationDate]
-        );
-    } catch (err) {
-        console.error(err);
-    } finally {
-        client.release();
-    }
-    return token;
 }
 
 async function ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp) {
@@ -89,6 +77,31 @@ async function recupererUtilisateur(email_co, mdp_co) {
         client.release();
     }
 }
+
+function generateToken() {
+    return crypto.randomBytes(20).toString('hex');
+}
+
+async function saveResetToken(email) {
+    const token = generateToken();
+    const expirationDate = new Date(Date.now() + 5 * 60 * 1000); 
+
+    const client = await pool.connect();
+    try {
+        await client.query("DELETE FROM token WHERE email = $1", [email]);
+        await client.query("DELETE FROM token WHERE expire_at < NOW()");
+        await client.query("INSERT INTO token (email, token, expire_at) VALUES ($1, $2, $3)", [email, token, expirationDate]);
+    } catch (err) {
+        console.error(err);
+    } finally {
+        client.release();
+    }
+    return token;
+}
+
+
+// GET
+
 
 server.get('/index', function (req, res) {
     res.render('index');
@@ -160,6 +173,10 @@ server.get('/reinitialisation', async function (req, res) {
         client.release();
     }
 });
+
+
+// POST
+
 
 server.post('/index', async (req, res) => {
     const { email_co, mdp_co } = req.body;
@@ -260,7 +277,6 @@ server.post('/reinitialisation', async (req, res) => {
             token
         });
     }
-
     const client = await pool.connect();
     try {
         const result = await client.query("SELECT * FROM token WHERE token = $1 AND expire_at > NOW()", [token]);
@@ -277,7 +293,12 @@ server.post('/reinitialisation', async (req, res) => {
         const email = result.rows[0].email;
         await client.query("UPDATE utilisateur SET mot_de_passe = $1 WHERE email = $2", [mdp_re, email]);
         await client.query("DELETE FROM token WHERE email = $1", [email]);
-        res.redirect('/connection');
+        res.redirect('/connection', {
+            title: "Connection - Planify",
+            mode: "connection",
+            email_co: email,
+            mdp_co: ""
+        });
     } catch (err) {
         console.error(err);
         return res.render('authentification', { 
@@ -290,6 +311,10 @@ server.post('/reinitialisation', async (req, res) => {
         client.release();
     }
 });
+
+
+// LANCER LE SERVEUR
+
 
 server.listen(port, hostname, () => {
     console.log(`Serveur est en route sur http://${hostname}:${port}/`);
