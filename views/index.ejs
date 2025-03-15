@@ -10,7 +10,9 @@
 		<header class="top-nav">
 			<div class="left-nav">
 				<img src="/images/menu.png" id="menu" width="44" height="34"/>
-				<img src="/images/logo.png" id="logo" width="170" height="40"/>
+				<a href="/index">
+					<img src="/images/logo.png" id="logo" width="170" height="40" />
+				</a>				
 			</div>
 			<div class="right-nav">
 				<a href="connection" id="connexion-b" class="button">Se connecter</a>
@@ -41,6 +43,10 @@
 				$("main").css("grid-template-columns", "20% 60% 20%");
 				visible = true;
 			}
+		});
+
+		$("#menu").on("dragstart", function(event) {
+			event.preventDefault();
 		});
 	</script>
 </html>
