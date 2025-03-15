@@ -4,6 +4,7 @@
 		<meta charset="UTF-8"/>
 		<title>Planify</title>
 		<link href="/css/index.css" rel="stylesheet"/>
+		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	</head>
 	<body>
 		<header class="top-nav">
@@ -28,4 +29,18 @@
 			</div>
 		</main>
 	</body>
+	<script>
+		let visible = true;
+		$("#menu").click(function() {
+			if (visible) {
+				$(".left-main").css("display", "none");
+				$("main").css("grid-template-columns", "80% 20%");
+				visible = false;
+			} else {
+				$(".left-main").css("display", "block");
+				$("main").css("grid-template-columns", "20% 60% 20%");
+				visible = true;
+			}
+		});
+	</script>
 </html>

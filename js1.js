@@ -241,7 +241,6 @@ server.post('/mot_de_passe_oublie', async (req, res) => {
     if (existe) {
         try {
             const token = await saveResetToken(email_oublie);
-            console.log(token);
             await transporter.sendMail({
                 from: 'programmationwebprojet@gmail.com',
                 to: email_oublie,

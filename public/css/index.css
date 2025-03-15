@@ -40,3 +40,21 @@ body {
     padding: 10px 30px;
     border: 1px solid gray;
 }
+
+main {
+    display: grid;
+    grid-template-columns: 20% 60% 20%;
+    height: 100vh;
+}
+
+.left-main {
+    background-color: lightskyblue;
+}
+
+.center-main {
+    background-color: lightyellow;
+}
+
+.right-main {
+    background-color: lightpink;
+}
