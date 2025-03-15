@@ -32,8 +32,8 @@ const pool = new pg.Pool({
 const hostname = '127.0.0.1';
 const port = 8080;
 
-server.use(express.urlencoded({ extended: true }));
 server.set('view engine', 'ejs');
+server.use(express.urlencoded({ extended: true }));
 server.use(express.static(path.join(__dirname, 'public')));
 
 
