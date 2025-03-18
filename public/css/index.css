@@ -41,20 +41,26 @@ body {
     border: 1px solid gray;
 }
 
-main {
-    display: grid;
-    grid-template-columns: 20% 60% 20%;
+.col-sm-4 {
     height: 100vh;
 }
 
-.left-main {
+@media (max-width: 767px) { #left, #center, #right {
+        width: 100% !important;
+    }
+}
+
+#left {
     background-color: lightskyblue;
+    width: 20%;
 }
 
-.center-main {
+#center {
     background-color: lightyellow;
+    width: 60%;
 }
 
-.right-main {
+#right {
     background-color: lightpink;
+    width: 20%;
 }
