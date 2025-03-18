@@ -4,6 +4,7 @@
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Planify</title>
+		<link href="/css/nav.css" rel="stylesheet"/>
 		<link href="/css/index.css" rel="stylesheet"/>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
@@ -14,7 +15,7 @@
 			<div class="left-nav">
 				<img src="/images/menu.png" id="menu" width="44" height="34"/>
 				<a href="/index">
-					<img src="/images/logo.png" id="logo" width="170" height="40" />
+					<img src="/images/logo.png" class="logo" width="170" height="40" />
 				</a>			
 			</div>
 			<div class="right-nav">
@@ -22,9 +23,9 @@
 					<a href="connection" id="connexion-b" class="button">Se connecter</a>
 					<a href="inscription" id="inscription-b" class="button">S'inscrire</a>
 				<% } else { %>
-					<label id="pseudo"><%= pseudo %></label>
-					<a href="/index">
-						<img src="/images/reglage.png" id="logo" width="40" height="40" />
+					<label class="pseudo"><%= pseudo %></label>
+					<a href="/parametres">
+						<img src="/images/parametres.png" id="logo" width="40" height="40" />
 					</a>	
 				<% } %>
 			</div>

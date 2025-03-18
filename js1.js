@@ -122,6 +122,17 @@ server.get('/index', function (req, res) {
     });
 });
 
+server.get('/parametres', function (req, res) {
+    if (typeof req.session.email === 'undefined' || typeof req.session.pseudo === 'undefined') {
+        res.redirect('/connection');
+    } else {
+        res.render('parametres', {
+            email: req.session.email, 
+            pseudo: req.session.pseudo
+        });
+    }
+});
+
 server.get('/connection', function (req, res) {
     res.render('authentification', { 
         title: "Connection - Planify", 
@@ -215,6 +226,10 @@ server.post('/index', async (req, res) => {
             });
         }
     } 
+});
+
+server.post('/parametres', async (req, res) => {
+    
 });
 
 server.post('/connection', async (req, res) => {

@@ -4,13 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-    <link rel="stylesheet" href="css/authentification.css">
+    <link href="css/authentification.css" rel="stylesheet">
+    <link href="/css/nav.css" rel="stylesheet"/>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 </head>
 <body>
+    <header class="top-nav">
+        <div class="left-nav">
+            <img src="/images/empty.png" id="menu" width="44" height="34"/>
+            <a href="/index">
+                <img src="/images/logo.png" class="logo" width="170" height="40" />
+            </a>			
+        </div>
+        <div class="right-nav">
+            <a href="connection" id="connexion-b" class="button">Se connecter</a>
+            <a href="inscription" id="inscription-b" class="button">S'inscrire</a>
+        </div>
+    </header>
     <% if (mode === "connection") { %>  
         <form action="/index" method="POST">
-            <header>
+            <header class="authentification">
                 <h2>Connection</h2>
             </header>
             <div>
@@ -33,17 +46,16 @@
                     <label class="error"><%= erreur %></label>
                 </div>
             <% } %>
-            <div>
+            <div class="reparer">
                 <input type="submit" id="connection" value="Connection">
             </div>
-            <div>
-                <a href="/inscription">Pas encore inscrit ?</a>
+            <div class="reparer">
                 <a href="/mot_de_passe_oublie">Mot de passe oublie ?</a>
             </div>
         </form>
     <% } else if (mode === "inscription") { %>  
         <form action="/connection" method="POST">
-            <header>
+            <header class="authentification">
                 <h2>Inscription</h2>
             </header>
             
@@ -64,10 +76,9 @@
                     <label class="error">Veuillez remplir tous les champs.</label>
                 </div>
                 <div>
-                    <button type="button" id="suivant">Suivant</button>
+                    <button type="button" class="button" id="suivant">Suivant</button>
                 </div>
                 <div>
-                    <a href="/connection">Deja inscrit ?</a>
                     <a href="/mot_de_passe_oublie">Mot de passe oublie ?</a>
                 </div>
             </div>
@@ -102,18 +113,17 @@
                     <label class="error">Veuillez remplir tous les champs.</label>
                 </div> 
                 <div>
-                    <button type="button" id="retour">Retour</button>
+                    <button type="button" class="button" id="retour">Retour</button>
                     <input type="submit" id="inscription" value="Inscription">
                 </div>
                 <div>
-                    <a href="/connection">Deja inscrit ?</a>
                     <a href="/mot_de_passe_oublie">Mot de passe oublie ?</a>
                 </div>
             </div>
         </form>
     <% } else if (mode === "mot_de_passe_oublie") { %>
         <form action="/mot_de_passe_oublie" method="POST">
-            <header>
+            <header class="authentification">
                 <h2>Mot de passe oublié</h2>
             </header>
             <div>
@@ -128,17 +138,13 @@
                     <label class="error"><%= erreur %></label>
                 </div>
             <% } %>
-            <div>
+            <div class="reparer">
                 <input type="submit" id="oublie" value="Envoyer">
-            </div>
-            <div>
-                <a href="/connection">Deja inscrit ?</a>
-                <a href="/inscription">Pas encore inscrit ?</a>
             </div>
         </form>
     <% } else if (mode === "reinitialisation") { %>
         <form action="/reinitialisation" method="POST">
-            <header>
+            <header class="authentification">
                 <h2>Réinitialiser son mot de passe</h2>
             </header>
             <input type="hidden" name="token" value="<%= token %>"/>
