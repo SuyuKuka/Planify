@@ -104,7 +104,9 @@ async function saveResetToken(email) {
 
 
 server.get('/index', function (req, res) {
-    res.render('index');
+    res.render('index', {
+        cookie: undefined  
+    });
 });
 
 server.get('/connection', function (req, res) {
@@ -182,7 +184,12 @@ server.post('/index', async (req, res) => {
     const { email_co, mdp_co } = req.body;
     if (email_co && mdp_co) {
         if (await recupererUtilisateur(email_co, mdp_co)) {
-            res.render('index');
+            const client = await pool.connect();
+            let pseudo = await client.query("SELECT pseudo FROM utilisateur WHERE email = $1", [email_co]);
+            let c = document.cookie = "email=" + email_co + "; pseudo=" + pseudo + ";";
+            res.render('index', {
+                cookie: c
+            });
         } else {
             res.render('authentification', { 
                 title: "Connection - Planify",

@@ -18,8 +18,12 @@
 				</a>				
 			</div>
 			<div class="right-nav">
-				<a href="connection" id="connexion-b" class="button">Se connecter</a>
-				<a href="inscription" id="inscription-b" class="button">S'inscrire</a>
+				<% if (typeof cookie === 'undefined') { %>
+					<a href="connection" id="connexion-b" class="button">Se connecter</a>
+					<a href="inscription" id="inscription-b" class="button">S'inscrire</a>
+				<% } else { %>
+					<label for="pseudo"><%= cookie.pseudo %></label>
+				<% } %>
 			</div>
 		</header>
 		<div class="container-fluid">
