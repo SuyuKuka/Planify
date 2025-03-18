@@ -30,6 +30,13 @@ body {
 
 #menu {
     cursor: pointer;
+    margin-right: 10px;
+}
+
+#pseudo {
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: medium;
 }
 
 .button {

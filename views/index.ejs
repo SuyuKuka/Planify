@@ -15,14 +15,17 @@
 				<img src="/images/menu.png" id="menu" width="44" height="34"/>
 				<a href="/index">
 					<img src="/images/logo.png" id="logo" width="170" height="40" />
-				</a>				
+				</a>			
 			</div>
 			<div class="right-nav">
-				<% if (typeof cookie === 'undefined') { %>
+				<% if (typeof email === 'undefined' && typeof pseudo === 'undefined') { %>
 					<a href="connection" id="connexion-b" class="button">Se connecter</a>
 					<a href="inscription" id="inscription-b" class="button">S'inscrire</a>
 				<% } else { %>
-					<label for="pseudo"><%= cookie.pseudo %></label>
+					<label id="pseudo"><%= pseudo %></label>
+					<a href="/index">
+						<img src="/images/reglage.png" id="logo" width="40" height="40" />
+					</a>	
 				<% } %>
 			</div>
 		</header>

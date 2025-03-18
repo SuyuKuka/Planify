@@ -1,20 +1,21 @@
 // DEPENDANCES
-const express = require('express');
-const fs = require('fs');
-const pg = require('pg');
-const { titre } = require('process');
-const path = require('path');
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
+let express = require('express');
+let fs = require('fs');
+let pg = require('pg');
+let { titre } = require('process');
+let path = require('path');
+let nodemailer = require('nodemailer');
+let crypto = require('crypto');
+let session = require('express-session');
 
 
 // VARIABLES
 
 
-const server = express();
-const router = express.Router();
+let server = express();
+let router = express.Router();
 
-const transporter = nodemailer.createTransport({
+let transporter = nodemailer.createTransport({
     service: 'gmail', 
     auth: {
         user: 'programmationwebprojet@gmail.com',
@@ -22,15 +23,15 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const pool = new pg.Pool({
+let pool = new pg.Pool({
     user: 'postgres',
     host: 'localhost',
     database: 'planify',
     password: '2004',
     port: 5432
 });
-const hostname = '127.0.0.1';
-const port = 8080;
+let hostname = '127.0.0.1';
+let port = 8080;
 
 server.set('view engine', 'ejs');
 server.use(express.urlencoded({ extended: true }));
@@ -50,7 +51,7 @@ function getDBPassword() {
 }
 
 async function ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp) {
-    const client = await pool.connect();
+    let client = await pool.connect();
     try {
         let res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
         if (res.rows.length > 0) {
@@ -66,7 +67,7 @@ async function ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp) {
 }
 
 async function recupererUtilisateur(email_co, mdp_co) {
-    const client = await pool.connect();
+    let client = await pool.connect();
     try {
         let res = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND mot_de_passe = $2", [email_co, mdp_co]);
         return res.rows.length > 0;
@@ -83,10 +84,10 @@ function generateToken() {
 }
 
 async function saveResetToken(email) {
-    const token = generateToken();
-    const expirationDate = new Date(Date.now() + 5 * 60 * 1000); 
+    let token = generateToken();
+    let expirationDate = new Date(Date.now() + 5 * 60 * 1000); 
 
-    const client = await pool.connect();
+    let client = await pool.connect();
     try {
         await client.query("DELETE FROM token WHERE email = $1", [email]);
         await client.query("DELETE FROM token WHERE expire_at < NOW()");
@@ -100,12 +101,24 @@ async function saveResetToken(email) {
 }
 
 
+// USE
+
+
+server.use(session({
+    secret: generateToken(),
+    resave: false,
+    saveUninitialized: true,
+    cookie: { httpOnly: true, secure: false } 
+}));
+
+
 // GET
 
 
 server.get('/index', function (req, res) {
     res.render('index', {
-        cookie: undefined  
+        email: req.session.email, 
+        pseudo: req.session.pseudo
     });
 });
 
@@ -140,14 +153,14 @@ server.get('/mot_de_passe_oublie', function (req, res) {
 });
 
 server.get('/reinitialisation', async function (req, res) {
-    const { token } = req.query;
+    let { token } = req.query;
     if (!token) {
         return res.redirect('/mot_de_passe_oublie'); 
     }
     
-    const client = await pool.connect();
+    let client = await pool.connect();
     try {
-        const result = await client.query("SELECT * FROM token WHERE token = $1 AND expire_at > NOW()", [token]);
+        let result = await client.query("SELECT * FROM token WHERE token = $1 AND expire_at > NOW()", [token]);
         if (result.rows.length === 0) {
             return res.render('authentification', { 
                 title: "Réinitialisation du mot de passe - Planify",
@@ -181,14 +194,16 @@ server.get('/reinitialisation', async function (req, res) {
 
 
 server.post('/index', async (req, res) => {
-    const { email_co, mdp_co } = req.body;
+    let { email_co, mdp_co } = req.body;
     if (email_co && mdp_co) {
         if (await recupererUtilisateur(email_co, mdp_co)) {
-            const client = await pool.connect();
-            let pseudo = await client.query("SELECT pseudo FROM utilisateur WHERE email = $1", [email_co]);
-            let c = document.cookie = "email=" + email_co + "; pseudo=" + pseudo + ";";
+            let client = await pool.connect();
+            let p = await client.query("SELECT pseudo FROM utilisateur WHERE email = $1", [email_co]);
+            req.session.email = email_co;
+            req.session.pseudo = p.rows[0].pseudo; 
             res.render('index', {
-                cookie: c
+                email: req.session.email,
+                pseudo: req.session.pseudo
             });
         } else {
             res.render('authentification', { 
@@ -203,7 +218,7 @@ server.post('/index', async (req, res) => {
 });
 
 server.post('/connection', async (req, res) => {
-    const { nom, prenom, date, pseudo, email, mdp } = req.body;
+    let { nom, prenom, date, pseudo, email, mdp } = req.body;
     if (nom && prenom && date && pseudo && email && mdp) {
         if (await ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp)) {
             res.render('authentification', {
@@ -231,10 +246,10 @@ server.post('/connection', async (req, res) => {
 
 
 server.post('/mot_de_passe_oublie', async (req, res) => {
-    const { email_oublie } = req.body;
+    let { email_oublie } = req.body;
     
     let existe = false;
-    const client = await pool.connect();
+    let client = await pool.connect();
     try {
         let res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email_oublie]);
         if (res.rows.length > 0) {
@@ -247,7 +262,7 @@ server.post('/mot_de_passe_oublie', async (req, res) => {
     }
     if (existe) {
         try {
-            const token = await saveResetToken(email_oublie);
+            let token = await saveResetToken(email_oublie);
             await transporter.sendMail({
                 from: 'programmationwebprojet@gmail.com',
                 to: email_oublie,
@@ -271,7 +286,7 @@ server.post('/mot_de_passe_oublie', async (req, res) => {
 });
 
 server.post('/reinitialisation', async (req, res) => {
-    const { token, mdp_re, mdp_re2 } = req.body;
+    let { token, mdp_re, mdp_re2 } = req.body;
 
     if (mdp_re !== mdp_re2) {
         return res.render('authentification', { 
@@ -283,9 +298,9 @@ server.post('/reinitialisation', async (req, res) => {
             token
         });
     }
-    const client = await pool.connect();
+    let client = await pool.connect();
     try {
-        const result = await client.query("SELECT * FROM token WHERE token = $1 AND expire_at > NOW()", [token]);
+        let result = await client.query("SELECT * FROM token WHERE token = $1 AND expire_at > NOW()", [token]);
 
         if (result.rows.length === 0) {
             return res.render('authentification', { 
@@ -296,7 +311,7 @@ server.post('/reinitialisation', async (req, res) => {
             });
         }
 
-        const email = result.rows[0].email;
+        let email = result.rows[0].email;
         await client.query("UPDATE utilisateur SET mot_de_passe = $1 WHERE email = $2", [mdp_re, email]);
         await client.query("DELETE FROM token WHERE email = $1", [email]);
         res.redirect('/connection', {
