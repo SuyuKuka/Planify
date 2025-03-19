@@ -1,7 +1,12 @@
 .PHONY: all
 
 all:
-	@if [ ! -d ./node_modules ]; then \
-		ln -s ./modules/node_modules ./node_modules; \
+	@npm ci --prefix ./modules;
+	@if [ -d ./node_modules ]; then \
+		rm -rf ./node_modules; \
 	fi
-	@echo "modules du serveur initialisés !";
+	@ln -s ./modules/node_modules ./;
+	@echo "Modules du serveur initialisés !";
+
+	@echo "- 'npm list' pour voir les modules utilisés."
+	@echo "- 'node server.js' pour lancer le serveur. (10s~)"
