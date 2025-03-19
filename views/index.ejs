@@ -20,13 +20,11 @@
 			</div>
 			<div class="right-nav">
 				<% if (typeof email === 'undefined' && typeof pseudo === 'undefined') { %>
-					<a href="connection" id="connexion-b" class="button">Se connecter</a>
+					<a href="connexion" id="connexion-b" class="button">Se connecter</a>
 					<a href="inscription" id="inscription-b" class="button">S'inscrire</a>
 				<% } else { %>
 					<label class="pseudo"><%= pseudo %></label>
-					<a href="/parametres">
-						<img src="/images/parametres.png" id="logo" width="40" height="40" />
-					</a>	
+					<img src="/images/list.png" id="list" width="40" height="40" />
 				<% } %>
 			</div>
 		</header>
@@ -39,7 +37,18 @@
 
 				</div>
 				<div class="col-sm-4" id="right">
-
+					<div class="list">
+						<div class="profil_div">
+							<a href="/profil" id="profil">Profil</a>
+						</div>
+						<div class="parametres_div">
+							<a href="/parametres" id="parametres">Paramètres</a>
+						</div>
+						<a href="" id="rien"></a>
+						<div class="deconnexion_div">
+							<a href="/deconnexion" id="deconnexion">Se déconnecter</a>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -65,5 +74,19 @@
 		$("#menu").on("dragstart", function(event) {
 			event.preventDefault();
 		});
+
+		$(".list").hide();
+		$("#list").click(function() {
+			$(".list").toggle();
+		})
+
+		let down = $(".profil_div, .parametres_div, .deconnexion_div");
+		down.on("mouseenter", function() {
+			$(this).css("background-color", "lightgray");	
+		})
+
+		down.on("mouseleave", function() {
+			$(this).css("background-color", "white");
+		})
 	</script>
 </html>

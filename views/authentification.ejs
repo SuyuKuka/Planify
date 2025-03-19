@@ -17,14 +17,14 @@
             </a>			
         </div>
         <div class="right-nav">
-            <a href="connection" id="connexion-b" class="button">Se connecter</a>
+            <a href="connexion" id="connexion-b" class="button">Se connecter</a>
             <a href="inscription" id="inscription-b" class="button">S'inscrire</a>
         </div>
     </header>
-    <% if (mode === "connection") { %>  
+    <% if (mode === "connexion") { %>  
         <form action="/index" method="POST">
             <header class="authentification">
-                <h2>Connection</h2>
+                <h2>Connexion</h2>
             </header>
             <div>
                 <label for="email_co">Adresse e-mail :</label><br>
@@ -38,7 +38,7 @@
                 <input type ="checkbox" name="afficher"/>
                 <label>Afficher le mot de passe</label>
             </div>
-            <div class="error_connection" style="display: none;">
+            <div class="error_connexion" style="display: none;">
                 <label class="error">Veuillez remplir tous les champs.</label>
             </div>
             <% if (typeof erreur !== 'undefined') { %>
@@ -47,14 +47,14 @@
                 </div>
             <% } %>
             <div class="reparer">
-                <input type="submit" id="connection" value="Connection">
+                <input type="submit" id="connexion" value="Connexion">
             </div>
             <div class="reparer">
                 <a href="/mot_de_passe_oublie">Mot de passe oublie ?</a>
             </div>
         </form>
     <% } else if (mode === "inscription") { %>  
-        <form action="/connection" method="POST">
+        <form action="/connexion" method="POST">
             <header class="authentification">
                 <h2>Inscription</h2>
             </header>
@@ -176,7 +176,7 @@
     <script>
         let champs_inscription = $("input[name='nom'], input[name='prenom'], input[name='date']");
         let champs_inscription2 = $("input[name='pseudo'], input[name='email'], input[name='mdp']");
-        let champs_connection = $("input[name='email_co'], input[name='mdp_co']");
+        let champs_connexion = $("input[name='email_co'], input[name='mdp_co']");
         let champs_oublie = $("input[name='email_oublie']");
         let champs_reinitialisation = $("input[name='mdp_re'], input[name='mdp_re2']");
 
@@ -215,8 +215,8 @@
                 $(".error_inscription").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
             } else if (mode === "inscription2") {
                 $(".error_inscription2").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
-            } else if (mode === "connection") {
-                $(".error_connection").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+            } else if (mode === "connexion") {
+                $(".error_connexion").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
             } else if (mode === "oublie") {
                 $(".error_oublie").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
             } else if (mode === "reinitialisation") {
@@ -224,7 +224,7 @@
             } else {
                 $(".error_inscription").css("display", "none");
                 $(".error_inscription2").css("display", "none");
-                $(".error_connection").css("display", "none");
+                $(".error_connexion").css("display", "none");
                 $(".error_oublie").css("display", "none");
                 $(".error_reinitialisation").css("display", "none");
             }
@@ -232,7 +232,7 @@
 
         updateCouleur(champs_inscription);
         updateCouleur(champs_inscription2);
-        updateCouleur(champs_connection);
+        updateCouleur(champs_connexion);
         updateCouleur(champs_oublie);
         updateCouleur(champs_reinitialisation);
 
@@ -251,8 +251,8 @@
             couleurChamps(champs_inscription2, "inscription2");
         });
 
-        $("#connection").click(function() {
-            couleurChamps(champs_connection, "connection");
+        $("#connexion").click(function() {
+            couleurChamps(champs_connexion, "connexion");
         });
 
         $("#oublie").click(function() {

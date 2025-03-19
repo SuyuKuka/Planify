@@ -1,5 +1,5 @@
 body {
-    background-color: lightgray;
+    background-color: rgb(225, 225, 225);
 }
 
 .authentification {
@@ -15,7 +15,7 @@ form {
     flex-direction: column;
     width: 340px;
     border-radius: 10px; 
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0); 
+    box-shadow: 0px 2px 4px black; 
     position: absolute;
     top: 50%;
     left: 50%;
@@ -61,7 +61,7 @@ input[type="submit"] {
 }
 
 .afficher,
-.error_connection,
+.error_connexion,
 .error_message,
 .reparer {
     align-self: flex-start;

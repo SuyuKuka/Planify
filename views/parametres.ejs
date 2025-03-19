@@ -2,9 +2,13 @@
 <html lang="fr">
 	<head>
 		<meta charset="UTF-8"/>
-		<title>Planify - Paramètres</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Planify</title>
 		<link href="/css/nav.css" rel="stylesheet"/>
+		<link href="/css/parametrescss" rel="stylesheet"/>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 	</head>
 	<body>
 		<header class="top-nav">
@@ -23,20 +27,37 @@
 				<% } %>
 			</div>
 		</header>
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-sm-4" id="left">
-
+			<form action="/parametres" method="POST">
+				<header class="authentification">
+					<h2>Paramètres</h2>
+				</header>
+				<div>
+					<label for="pseudo_pa">Pseudo :</label><br>
+					<input type="text" name="pseudo" id="pseudo" value="<%= pseudo %>"/>
 				</div>
-				<div class="col-sm-4" id="center">
-
+				<div>
+					<label for="email_pa">Adresse e-mail :</label><br>
+					<input type="email" name="email" id="email" value="<%= email %>"/>
 				</div>
-				<div class="col-sm-4" id="right">
-
+				<div>
+					<label for="mdp_pa">Mot de passe :</label><br>
+					<input type="password" name="mdp" id="mdp" value=""/>
 				</div>
-			</div>
-		</div>
+				<div class="afficher">
+					<input type ="checkbox" name="afficher"/>
+					<label>Afficher le mot de passe</label>
+				</div>
+				<% if (typeof erreur !== 'undefined') { %>
+					<div class="error_message">
+						<label class="error"><%= erreur %></label>
+					</div>
+				<% } %>
+				<div class="reparer">
+					<input type="submit" id="enregistrer" value="Enregistrer">
+				</div>
+			</form>
 	</body>
 	<script>
+		
 	</script>
 </html>

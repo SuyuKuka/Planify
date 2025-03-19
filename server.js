@@ -79,6 +79,20 @@ async function recupererUtilisateur(email_co, mdp_co) {
     }
 }
 
+async function modifierUtilisateur(pseudo, email, mdp) {
+    let client = await pool.connect();
+    try {
+        await client.query("UPDATE utilisateur SET pseudo = $1, email = $2, mot_de_passe = $3 WHERE email = $4", [pseudo, email, mdp, email]);
+    } catch (err) {
+        console.error(err);
+        return false;
+    } finally {
+        client.release();
+    }
+    return true;
+}
+
+
 function generateToken() {
     return crypto.randomBytes(20).toString('hex');
 }
@@ -124,7 +138,7 @@ server.get('/index', function (req, res) {
 
 server.get('/parametres', function (req, res) {
     if (typeof req.session.email === 'undefined' || typeof req.session.pseudo === 'undefined') {
-        res.redirect('/connection');
+        res.redirect('/connexion');
     } else {
         res.render('parametres', {
             email: req.session.email, 
@@ -133,10 +147,10 @@ server.get('/parametres', function (req, res) {
     }
 });
 
-server.get('/connection', function (req, res) {
+server.get('/connexion', function (req, res) {
     res.render('authentification', { 
-        title: "Connection - Planify", 
-        mode: "connection", 
+        title: "Connexion - Planify", 
+        mode: "connexion", 
         email_co: "",
         mdp_co: ""
     });
@@ -218,8 +232,8 @@ server.post('/index', async (req, res) => {
             });
         } else {
             res.render('authentification', { 
-                title: "Connection - Planify",
-                mode: "connection",
+                title: "Connexion - Planify",
+                mode: "connexion",
                 email_co, 
                 mdp_co,
                 erreur: "Email ou mot de passe incorrect."
@@ -229,16 +243,43 @@ server.post('/index', async (req, res) => {
 });
 
 server.post('/parametres', async (req, res) => {
+    let { pseudo, email, mdp } = req.body;
     
+    if (pseudo && email && mdp) {
+        // if sur le mdp
+        // faire un autre input pour le mdp nouveau 
+        
+        // bouton de déco post ou get => 
+        // req.session.destroy(function(err) {
+        //     if (err) {
+        //         console.log(err);
+        //     }
+        //     res.clearCookie('connect.sid'); 
+        // });
+        if (await modifierUtilisateur(pseudo, email, mdp)) {
+            let client = await pool.connect();
+            let data = await client.query("SELECT pseudo, email FROM utilisateur WHERE email = $1", [email]);
+            req.session.pseudo = data.rows[0].pseudo;
+            req.session.email = data.rows[0].email;
+
+            res.redirect('/index');
+        } else {
+            res.render('parametres', { 
+                email: req.session.email, 
+                pseudo: req.session.pseudo,
+                erreur: "Email ou mot de passe incorrect."
+            });
+        }
+    }
 });
 
-server.post('/connection', async (req, res) => {
+server.post('/connexion', async (req, res) => {
     let { nom, prenom, date, pseudo, email, mdp } = req.body;
     if (nom && prenom && date && pseudo && email && mdp) {
         if (await ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp)) {
             res.render('authentification', {
-                title: "Connection - Planify",
-                mode: "connection",
+                title: "Connexion - Planify",
+                mode: "connexion",
                 email_co: email,
                 mdp_co:""
             });
@@ -329,9 +370,9 @@ server.post('/reinitialisation', async (req, res) => {
         let email = result.rows[0].email;
         await client.query("UPDATE utilisateur SET mot_de_passe = $1 WHERE email = $2", [mdp_re, email]);
         await client.query("DELETE FROM token WHERE email = $1", [email]);
-        res.redirect('/connection', {
-            title: "Connection - Planify",
-            mode: "connection",
+        res.redirect('/connexion', {
+            title: "Connexion - Planify",
+            mode: "connexion",
             email_co: email,
             mdp_co: ""
         });

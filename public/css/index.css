@@ -1,5 +1,5 @@
 .col-sm-4 {
-    height: 100vh;
+    height: calc(100vh - 70px);;
 }
 
 @media (max-width: 767px) { #left, #center, #right {
@@ -21,3 +21,57 @@
     background-color: lightpink;
     width: 20%;
 }
+
+.list {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    margin-right: 12px;
+    margin-top: 2px;
+    border-radius: 10px;
+    font-size: medium;
+}
+
+.profil_div {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-top: 4px;
+}
+
+.parametres_div {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+}
+
+.deconnexion_div {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+#rien {
+    border-top: 1px solid black;
+}
+
+#profil, #parametres, #deconnexion {
+    margin-left: 16px;
+}
+
+
+#profil :link , #parametres :link , #deconnexion :link  {
+    color: red;
+}
+
+#profil :visited, #parametres :visited, #deconnexion :visited {
+    color: redr;
+}
+
+#profil :hover, #parametres :hover, #deconnexion :hover {
+    color: red;
+}
+
+/* #profil :hover, #parametres :hover, #deconnexion :hover {
+    color: white;
+} */
