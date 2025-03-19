@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Planify</title>
+		<link href="/css/nav.css" rel="stylesheet"/>
+		<link href="/css/parametrescss" rel="stylesheet"/>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<header class="top-nav">
+			<div class="left-nav">
+				<img src="/images/empty.png" id="menu" width="44" height="34"/>
+				<a href="/index">
+					<img src="/images/logo.png" class="logo" width="170" height="40" />
+				</a>			
+			</div>
+			<div class="right-nav">
+				<% if (typeof email !== 'undefined' && typeof pseudo !== 'undefined') { %>
+					<label class="pseudo"><%= pseudo %></label>
+					<a href="/parametres">
+						<img src="/images/parametres.png" id="logo" width="40" height="40" />
+					</a>	
+				<% } %>
+			</div>
+		</header>
+			<form action="/parametres" method="POST">
+				<header class="authentification">
+					<h2>Paramètres</h2>
+				</header>
+				<div>
+					<label for="pseudo_pa">Pseudo :</label><br>
+					<input type="text" name="pseudo" id="pseudo" value="<%= pseudo %>"/>
+				</div>
+				<div>
+					<label for="email_pa">Adresse e-mail :</label><br>
+					<input type="email" name="email" id="email" value="<%= email %>"/>
+				</div>
+				<div>
+					<label for="mdp_pa">Mot de passe :</label><br>
+					<input type="password" name="mdp" id="mdp" value=""/>
+				</div>
+				<div class="afficher">
+					<input type ="checkbox" name="afficher"/>
+					<label>Afficher le mot de passe</label>
+				</div>
+				<% if (typeof erreur !== 'undefined') { %>
+					<div class="error_message">
+						<label class="error"><%= erreur %></label>
+					</div>
+				<% } %>
+				<div class="reparer">
+					<input type="submit" id="enregistrer" value="Enregistrer">
+				</div>
+			</form>
+	</body>
+	<script>
+		
+	</script>
+</html>

@@ -1,21 +1,26 @@
 body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-    background-color: lightgray;
+    background-color: rgb(225, 225, 225);
 }
 
-header {
+.authentification {
     text-align: center;
     padding-bottom: 5%;
 }
 
 form {
     background-color: white;
-    padding: 3% 1% 3% 1%;
+    padding: 3% 2%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 340px;
+    border-radius: 10px; 
+    box-shadow: 0px 2px 4px black; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 2%;
 }
 
 div {
@@ -40,16 +45,6 @@ input[type="submit"] {
     cursor: pointer;
 }
 
-button[type="button"] {
-    margin: auto 0px;
-    text-decoration: none;
-    text-align: center;
-    border-radius: 30px;
-    padding: 8px 30px;
-    border: 1px solid gray;
-    cursor: pointer;
-}
-
 .afficher {
     display: flex;
     font-size: small;
@@ -63,4 +58,12 @@ button[type="button"] {
 .error {
     color: red;
     font-size: smaller;
+}
+
+.afficher,
+.error_connexion,
+.error_message,
+.reparer {
+    align-self: flex-start;
+    margin-left: 14%;
 }

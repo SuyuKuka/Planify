@@ -4,14 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %></title>
-    <link rel="stylesheet" href="css/authentification.css">
+    <link href="css/authentification.css" rel="stylesheet">
+    <link href="/css/nav.css" rel="stylesheet"/>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 </head>
 <body>
-    <% if (mode === "connection") { %>  
+    <header class="top-nav">
+        <div class="left-nav">
+            <img src="/images/empty.png" id="menu" width="44" height="34"/>
+            <a href="/index">
+                <img src="/images/logo.png" class="logo" width="170" height="40" />
+            </a>			
+        </div>
+        <div class="right-nav">
+            <a href="connexion" id="connexion-b" class="button">Se connecter</a>
+            <a href="inscription" id="inscription-b" class="button">S'inscrire</a>
+        </div>
+    </header>
+    <% if (mode === "connexion") { %>  
         <form action="/index" method="POST">
-            <header>
-                <h2>Connection</h2>
+            <header class="authentification">
+                <h2>Connexion</h2>
             </header>
             <div>
                 <label for="email_co">Adresse e-mail :</label><br>
@@ -25,7 +38,7 @@
                 <input type ="checkbox" name="afficher"/>
                 <label>Afficher le mot de passe</label>
             </div>
-            <div class="error_connection" style="display: none;">
+            <div class="error_connexion" style="display: none;">
                 <label class="error">Veuillez remplir tous les champs.</label>
             </div>
             <% if (typeof erreur !== 'undefined') { %>
@@ -33,17 +46,16 @@
                     <label class="error"><%= erreur %></label>
                 </div>
             <% } %>
-            <div>
-                <input type="submit" id="connection" value="Connection">
+            <div class="reparer">
+                <input type="submit" id="connexion" value="Connexion">
             </div>
-            <div>
-                <a href="/inscription">Pas encore inscrit ?</a>
+            <div class="reparer">
                 <a href="/mot_de_passe_oublie">Mot de passe oublie ?</a>
             </div>
         </form>
     <% } else if (mode === "inscription") { %>  
-        <form action="/connection" method="POST">
-            <header>
+        <form action="/connexion" method="POST">
+            <header class="authentification">
                 <h2>Inscription</h2>
             </header>
             
@@ -64,10 +76,9 @@
                     <label class="error">Veuillez remplir tous les champs.</label>
                 </div>
                 <div>
-                    <button type="button" id="suivant">Suivant</button>
+                    <button type="button" class="button" id="suivant">Suivant</button>
                 </div>
                 <div>
-                    <a href="/connection">Deja inscrit ?</a>
                     <a href="/mot_de_passe_oublie">Mot de passe oublie ?</a>
                 </div>
             </div>
@@ -102,18 +113,17 @@
                     <label class="error">Veuillez remplir tous les champs.</label>
                 </div> 
                 <div>
-                    <button type="button" id="retour">Retour</button>
+                    <button type="button" class="button" id="retour">Retour</button>
                     <input type="submit" id="inscription" value="Inscription">
                 </div>
                 <div>
-                    <a href="/connection">Deja inscrit ?</a>
                     <a href="/mot_de_passe_oublie">Mot de passe oublie ?</a>
                 </div>
             </div>
         </form>
     <% } else if (mode === "mot_de_passe_oublie") { %>
         <form action="/mot_de_passe_oublie" method="POST">
-            <header>
+            <header class="authentification">
                 <h2>Mot de passe oublié</h2>
             </header>
             <div>
@@ -128,17 +138,13 @@
                     <label class="error"><%= erreur %></label>
                 </div>
             <% } %>
-            <div>
+            <div class="reparer">
                 <input type="submit" id="oublie" value="Envoyer">
-            </div>
-            <div>
-                <a href="/connection">Deja inscrit ?</a>
-                <a href="/inscription">Pas encore inscrit ?</a>
             </div>
         </form>
     <% } else if (mode === "reinitialisation") { %>
         <form action="/reinitialisation" method="POST">
-            <header>
+            <header class="authentification">
                 <h2>Réinitialiser son mot de passe</h2>
             </header>
             <input type="hidden" name="token" value="<%= token %>"/>
@@ -170,7 +176,7 @@
     <script>
         let champs_inscription = $("input[name='nom'], input[name='prenom'], input[name='date']");
         let champs_inscription2 = $("input[name='pseudo'], input[name='email'], input[name='mdp']");
-        let champs_connection = $("input[name='email_co'], input[name='mdp_co']");
+        let champs_connexion = $("input[name='email_co'], input[name='mdp_co']");
         let champs_oublie = $("input[name='email_oublie']");
         let champs_reinitialisation = $("input[name='mdp_re'], input[name='mdp_re2']");
 
@@ -209,8 +215,8 @@
                 $(".error_inscription").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
             } else if (mode === "inscription2") {
                 $(".error_inscription2").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
-            } else if (mode === "connection") {
-                $(".error_connection").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+            } else if (mode === "connexion") {
+                $(".error_connexion").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
             } else if (mode === "oublie") {
                 $(".error_oublie").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
             } else if (mode === "reinitialisation") {
@@ -218,7 +224,7 @@
             } else {
                 $(".error_inscription").css("display", "none");
                 $(".error_inscription2").css("display", "none");
-                $(".error_connection").css("display", "none");
+                $(".error_connexion").css("display", "none");
                 $(".error_oublie").css("display", "none");
                 $(".error_reinitialisation").css("display", "none");
             }
@@ -226,7 +232,7 @@
 
         updateCouleur(champs_inscription);
         updateCouleur(champs_inscription2);
-        updateCouleur(champs_connection);
+        updateCouleur(champs_connexion);
         updateCouleur(champs_oublie);
         updateCouleur(champs_reinitialisation);
 
@@ -245,8 +251,8 @@
             couleurChamps(champs_inscription2, "inscription2");
         });
 
-        $("#connection").click(function() {
-            couleurChamps(champs_connection, "connection");
+        $("#connexion").click(function() {
+            couleurChamps(champs_connexion, "connexion");
         });
 
         $("#oublie").click(function() {
