@@ -2,33 +2,27 @@
 <html lang="fr">
 	<head>
 		<meta charset="UTF-8"/>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Planify</title>
+		<%- include('bootstrap_style') %>
 		<link href="/css/nav.css" rel="stylesheet"/>
 		<link href="/css/index.css" rel="stylesheet"/>
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 	</head>
 	<body>
-		<header class="top-nav">
-			<div class="left-nav">
-				<img src="/images/menu.png" id="menu" width="44" height="34"/>
-				<a href="/index">
-					<img src="/images/logo.png" class="logo" width="170" height="40" />
-				</a>			
+		<%- include('nav') %>
+		<div class="container-fluid bg-warning">
+			<div class="row">
+				<div class="col bg-success">
+					1 of 3
+				</div>
+				<div class="col-8 bg-body-tertiary">
+					2 of 3 (wider)
+				</div>
+				<div class="col bg-danger">
+					3 of 3
+				</div>
 			</div>
-			<div class="right-nav">
-				<% if (typeof email === 'undefined' && typeof pseudo === 'undefined') { %>
-					<a href="connexion" id="connexion-b" class="button">Se connecter</a>
-					<a href="inscription" id="inscription-b" class="button">S'inscrire</a>
-				<% } else { %>
-					<label class="pseudo"><%= pseudo %></label>
-					<img src="/images/list.png" id="list" width="40" height="40" />
-				<% } %>
-			</div>
-		</header>
-		<div class="container-fluid">
+		</div>
+		<!-- <div class="container-fluid">
 			<div class="row">
 				<div class="col-sm-4" id="left">
 
@@ -51,42 +45,8 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> -->
+		<%- include('bootstrap_script') %>
+		<script src="/js/index.js"></script> 
 	</body>
-	<script>
-		let visible = true;
-		$("#menu").click(function() {
-			if (visible) {
-				$("#left").css("display", "none");
-				$("#left").css("width", "0%");
-				$("#center").css("width", "80%");
-				$("#right").css("width", "20%");
-				visible = false;
-			} else {
-				$("#left").css("display", "block");
-				$("#left").css("width", "20%");
-				$("#center").css("width", "60%");
-				$("#right").css("width", "20%");
-				visible = true;
-			}
-		});
-
-		$("#menu").on("dragstart", function(event) {
-			event.preventDefault();
-		});
-
-		$(".list").hide();
-		$("#list").click(function() {
-			$(".list").toggle();
-		})
-
-		let down = $(".profil_div, .parametres_div, .deconnexion_div");
-		down.on("mouseenter", function() {
-			$(this).css("background-color", "lightgray");	
-		})
-
-		down.on("mouseleave", function() {
-			$(this).css("background-color", "white");
-		})
-	</script>
 </html>

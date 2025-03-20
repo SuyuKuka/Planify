@@ -1,4 +1,4 @@
-.col-sm-4 {
+/* .col-sm-4 {
     height: calc(100vh - 70px);;
 }
 
@@ -70,7 +70,7 @@
 
 #profil :hover, #parametres :hover, #deconnexion :hover {
     color: red;
-}
+} */
 
 /* #profil :hover, #parametres :hover, #deconnexion :hover {
     color: white;

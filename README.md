@@ -7,5 +7,7 @@ Lancez `make` dans `.../programmation-web`.
 Lancez le serveur avec `node server.js`.
 
 ## Membres
-CHIV Henri 22205265
-CHEN Michel 22202655
+|  Nom  | Prénom | N° étudiant |
+| :---: | :----: | :---------: |
+| CHIV  | Henri  |  22205265   |
+| CHEN  | Michel |  22202655   |

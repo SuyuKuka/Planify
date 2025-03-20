@@ -1,0 +1,54 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <img src="/images/menu.png" id="menu" width="44" height="34"/>
+        <a class="navbar-brand" href="#">
+            <img class="logo" src="/images/logo.png" width="170" height="40">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <% if (typeof email === 'undefined' && typeof pseudo === 'undefined') { %>
+                    <li class="nav-item">
+                        <a class="nav-link button" aria-current="page" href="connexion" id="connexion-b">Se connecter</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link button" href="inscription" id="inscription-b">S'inscrire</a>
+                    </li>
+                <% } else { %>
+                    <label class="pseudo"><%= pseudo %></label>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">Mon profil</a></li>
+                            <li><a class="dropdown-item" href="#">Paramètres</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Se déconnecter</a></li>
+                        </ul>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!--
+<header class="top-nav">
+    <div class="left-nav">
+        <img src="/images/menu.png" id="menu" width="44" height="34"/>
+        <a href="/index">
+            <img src="/images/logo.png" class="logo" width="170" height="40" />
+        </a>			
+    </div>
+    <div class="right-nav">
+        <% if (typeof email === 'undefined' && typeof pseudo === 'undefined') { %>
+            <a href="connexion" id="connexion-b" class="button">Se connecter</a>
+            <a href="inscription" id="inscription-b" class="button">S'inscrire</a>
+        <% } else { %>
+            <label class="pseudo"><%= pseudo %></label>
+            <img src="/images/list.png" id="list" width="40" height="40" />
+        <% } %>
+    </div>
+</header>
+-->
