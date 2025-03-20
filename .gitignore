@@ -1,3 +1,4 @@
+.vscode
 .vscode/*
 gitignore
 modules/node_modules
