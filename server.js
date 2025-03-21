@@ -50,6 +50,26 @@ function getDBPassword() {
     }
 }
 
+// async function clientConnect(f, ...args) {
+//     let client = await pool.connect();
+//     try {
+//         return f(client, args);
+//     } catch (err) {
+//         console.error(err);
+//     } finally {
+//         client.release();
+//     }
+// }
+
+// function ajouterUtilisateur2(client, nom, prenom, date, pseudo, email, mdp) {
+//     let res = client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
+//     if (res.rows.length > 0) {
+//         return false;
+//     }
+//     client.query("INSERT INTO utilisateur (nom, prenom, date_de_naissance, pseudo, email, mot_de_passe) VALUES ($1, $2, $3, $4, $5, $6)", [nom, prenom, date, pseudo, email, mdp]);
+//     return true;
+// }
+
 async function ajouterUtilisateur(nom, prenom, date, pseudo, email, mdp) {
     let client = await pool.connect();
     try {

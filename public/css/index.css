@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 /* .col-sm-4 {
     height: calc(100vh - 70px);
 }
@@ -75,3 +79,8 @@
 /* #profil :hover, #parametres :hover, #deconnexion :hover {
     color: white;
 } */
+
+.bar {
+    border: 2px solid black;
+    text-align: center;
+}
