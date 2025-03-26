@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Inscription - Planify</title>
+        <%- include('bootstrap_style') %>
+        <link href="/css/authentification.css" rel="stylesheet">
+        <link href="/css/inscription.css" rel="stylesheet">
+        <script src="/js/jquery.js"></script>
+    </head>
+    <body>
+        <form autocomplete="off" method="POST">
+            <header class="authentification">
+                <h2>Inscription</h2>
+            </header>
+
+            <input type="hidden" id="postId" name="postId" value="34657"/>
+            
+            <div id="step1">
+                <div>
+                    <label for="nom">Nom :</label><br>
+                    <input type="text" name="nom" id="nom"
+                        value="<%= typeof nom !== 'undefined' ? nom : '' %>" required/>
+                </div>
+                <div>
+                    <label for="prenom">Prénom :</label><br>
+                    <input type="text" name="prenom" id="prenom"
+                        value="<%= typeof prenom !== 'undefined' ? prenom : '' %>"required/>
+                </div>
+                <div>
+                    <label for="date">Date de naissance :</label><br>
+                    <input type="date" name="date" id="date"
+                        value="<%= typeof date !== 'undefined' ? date : '' %>"required/>
+                </div>
+                <div class="error_inscription" style="display: none;">
+                    <label class="error">Veuillez remplir tous les champs.</label>
+                </div>
+                <div>
+                    <button type="button" class="button" id="suivant">Suivant</button>
+                </div>
+            </div>
+
+            <div id="step2" style="display: none;">
+                <div>
+                    <label for="pseudo">Pseudo :</label><br>
+                    <input type="text" name="pseudo" id="pseudo"
+                        value="<%= typeof pseudo !== 'undefined' ? pseudo : '' %>"required/>
+                </div>
+                <div>
+                    <label for="email">Adresse e-mail :</label><br>
+                    <input type="email" name="email" id="email"
+                        value="<%= typeof email !== 'undefined' ? email : '' %>"required/>
+                </div>
+                <div>
+                    <label for="mdp">Mot de passe :</label><br>
+                    <input type="password" name="mdp" id="mdp"
+                        value="<%= typeof mdp !== 'undefined' ? mdp : '' %>"required/>
+                </div>
+                <div class="afficher">
+                    <input type="checkbox" name="afficher" id="afficher"/>
+                    <label for="afficher">Afficher le mot de passe</label>
+                </div>
+                <% if (typeof errMsg !== 'undefined') { %>
+                    <script>
+                        document.getElementById('step1').style.display = 'none';
+                        document.getElementById('step2').style.display = 'block';
+                    </script>
+                    <div class="error_message">
+                        <label class="error"><%= erreur %></label>
+                    </div>
+                <% } %>
+                <div class="error_inscription2" style="display: none;">
+                    <label class="error">Veuillez remplir tous les champs.</label>
+                </div> 
+                <div>
+                    <button type="button" class="button" id="retour">Retour</button>
+                    <input type="submit" id="inscription" value="Inscription">
+                </div>
+            </div>
+        </form>
+        <script>
+            let champs_inscription = $("input[name='nom'], input[name='prenom'], input[name='date']");
+            let champs_inscription2 = $("input[name='pseudo'], input[name='email'], input[name='mdp']");
+            let champs_connexion = $("input[name='email_co'], input[name='mdp_co']");
+            let champs_oublie = $("input[name='email_oublie']");
+            let champs_reinitialisation = $("input[name='mdp_re'], input[name='mdp_re2']");
+
+            function couleurChamps(champs, mode) {
+                let empty = false;
+                champs.each(function() {
+                    let input = $(this);
+                    if (input.val() === "") {
+                        empty = true;
+                        input.css("border", "2px solid red");
+                        input.prev("label").css("color", "red");
+                        erreur(mode);
+                    } else {
+                        input.css("border", "");
+                        input.prev("label").css("color", "");
+                        if (!empty) {
+                            erreur("");
+                        }
+                    }
+                });
+                return empty;
+            }
+
+            function updateCouleur(champs) {
+                $(champs).on('input', function() {
+                    let input = $(this);
+                    if (input.val() !== "") {
+                        input.css("border", "");
+                        input.prev("label").css("color", "");
+                    }
+                });
+            }
+
+            function erreur(mode) {
+                if (mode === "inscription") {
+                    $(".error_inscription").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+                } else if (mode === "inscription2") {
+                    $(".error_inscription2").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+                } else if (mode === "connexion") {
+                    $(".error_connexion").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+                } else if (mode === "oublie") {
+                    $(".error_oublie").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+                } else if (mode === "reinitialisation") {
+                    $(".error_reinitialisation").css("display", "block").find(".error").text("Veuillez remplir tous les champs.");
+                } else {
+                    $(".error_inscription").css("display", "none");
+                    $(".error_inscription2").css("display", "none");
+                    $(".error_connexion").css("display", "none");
+                    $(".error_oublie").css("display", "none");
+                    $(".error_reinitialisation").css("display", "none");
+                }
+            }
+
+            updateCouleur(champs_inscription);
+            updateCouleur(champs_inscription2);
+            updateCouleur(champs_connexion);
+            updateCouleur(champs_oublie);
+            updateCouleur(champs_reinitialisation);
+
+            $("#suivant").click(function() {
+                let empty = couleurChamps(champs_inscription, "inscription");
+                console.log("test");
+                if (!empty) {
+                    console.log("not empty");
+                    showStep(2);
+                }
+            });
+
+            $("#retour").click(function() {
+                showStep(1);
+            });
+            
+            $("#inscription").click(function() {
+                couleurChamps(champs_inscription2, "inscription2");
+            });
+
+            $("#connexion").click(function() {
+                couleurChamps(champs_connexion, "connexion");
+            });
+
+            $("#oublie").click(function() {
+                couleurChamps(champs_oublie, "oublie");
+            });
+
+            $("#reinitialisation").click(function() {
+                couleurChamps(champs_reinitialisation, "reinitialisation");
+            });
+
+            function showStep(step) {
+                if (step === 1) {
+                    document.getElementById('step1').style.display = 'block';
+                    document.getElementById('step2').style.display = 'none';
+                }
+                if (step === 2) {
+                    document.getElementById('step1').style.display = 'none';
+                    document.getElementById('step2').style.display = 'block';
+                }
+            }
+
+            $("input[type = 'checkbox']").on("change" ,function() {
+                if ($(this).is(":checked")) {
+                    $("input[name = 'mdp']").prop("type", "text");
+                    $("input[name = 'mdp_co']").prop("type", "text");
+                    $("input[name = 'mdp_re'], input[name = 'mdp_re2']").prop("type", "text");
+                } else {
+                    $("input[name = 'mdp']").prop("type", "password");
+                    $("input[name = 'mdp_co']").prop("type", "password");
+                    $("input[name = 'mdp_re'], input[name = 'mdp_re2']").prop("type", "password");
+                }
+            });
+
+            let today = new Date();
+            let dd = String(today.getDate()).padStart(2, '0');
+            let mm = String(today.getMonth() + 1).padStart(2, '0');
+            let yyyy = today.getFullYear();
+            let yyyy_min = today.getFullYear() - 100;
+
+            let max = `${yyyy}-${mm}-${dd}`;
+            let min = `${yyyy_min}-${mm}-${dd}`;
+            $("input[type = 'date']").attr("max", max);
+            $("input[type = 'date']").attr("min", min);
+        </script>
+        <%- include('bootstrap_script') %>
+    </body>
+</html>

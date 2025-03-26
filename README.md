@@ -4,7 +4,7 @@
 
 Lancez `make` dans `.../programmation-web`.
 
-Lancez le serveur avec `node server.js`.
+Lancez le serveur avec `node app.js`.
 
 ## Membres
 |  Nom  | Prénom | N° étudiant |

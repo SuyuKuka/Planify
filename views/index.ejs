@@ -11,7 +11,14 @@
 		<%- include('nav') %>
 		<div class="container-fluid bg-warning" id="center-bar">
 			<div class="row">
-				<div class="bar col-sm-3" id="left-bar">
+				<p>
+					<a class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#left-bar" aria-expanded="false" aria-controls="left-bar">
+						Toggle
+					</a>
+				</p>				  
+			</div>
+			<div class="row">
+				<div class="bar col-sm-3 collapse collapse-horizontal" id="left-bar">
 					1 of 3
 				</div>
 				<div class="bar col-sm" id="center-bar">
@@ -23,7 +30,5 @@
 			</div>
 		</div>
 		<%- include('bootstrap_script') %>
-		<script src="/js/nav.js"></script>
-		<script src="/js/index.js"></script> 
 	</body>
 </html>
