@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     background-color: rgb(225, 225, 225);
 }
@@ -60,10 +64,11 @@ input[type="submit"] {
     font-size: smaller;
 }
 
-.afficher,
+.submit_div,
+.forgotten_password_div,
 .error_connexion,
 .error_message,
-.reparer {
+.show_password_div {
     align-self: flex-start;
     margin-left: 14%;
 }

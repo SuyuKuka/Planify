@@ -2,7 +2,8 @@
 
 ## Manuel d'utilisation
 
-Lancez `make` dans `.../programmation-web`.
+Lancez `npm ci .` dans `.../programmation-web`.
+- `npm list` pour voir les modules utilisés.
 
 Lancez le serveur avec `node app.js`.
 

@@ -1,14 +1,14 @@
 function getIndex(req, res) {
     res.render('index', {
         email: req.session.email,
-        pseudo: req.session.pseudo
+        username: req.session.username
     });
 }
 
 function postIndex(req, res) {
     res.render('index', {
         email: req.session.email,
-        pseudo: req.session.pseudo
+        username: req.session.username
     });
 }
 

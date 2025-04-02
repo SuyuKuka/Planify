@@ -1,73 +1,215 @@
 const Auth = require('./auth_model');
 
-const authentificationType = {
-    registration: "inscription",
-    connection: "connexion",
-    passwordForgotten: "mdpOublie"
+//#region Erreurs
+const errorMessages = Object.freeze({
+    default: {
+        code: 0,
+        msg: "Une erreur est survenue. Veuillez réessayer plus tard."
+    },
+    wrongEmailOrPassword: {
+        code: 1,
+        msg: "L'email ou le mot de passe est erroné."
+    },
+    alreadyUsedEmail: {
+        code: 2,
+        msg: "L'adresse email spécifiée est déjà associé à un compte."
+    },
+    emptyQuery: {
+        code: 3,
+        msg: "Veuillez remplir tous les champs."
+    },
+    invalidQuery: {
+        code: 4,
+        msg: "Les données spécifiées ne sont pas valides."
+    }
+});
+//#endregion
+
+//#region Vérif Authentification
+function verifySurname(surname) {
+    return /^[A-Z][A-Za-z'éèëêîïç -]{1,31}$/.test(surname);
 }
 
-const errorMessages = {
-    default: "Une erreur est survenue. Veuillez réessayer plus tard.",
-    wrongEmailOrPassword: "L'email ou le mot de passe est erroné.",
-    alreadyUsedEmail: "L'adresse email spécifiée est déjà associé à un compte."
+function verifyName(name) {
+    return /^[A-Z][A-Za-z'éèëêîïç -]{1,31}$/.test(name);
 }
 
+function verifyBirthdate(birthdate) {
+    const inputDate = new Date(birthdate);
+    const minDate = new Date('1900-01-01');
+    const maxDate = new Date();
+    return (inputDate >= minDate && inputDate < maxDate);
+}
+
+function verifyUsername(username) {
+    return /^[A-Z][A-Za-z' -]{1,31}$/.test(username);
+}
+
+function verifyEmail(email) {
+    return /^\S+@\S+\.\S+$/.test(email);
+}
+
+function verifyPassword(password) {
+    return password.length >= 8 && password.length <= 32;
+}
+
+//#region Inscription
 function getRegistration(req, res) {
-    res.render('inscription');
+    const { surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
+    res.render('inscription', {
+        surname, name, birthdate, username, email,
+        error_step1, error_step2
+    });
 }
 
-async function postRegistration(req, res) {
-    const { surname, name, birthdate, username, email, mdp } = req.body;
+function getRegistrationVerif(req, res) {
+    res.redirect('/auth/inscription');
+}
+
+async function postRegistrationVerif(req, res) {
+    const ret = verifyRegistration(req.body);
+    const { surname, name, birthdate, username, email, password } = req.body;
     try {
-        const emailUsed = await Auth.isEmailAlreadyUsed(email);
-        console.log(req.body);
-        if (emailUsed) {
-            res.render('inscription', {
-                surname, name, birthdate, username, email,
-                errMsg: errorMessages.alreadyUsedEmail
+        if (ret) {
+            const emailUsed = await Auth.isEmailAlreadyUsed(email);
+            if (emailUsed) { // Cas email déjà utilisé
+                Object.assign(req.session, {
+                    surname, name, birthdate, username, email,
+                    error_step2: errorMessages.alreadyUsedEmail
+                });
+                res.redirect('/auth/inscription');
+            } else { // Cas succès
+                await Auth.addUser(surname, name, birthdate, username, email, password);
+                Object.assign(req.session, {
+                    username, email
+                });
+                res.redirect('/');
+            }
+        } else { // Cas au moins une valeur non valide
+            Object.assign(req.session, {
+                surname, name, birthdate, username, email
             });
-        } else {
-            await Auth.addUser(nom, prenom, date, pseudo, email, mdp);
-            req.session.pseudo = pseudo;
-            req.session.email = email;
-            res.redirect('/');
+            res.redirect('/auth/inscription');
         }
     } catch (error) {
-        console.log(error);
-        res.render('inscription', {
-            errMsg: errorMessages.default
-        });
+        req.session.error_step1 = errorMessages.default;
+        res.redirect('/auth/inscription');
     }
 }
 
+/**
+ * Vérifie la validité des données du form
+ * @param {*} req_body 
+ * @returns true si aucun problème, false sinon
+ */
+function verifyRegistration(req_body) {
+    let valid = true;
+    if (!verifySurname(req_body.surname)) {
+        req_body.surname = '';
+        valid = false;
+    }
+    if (!verifyName(req_body.name)) {
+        req_body.name = '';
+        valid = false;
+    }
+    if (!verifyBirthdate(req_body.birthdate)) {
+        req_body.birthdate = '';
+        valid = false;
+    }
+    if (!verifyUsername(req_body.username)) {
+        req_body.username = '';
+        valid = false;
+    }
+    if (!verifyEmail(req_body.email)) {
+        req_body.email = '';
+        valid = false;
+    }
+    if (!verifyPassword(req_body.password)) {
+        req_body.password = '';
+        valid = false;
+    }
+    return valid;
+}
+
+//#endregion
+
+//#region Connexion
 function getConnection(req, res) {
-    res.render('connexion');
+    const { email, error } = req.session;
+    res.render('connexion', {
+        email, error
+    });
 }
 
-async function postConnection(req, res) {
-    const { email, mdp } = req.body;
+function getConnectionVerif(req, res) {
+    res.redirect('/auth/connexion');
+}
+
+async function postConnectionVerif(req, res) {
+    const ret = verifyConnection(req.body);
+    const { email, password } = req.body;
     try {
-        const user = await Auth.getUser(email, mdp);
-        if (user == null) {
-            res.render('connexion', {
-                email,
-                errMsg: errorMessages.wrongEmailOrPassword
-            });
+        if (ret) {
+            const user = await Auth.getUser(email, password);
+            if (user === null) {
+                Object.assign(req.session, {
+                    email,
+                    error:errorMessages.wrongEmailOrPassword
+                });
+                res.redirect('/auth/connexion');
+            } else {
+                Object.assign(req.session, {
+                    email,
+                    // TODO: CHANGER pseudo -> username dans db
+                    username: user.pseudo
+                });
+                res.redirect('/');
+            }
         } else {
-            req.session.pseudo = user.pseudo;
-            req.session.email = email;
-            res.redirect('/');
+            Object.assign(req.session, {
+                email,
+                error: errorMessages.invalidQuery
+            });
+            res.redirect('/auth/connexion');
         }
-    } catch(error) {
-        res.render('connexion', {
-            errMsg: errorMessages.default
-        });
+    } catch (e) {
+        req.session.error = errorMessages.default;
+        res.redirect('/auth/connexion');
     }
 }
+
+function verifyConnection(req_body) {
+    let valid = true;
+    if (!verifyEmail(req_body.email)) {
+        req_body.email = '';
+        valid = false;
+    }
+    if (!verifyPassword(req_body.password)) {
+        req_body.password = '';
+        valid = false;
+    }
+    return valid;
+}
+
+//#endregion
+
+//#region Mot de passe oublié
 
 function getPasswordForgotten(req, res) {
     res.render('mdp_oublie');
 }
+
+async function postPasswordForgottenSuccess(req, res) {
+    const { email } = req.body;
+    try {
+        Auth.sendPasswordForgottenEmail(email);
+        res.render('mdp_oublie_succes');
+    } catch (error) {
+        res.render('mdp_oublie_succes');
+    }
+}
+
+//#endregion
 
 function getDisconnection(req, res) {
     req.session.destroy((err) => {
@@ -81,12 +223,17 @@ function getDisconnection(req, res) {
 
 module.exports = {
     getRegistration,
-    postRegistration,
+
+    getRegistrationVerif,
+    postRegistrationVerif,
 
     getConnection,
-    postConnection,
+
+    getConnectionVerif,
+    postConnectionVerif,
 
     getPasswordForgotten,
+    postPasswordForgottenSuccess,
 
     getDisconnection
 };

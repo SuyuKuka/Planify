@@ -47,4 +47,8 @@ async function disconnectSession() {
 
 }
 
-module.exports = { isEmailAlreadyUsed, getUser, addUser };
+async function sendPasswordForgottenEmail() {
+
+}
+
+module.exports = { isEmailAlreadyUsed, getUser, addUser, sendPasswordForgottenEmail };

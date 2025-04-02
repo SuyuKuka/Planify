@@ -1,16 +1,19 @@
 const express = require('express');
 const router = express.Router();
 
-const model = require('./auth_controller');
+const controller = require('./auth_controller');
 
-router.get('/inscription', model.getRegistration) // clique sur inscription
-router.post('/inscription', model.postRegistration); // email deja utilisé
+router.get('/inscription', controller.getRegistration)
+router.get('/inscription/verification', controller.getRegistrationVerif);
+router.post('/inscription/verification', controller.postRegistrationVerif);
 
-router.get('/connexion', model.getConnection); // clique sur connexion
-router.post('/connexion', model.postConnection); // email + mdp = aucun user
+router.get('/connexion', controller.getConnection);
+router.get('/connexion/verification', controller.getConnectionVerif);
+router.post('/connexion/verification', controller.postConnectionVerif);
 
-router.get('/mdp_oublie', model.getPasswordForgotten); // clique sur mdp oublié
+router.get('/mdp_oublie', controller.getPasswordForgotten);
+router.post('/mdp_oublie/succes', controller.postPasswordForgottenSuccess);
 
-router.get('/deconnexion', model.getDisconnection); // déconnecte et redirige sur index
+router.get('/deconnexion', controller.getDisconnection);
 
 module.exports = router;
