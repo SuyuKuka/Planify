@@ -51,3 +51,12 @@ function isPasswordValid() {
     const length = val.length;
     return length >= 8 && length <= 32;
 }
+
+function verificateForm() {
+    verificate(surname, isSurnameValid);
+    verificate(name, isNameValid);
+    verificate(birthdate, isBirthdateValid);
+    verificate(username, isUsernameValid);
+    verificate(email, isEmailValid);
+    verificate(password, isPasswordValid);
+}

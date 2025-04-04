@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Mot de passe oublié - Planify</title>
+        <link rel="shortcut icon" href="/images/favicon.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- script -->
+        <script src="/js/jquery.js"></script>
+        <!-- css -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/authentification.css" rel="stylesheet">
+        <link href="/css/mdp_oublie.css" rel="stylesheet">
+    </head>
+    <body>
+        <form autocomplete="off" action="mdp_oublie/succes" method="post" id="form">
+            <header class="authentification">
+                <h2>Mot de passe oublié</h2>
+            </header>
+            <div>
+                <label for="email">Adresse e-mail :</label><br>
+                <input type="email" name="email" id="email"/>
+            </div>
+            <div class="error" id="client-error" style="display: none;">
+                <label class="error-msg">Veuillez remplir tous les champs.</label>
+            </div>
+            <% if (typeof erreur !== 'undefined') { %>
+                <div class="error" id="server-error">
+                    <label class="error-msg"><%= erreur %></label>
+                </div>
+            <% } %>
+            <div>
+                <input type="submit" id="oublie" value="Envoyer">
+            </div>
+        </form>
+        <script src="/js/bootstrap.bundle.min.js"></script>
+        <script src="/js/authentification.js"></script>
+        <script>
+            const email = $('#email');
+            email.on("input", function() {
+                if (!method() && email.val() !== '') {
+                    email.css("border", "2px solid red");
+                } else {
+                    email.css("border", "");
+                }
+            });
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    if (!$(':focus').is('input')) {
+                        $('#form').submit();
+                    }
+                }
+            });
+            $("#form").on('submit', (e) => {
+                $('#server-error').css('display', 'none');
+                let valid = true;
+                if (!isEmailValid()) {
+                    email.css("border", "2px solid red");
+                    valid = false;
+                }
+                if (!isPasswordValid()) {
+                    password.css("border", "2px solid red");
+                    valid = false;
+                }
+                if (!valid) {
+                    $('#error_form').css('display', 'block');
+                    e.preventDefault();
+                }
+            });
+        </script>
+    </body>
+</html>

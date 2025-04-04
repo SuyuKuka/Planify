@@ -56,7 +56,7 @@ function verifyPassword(password) {
 //#region Inscription
 function getRegistration(req, res) {
     const { surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
-    res.render('inscription', {
+    res.render('auth/inscription', {
         surname, name, birthdate, username, email,
         error_step1, error_step2
     });
@@ -136,7 +136,7 @@ function verifyRegistration(req_body) {
 //#region Connexion
 function getConnection(req, res) {
     const { email, error } = req.session;
-    res.render('connexion', {
+    res.render('auth/connexion', {
         email, error
     });
 }
@@ -196,16 +196,16 @@ function verifyConnection(req_body) {
 //#region Mot de passe oublié
 
 function getPasswordForgotten(req, res) {
-    res.render('mdp_oublie');
+    res.render('auth/mdp_oublie');
 }
 
 async function postPasswordForgottenSuccess(req, res) {
     const { email } = req.body;
     try {
         Auth.sendPasswordForgottenEmail(email);
-        res.render('mdp_oublie_succes');
+        res.render('auth/mdp_oublie_succes');
     } catch (error) {
-        res.render('mdp_oublie_succes');
+        res.render('auth/mdp_oublie_succes');
     }
 }
 

@@ -1,9 +1,4 @@
-verificate(surname, isSurnameValid);
-verificate(name, isNameValid);
-verificate(birthdate, isBirthdateValid);
-verificate(username, isUsernameValid);
-verificate(email, isEmailValid);
-verificate(password, isPasswordValid);
+verificateForm();
 
 $(document).ready(function() {
     if (isSurnameValid() && isNameValid() && isBirthdateValid()) {

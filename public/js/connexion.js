@@ -1,5 +1,4 @@
-verificate(email, isEmailValid);
-verificate(password, isPasswordValid);
+verificateForm();
 
 $("#show_password").click(function() {
     if (password.attr('type') === 'password') {
@@ -19,16 +18,16 @@ $(document).on('keydown', function(e) {
 
 $("#form").on('submit', (e) => {
     $('#error_step').css('display', 'none');
-    let step2 = true;
+    let valid = true;
     if (!isEmailValid()) {
         email.css("border", "2px solid red");
-        step2 = false;
+        valid = false;
     }
     if (!isPasswordValid()) {
         password.css("border", "2px solid red");
-        step2 = false;
+        valid = false;
     }
-    if (!step2) {
+    if (!valid) {
         $('#error_form').css('display', 'block');
         e.preventDefault();
     }
