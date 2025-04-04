@@ -1,17 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-// const { getParametre, postParametre, getMdpOublie, 
-//         postMdpOublie, getMdpReinitialisation, postMdpReinitialisation } = require('./user_controller');
+const controller = require('./user_controller');
 
+router.get('/', controller.getProfile);
 
-// router.get('/parametres', getParametre);
-// router.post('/parametres', postParametre);
+router.get('/parametres', controller.getParameters);
 
-// router.get('/mdp_oublie', getMdpOublie);
-// router.post('/mdp_oublie', postMdpOublie);
-
-// router.get('/mdp_reinitialisation', getMdpReinitialisation);
-// router.post('/mdp_reinitialisation', postMdpReinitialisation);
+router.get('/mdp_reinitialisation', controller.getPasswordReset);
 
 module.exports = router;

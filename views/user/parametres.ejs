@@ -1,32 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
 	<head>
-		<meta charset="UTF-8"/>
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Planify</title>
-		<link href="/css/nav.css" rel="stylesheet"/>
-		<link href="/css/parametrescss" rel="stylesheet"/>
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+		<meta charset="UTF-8">
+        <title>Inscription - Planify</title>
+        <link rel="shortcut icon" href="/images/favicon.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- script -->
+        <script src="/js/jquery.js"></script>
+        <!-- css -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/nav.css" rel="stylesheet">
+        <link href="/css/parametres.css" rel="stylesheet">
 	</head>
 	<body>
-		<header class="top-nav">
-			<div class="left-nav">
-				<img src="/images/empty.png" id="menu" width="44" height="34"/>
-				<a href="/index">
-					<img src="/images/logo.png" class="logo" width="170" height="40" />
-				</a>			
-			</div>
-			<div class="right-nav">
-				<% if (typeof email !== 'undefined' && typeof pseudo !== 'undefined') { %>
-					<label class="pseudo"><%= pseudo %></label>
-					<a href="/parametres">
-						<img src="/images/parametres.png" id="logo" width="40" height="40" />
-					</a>	
-				<% } %>
-			</div>
-		</header>
+		<%- include('../nav') %>
 			<form action="/parametres" method="POST">
 				<header class="authentification">
 					<h2>Paramètres</h2>
@@ -57,7 +44,5 @@
 				</div>
 			</form>
 	</body>
-	<script>
-		
-	</script>
+	<script src="/js/bootstrap.bundle.min.js"></script>
 </html>

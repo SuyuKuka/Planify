@@ -10,7 +10,7 @@ $(document).ready(function() {
 
 //#region step1
 $("#suivant").click(function() {
-    $('#error_step1ejs').css('display', 'none');
+    $('#server_error1').css('display', 'none');
     let step1 = true;
     if (!isSurnameValid()) {
         surname.css("border", "2px solid red");
@@ -25,9 +25,9 @@ $("#suivant").click(function() {
         step1 = false;
     }
     if (!step1) {
-        $('#error_step1').css('display', 'block');
+        $('#client_error1').css('display', 'block');
     } else {
-        $('#error_step1').css('display', 'none');
+        $('#client_error1').css('display', 'none');
         $('#step1').css('display', 'none');
         $('#step2').css('display', 'block');
     }
@@ -63,7 +63,7 @@ $(document).on('keydown', function(e) {
 });
 
 $("#form").on('submit', (e) => {
-    $('#error_step2ejs').css('display', 'none');
+    $('#server_error2').css('display', 'none');
     let step2 = true;
     if (!isUsernameValid()) {
         username.css("border", "2px solid red");
@@ -78,7 +78,7 @@ $("#form").on('submit', (e) => {
         step2 = false;
     }
     if (!step2) {
-        $('#error_step2').css('display', 'block');
+        $('#client_error2').css('display', 'block');
         e.preventDefault();
     }
 });

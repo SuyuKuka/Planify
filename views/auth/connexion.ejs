@@ -30,12 +30,12 @@
                 <input type="checkbox" name="show_password" id="show_password"/>
                 <label for="show_password">Afficher le mot de passe</label>
             </div>
-            <div class="error_message" id="error_form" style="display: none;">
-                <label class="error">Les données spécifiées ne sont pas valides.</label>
+            <div class="error" id="client_error" style="display: none;">
+                <label class="error_msg">Les données spécifiées ne sont pas valides.</label>
             </div>
             <% if (typeof error !== 'undefined') { %>
-                <div class="error_message">
-                    <label class="error"><%= error.msg %></label>
+                <div class="error" id="server_error">
+                    <label class="error_msg"><%= error.msg %></label>
                 </div>
             <% } %>
             <div class="submit_div">

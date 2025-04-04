@@ -36,12 +36,12 @@
                         max="<%= new Date().toISOString().split('T')[0] %>"
                         value="<%= typeof birthdate !== 'undefined' ? birthdate : '' %>"/>
                 </div>
-                <div class="error_message" id="error_step1" style="display: none;">
-                    <label class="error">Les données spécifiées ne sont pas valides.</label>
+                <div class="error" id="client_error1" style="display: none;">
+                    <label class="error_msg">Les données spécifiées ne sont pas valides.</label>
                 </div>
                 <% if (typeof error_step1 !== 'undefined') { %>
-                    <div class="error_message" id="error_step1ejs">
-                        <label class="error"><%= error_step1.msg %></label>
+                    <div class="error" id="server_error1">
+                        <label class="error_msg"><%= error_step1.msg %></label>
                     </div>
                 <% } %>
                 <div class="suivant_div">
@@ -68,12 +68,12 @@
                     <input type="checkbox" name="show_password" id="show_password"/>
                     <label for="show_password">Afficher le mot de passe</label>
                 </div>
-                <div class="error_message" id="error_step2" style="display: none;">
-                    <label class="error">Les données spécifiées ne sont pas valides.</label>
+                <div class="error" id="client_error2" style="display: none;">
+                    <label class="error_msg">Les données spécifiées ne sont pas valides.</label>
                 </div>
                 <% if (typeof error_step2 !== 'undefined') { %>
-                    <div class="error_message" id="error_step2ejs">
-                        <label class="error"><%= error_step2.msg %></label>
+                    <div class="error" id="server_error2">
+                        <label class="error_msg"><%= error_step2.msg %></label>
                     </div>
                 <% } %>
                 <div>

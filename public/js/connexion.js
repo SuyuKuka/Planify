@@ -17,7 +17,7 @@ $(document).on('keydown', function(e) {
 });
 
 $("#form").on('submit', (e) => {
-    $('#error_step').css('display', 'none');
+    $('#server_error').css('display', 'none');
     let valid = true;
     if (!isEmailValid()) {
         email.css("border", "2px solid red");
@@ -28,7 +28,7 @@ $("#form").on('submit', (e) => {
         valid = false;
     }
     if (!valid) {
-        $('#error_form').css('display', 'block');
+        $('#client_error').css('display', 'block');
         e.preventDefault();
     }
 });

@@ -3,9 +3,21 @@
 ## Manuel d'utilisation
 
 Lancez `npm ci .` dans `.../programmation-web`.
-- `npm list` pour voir les modules utilisés.
 
 Lancez le serveur avec `node app.js`.
+
+### Modules utilisés
+
+`npm list` pour voir les modules utilisés.
+
+- `express`
+- `bootstrap`
+- `ejs`
+- `pg`
+
+- `nodemailer`
+- `express-session`
+- `nodemon`
 
 ## Membres
 |  Nom  | Prénom | N° étudiant |
