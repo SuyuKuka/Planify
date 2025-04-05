@@ -39,7 +39,7 @@ function isBirthdateValid() {
 }
 
 function isUsernameValid() {
-    return /^[A-Z][A-Za-z' -]{4,31}$/.test(username.val());
+    return /^[A-Z][A-Za-z' -]{3,31}$/.test(username.val());
 }
 
 function isEmailValid() {
