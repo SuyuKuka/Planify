@@ -1,8 +1,11 @@
--- DROP DATABASE IF EXISTS planify;
+-- psql -U postgres -d planify
+DROP DATABASE IF EXISTS planify;
 DROP TABLE IF EXISTS utilisateur CASCADE;
 DROP TABLE IF EXISTS token CASCADE;
 
--- CREATE DATABASE planify;
+CREATE DATABASE planify;
+
+\c planify;
 
 CREATE TABLE utilisateur (
     id SERIAL PRIMARY KEY,

@@ -2,10 +2,25 @@
 
 ## Manuel d'utilisation
 
-Lancez `make` dans `.../programmation-web`.
+Lancez `npm ci .` dans `.../programmation-web`.
 
-Lancez le serveur avec `node server.js`.
+Lancez le serveur avec `node app.js`.
+
+### Modules utilisés
+
+`npm list` pour voir les modules utilisés.
+
+- `express`
+- `bootstrap`
+- `ejs`
+- `pg`
+
+- `nodemailer`
+- `express-session`
+- `nodemon`
 
 ## Membres
-CHIV Henri 22205265
-CHEN Michel 22202655
+|  Nom  | Prénom | N° étudiant |
+| :---: | :----: | :---------: |
+| CHIV  | Henri  |  22205265   |
+| CHEN  | Michel |  22202655   |

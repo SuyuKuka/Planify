@@ -1,5 +1,9 @@
-.col-sm-4 {
-    height: calc(100vh - 70px);;
+* {
+    box-sizing: border-box;
+}
+
+/* .col-sm-4 {
+    height: calc(100vh - 70px);
 }
 
 @media (max-width: 767px) { #left, #center, #right {
@@ -70,8 +74,13 @@
 
 #profil :hover, #parametres :hover, #deconnexion :hover {
     color: red;
-}
+} */
 
 /* #profil :hover, #parametres :hover, #deconnexion :hover {
     color: white;
 } */
+
+.bar {
+    border: 2px solid black;
+    text-align: center;
+}

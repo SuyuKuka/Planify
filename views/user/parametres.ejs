@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+        <title>Inscription - Planify</title>
+        <link rel="shortcut icon" href="/images/favicon.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- script -->
+        <script src="/js/jquery.js"></script>
+        <!-- css -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/nav.css" rel="stylesheet">
+        <link href="/css/parametres.css" rel="stylesheet">
+	</head>
+	<body>
+		<%- include('../nav') %>
+			<form action="/parametres" method="POST">
+				<header class="authentification">
+					<h2>Paramètres</h2>
+				</header>
+				<div>
+					<label for="pseudo_pa">Pseudo :</label><br>
+					<input type="text" name="pseudo" id="pseudo" value="<%= pseudo %>"/>
+				</div>
+				<div>
+					<label for="email_pa">Adresse e-mail :</label><br>
+					<input type="email" name="email" id="email" value="<%= email %>"/>
+				</div>
+				<div>
+					<label for="mdp_pa">Mot de passe :</label><br>
+					<input type="password" name="mdp" id="mdp" value=""/>
+				</div>
+				<div class="afficher">
+					<input type ="checkbox" name="afficher"/>
+					<label>Afficher le mot de passe</label>
+				</div>
+				<% if (typeof erreur !== 'undefined') { %>
+					<div class="error_message">
+						<label class="error"><%= erreur %></label>
+					</div>
+				<% } %>
+				<div class="reparer">
+					<input type="submit" id="enregistrer" value="Enregistrer">
+				</div>
+			</form>
+	</body>
+	<script src="/js/bootstrap.bundle.min.js"></script>
+</html>
