@@ -15,7 +15,7 @@ async function isEmailAlreadyUsed(email) {
 async function getUser(email, mdp) {
     const client = await db.pool.connect();
     try {
-        const res = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND mot_de_passe = $2", [email, mdp]);
+        const res = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND password = $2", [email, mdp]);
         if (res.rows.length == 0) {
             return null;
         }

@@ -79,9 +79,11 @@ async function postRegistrationVerif(req, res) {
                 });
                 res.redirect('/auth/inscription');
             } else { // Cas succès
+                console.log("succes");
                 await Auth.addUser(surname, name, birthdate, username, email, password);
+                console.log("added");
                 Object.assign(req.session, {
-                    username, email
+                    surname, name, birthdate, username, email
                 });
                 res.redirect('/');
             }
@@ -151,21 +153,22 @@ async function postConnectionVerif(req, res) {
     try {
         if (ret) {
             const user = await Auth.getUser(email, password);
-            if (user === null) {
+            if (user === null) { // Cas email ou mot de passe incorrect
+                console.log("erreur");
                 Object.assign(req.session, {
                     email,
                     error:errorMessages.wrongEmailOrPassword
                 });
                 res.redirect('/auth/connexion');
-            } else {
+            } else { // Cas succes
+                console.log("succes");
+                const { username, surname, name, birthdate } = user;
                 Object.assign(req.session, {
-                    email,
-                    // TODO: CHANGER pseudo -> username dans db
-                    username: user.pseudo
+                    surname, name, birthdate, username, email
                 });
                 res.redirect('/');
             }
-        } else {
+        } else { // Cas au moins une valeur non valide
             Object.assign(req.session, {
                 email,
                 error: errorMessages.invalidQuery
