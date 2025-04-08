@@ -56,6 +56,9 @@ function verifyPassword(password) {
 //#region Inscription
 function getRegistration(req, res) {
     const { surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
+    if (req.session) {
+        destroySession(req, res);
+    }
     res.render('auth/inscription', {
         surname, name, birthdate, username, email,
         error_step1, error_step2
@@ -138,6 +141,9 @@ function verifyRegistration(req_body) {
 //#region Connexion
 function getConnection(req, res) {
     const { email, error } = req.session;
+    if (req.session) {
+        destroySession(req, res);
+    }
     res.render('auth/connexion', {
         email, error
     });
@@ -221,6 +227,14 @@ function getDisconnection(req, res) {
         }
         res.clearCookie('connect.sid');
         res.redirect('/');
+    });
+}
+
+function destroySession(req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send('Erreur');
+        }
     });
 }
 
