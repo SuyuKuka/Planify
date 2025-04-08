@@ -1,7 +1,7 @@
-const db = require('../../services/database/db');
+const { getPool } = require('../../config/database/db');
 
 async function isEmailAlreadyUsed(email) {
-    let client = await db.pool.connect();
+    let client = await getPool().connect();
     try {
         let res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
         return res.rowCount > 0;
@@ -13,7 +13,7 @@ async function isEmailAlreadyUsed(email) {
 }
 
 async function getUser(email, mdp) {
-    const client = await db.pool.connect();
+    const client = await getPool().connect();
     try {
         const res = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND mot_de_passe = $2", [email, mdp]);
         if (res.rows.length == 0) {
@@ -28,7 +28,7 @@ async function getUser(email, mdp) {
 }
 
 async function addUser(nom, prenom, date, pseudo, email, mdp) {
-    const client = await db.pool.connect();
+    const client = await getPool().connect();
     try {
         let res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
         if (res.rows.length > 0) {

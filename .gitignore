@@ -1,5 +1,4 @@
 .vscode
-.vscode/*
 gitignore
 node_modules
-password.txt
+.env

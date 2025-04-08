@@ -1,36 +1,40 @@
 // MODULES
 const express = require('express');
+const { initDatabase } = require('./config/database/db');
 const session = require('express-session');
 const path = require('path');
-const { generateToken } = require('./services/encryption/encrypt');
+const { generateToken } = require('./utilities/encryption/encrypt');
 
-// VARIABLES
+initDatabase()
+.then(() => {
+    // VARIABLES
+    const app = express();
+    const hostname = '127.0.0.1';
+    const port = 8080;
 
-const app = express();
-const hostname = '127.0.0.1';
-const port = 8080;
+    // ROUTES
 
-// ROUTES
+    app.set('view engine', 'ejs');
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.static(path.join(__dirname, 'public')));
 
-app.set('view engine', 'ejs');
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+    app.use(session({
+        secret: generateToken(),
+        resave: false,
+        saveUninitialized: true,
+        cookie: { httpOnly: true, secure: false } 
+    }));
 
-app.use(session({
-    secret: generateToken(),
-    resave: false,
-    saveUninitialized: true,
-    cookie: { httpOnly: true, secure: false } 
-}));
+    app.get('/', require('./entities/index/index_routes'));
+    app.use('/auth', require('./entities/auth/auth_routes'));
+    app.use('/user', require('./entities/user/user_routes'));
 
-app.get('/', require('./entities/index/index_routes'));
-app.use('/auth', require('./entities/auth/auth_routes'));
-app.use('/user', require('./entities/user/user_routes'));
+    app.use('/*', (req, res) => res.status(404).send("Lien non reconnu."));
 
-app.use('/*', (req, res) => res.status(404).send("Lien non reconnu."));
+    // LANCEMENT SERVEUR
 
-// LANCEMENT SERVEUR
-
-app.listen(port, hostname, () => {
-    console.log(`Serveur est en route sur http://${hostname}:${port}/`);
-});
+    app.listen(port, hostname, () => {
+        console.log(`Application en route sur http://${hostname}:${port}/`);
+    });
+})
+.catch(err => console.error (err.stack));
