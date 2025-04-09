@@ -1,4 +1,11 @@
 const Auth = require('./auth_model');
+function destroySession(req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send('Erreur');
+        }
+    });
+}
 
 //#region Erreurs
 const errorMessages = Object.freeze({
@@ -56,6 +63,9 @@ function verifyPassword(password) {
 //#region Inscription
 function getRegistration(req, res) {
     const { surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
+    if (req.session) {
+        destroySession(req, res);
+    }
     res.render('auth/inscription', {
         surname, name, birthdate, username, email,
         error_step1, error_step2
@@ -79,9 +89,7 @@ async function postRegistrationVerif(req, res) {
                 });
                 res.redirect('/auth/inscription');
             } else { // Cas succès
-                console.log("succes");
                 await Auth.addUser(surname, name, birthdate, username, email, password);
-                console.log("added");
                 Object.assign(req.session, {
                     surname, name, birthdate, username, email
                 });
@@ -138,6 +146,9 @@ function verifyRegistration(req_body) {
 //#region Connexion
 function getConnection(req, res) {
     const { email, error } = req.session;
+    if (req.session) {
+        destroySession(req, res);
+    }
     res.render('auth/connexion', {
         email, error
     });
@@ -154,14 +165,12 @@ async function postConnectionVerif(req, res) {
         if (ret) {
             const user = await Auth.getUser(email, password);
             if (user === null) { // Cas email ou mot de passe incorrect
-                console.log("erreur");
                 Object.assign(req.session, {
                     email,
                     error:errorMessages.wrongEmailOrPassword
                 });
                 res.redirect('/auth/connexion');
             } else { // Cas succes
-                console.log("succes");
                 const { username, surname, name, birthdate } = user;
                 Object.assign(req.session, {
                     surname, name, birthdate, username, email

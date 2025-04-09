@@ -1,13 +1,26 @@
 const db = require('../../services/database/db');
 const encrypt = require('../../services/encryption/encrypt');
 
-async function modifyUser(pseudo, email, mdp) {
+async function modifyUser(username, email, password, old_email, new_password) {
+    let client = await db.pool.connect();
     try {
-        return await db.clientConnect(async client => {
-            return client.query("UPDATE utilisateur SET pseudo = $1, email = $2, password = $3 WHERE email = $4", [pseudo, email, mdp, email]);
-        }, pseudo, email, mdp);
-    } catch (error) {
-        throw error;
+        let exist = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
+        if (exist.rows.length > 0) {
+            return 1;
+        }
+
+        let check = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND password = $2", [old_email, password]);
+        if (check.rows.length === 0) {
+            return 2;
+        } else {
+            let res = await client.query("UPDATE utilisateur SET username = $1, email = $2, password = $3 WHERE email = $4", [username, email, new_password, old_email]);
+            return 0;
+        }
+
+    } catch (err) {
+        throw err;
+    } finally {
+        client.release();
     }
 }
 
