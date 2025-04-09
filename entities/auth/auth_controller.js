@@ -1,11 +1,4 @@
 const Auth = require('./auth_model');
-function destroySession(req, res) {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).send('Erreur');
-        }
-    });
-}
 
 //#region Erreurs
 const errorMessages = Object.freeze({
