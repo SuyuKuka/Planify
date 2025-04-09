@@ -233,6 +233,14 @@ function getDisconnection(req, res) {
     });
 }
 
+function destroySession(req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send('Erreur');
+        }
+    });
+}
+
 module.exports = {
     getRegistration,
 
