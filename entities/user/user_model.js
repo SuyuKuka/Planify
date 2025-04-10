@@ -1,10 +1,10 @@
-const db = require('../../config/database/db');
-const encrypt = require('../../utilities/encryption/encrypt');
+const db = require('../../services/database/db');
+const encrypt = require('../../services/encryption/encrypt');
 
 async function modifyUser(pseudo, email, mdp) {
     try {
         return await db.clientConnect(async client => {
-            return client.query("UPDATE utilisateur SET pseudo = $1, email = $2, mot_de_passe = $3 WHERE email = $4", [pseudo, email, mdp, email]);
+            return client.query("UPDATE utilisateur SET username = $1, email = $2, password = $3 WHERE email = $4", [pseudo, email, mdp, email]);
         }, pseudo, email, mdp);
     } catch (error) {
         throw error;

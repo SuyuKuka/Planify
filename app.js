@@ -1,9 +1,9 @@
 // MODULES
 const express = require('express');
-const { initDatabase } = require('./config/database/db');
+const { initDatabase } = require('./services/database/db');
 const session = require('express-session');
 const path = require('path');
-const { generateToken } = require('./utilities/encryption/encrypt');
+const { generateToken } = require('./services/encryption/encrypt');
 
 initDatabase()
 .then(() => {

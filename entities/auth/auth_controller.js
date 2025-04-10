@@ -148,9 +148,11 @@ function getConnectionVerif(req, res) {
 async function postConnectionVerif(req, res) {
     const ret = verifyConnection(req.body);
     const { email, password } = req.body;
+    console.log(email, password);
     try {
         if (ret) {
             const user = await Auth.getUser(email, password);
+            console.log(user);
             if (user === null) {
                 Object.assign(req.session, {
                     email,
@@ -160,8 +162,7 @@ async function postConnectionVerif(req, res) {
             } else {
                 Object.assign(req.session, {
                     email,
-                    // TODO: CHANGER pseudo -> username dans db
-                    username: user.pseudo
+                    username: user.username
                 });
                 res.redirect('/');
             }

@@ -25,4 +25,5 @@ function getDbConfig() {
 
 module.exports = {
     getPool: () => pool, 
-    initDatabase };
+    initDatabase 
+};

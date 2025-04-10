@@ -4,7 +4,7 @@
 
 ### Configuration Base de données PostGreSQL
 
-Créer un fichier `.env` contenant :
+Créer un fichier `.env` sur `programmation-web/` contenant :
 
 ```
 DB_USER=postgres
@@ -14,9 +14,9 @@ DB_PASSWORD=password
 DB_PORT=5432
 ```
 
-- DB_USER peut être un autre utilisateur s'il
-- DB_NAME peut avoir un autre nom
-- DB_PASSWORD doit être le mot de passe de DB_USER choisi
+- DB_USER : utilisateur psql
+- DB_NAME : nom de la base de donnée
+- DB_PASSWORD : mot de passe de l'utilisateur psql
 
 ### Build des modules de l'application
 
