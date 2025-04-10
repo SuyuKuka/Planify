@@ -6,7 +6,9 @@ const controller = require('./user_controller');
 router.get('/', controller.getProfile);
 
 router.get('/parametres', controller.getParameters);
-router.post('/parametres', controller.postChangeParameters);
+
+router.get('/parametres/verification', controller.getParametersChangesVerif);
+router.post('/parametres/verification', controller.postParametersChangesVerif);
 
 router.get('/mdp_reinitialisation', controller.getPasswordReset);
 

@@ -14,7 +14,7 @@
 	</head>
 	<body>
 		<%- include('../nav') %>
-		<form autocomplete="off" action="/user/parametres" method="POST" id="form">
+		<form autocomplete="off" action="/user/parametres/verification" method="POST" id="form">
 			<header class="parametres">
 				<h1>Paramètres</h1>
 			</header>
@@ -23,10 +23,25 @@
 			<div>
 				<label for="username">*Pseudo :</label><br>
 				<input type="text" name="username" id="username" placeholder="<%= username %>"/>
+				<% if (typeof usernameChanged !== 'undefined') { %>
+                    <div class="success" id="server_error">
+                        <label class="success_msg"><%= usernameChanged.msg %></label>
+                    </div>
+                <% } %>
 			</div>
 			<div>
 				<label for="email">*Adresse e-mail :</label><br>
 				<input type="email" name="email" id="email" placeholder="<%= email %>"/>
+				<% if (typeof emailError !== 'undefined') { %>
+                    <div class="error" id="server_error">
+                        <label class="error_msg"><%= emailError.msg %></label>
+                    </div>
+                <% } %>
+				<% if (typeof emailChanged !== 'undefined') { %>
+                    <div class="success" id="server_error">
+                        <label class="success_msg"><%= emailChanged.msg %></label>
+                    </div>
+                <% } %>
 			</div>
 			<div>
 				<label for="password">Mot de passe actuel :</label><br>
@@ -35,6 +50,11 @@
 			<div>
 				<label for="new_password">*Nouveau mot de passe :</label><br>
 				<input type="password" name="new_password" id="new_password"/><br>
+				<% if (typeof passwordChanged !== 'undefined') { %>
+                    <div class="success" id="server_error">
+                        <label class="success_msg"><%= passwordChanged.msg %></label>
+                    </div>
+                <% } %>
 				<label id="information">*Laissez vide si vous gardez le même champ.</label>
 			</div>
 			<div class="show_password_div">

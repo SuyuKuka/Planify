@@ -1,22 +1,38 @@
 const db = require('../../services/database/db');
 const encrypt = require('../../services/encryption/encrypt');
 
-async function modifyUser(username, email, password, old_email, new_password) {
-    let client = await db.pool.connect();
+// TODO: changer session_username par token
+async function modifyUsername(session_username, username) {
+    const client = await db.pool.connect();
     try {
-        let exist = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
-        if (exist.rows.length > 0) {
-            return 1;
-        }
+        const res = await client.query("UPDATE utilisateur SET username = $1 WHERE username = $2", [username, session_username]);
+        return res.rowCount > 0;
+    } catch (err) {
+        throw err;
+    } finally {
+        client.release();
+    }
+}
 
-        let check = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND password = $2", [old_email, password]);
-        if (check.rows.length === 0) {
-            return 2;
-        } else {
-            let res = await client.query("UPDATE utilisateur SET username = $1, email = $2, password = $3 WHERE email = $4", [username, email, new_password, old_email]);
-            return 0;
-        }
+// TODO: changer session_username par token
+async function modifyEmail(session_username, email) {
+    const client = await db.pool.connect();
+    try {
+        const res = await client.query("UPDATE utilisateur SET email = $1 WHERE username = $2", [email, session_username]);
+        return res.rowCount > 0;
+    } catch (err) {
+        throw err;
+    } finally {
+        client.release();
+    }
+}
 
+// TODO: changer session_username par token
+async function modifyPassword(session_username, password) {
+    const client = await db.pool.connect();
+    try {
+        const res = await client.query("UPDATE utilisateur SET password = $1 WHERE username = $2", [password, session_username]);
+        return res.rowCount > 0;
     } catch (err) {
         throw err;
     } finally {
@@ -42,4 +58,9 @@ async function saveResetToken(email) {
     }
 }
 
-module.exports = { modifyUser, saveResetToken };
+module.exports = {
+    modifyUsername,
+    modifyEmail,
+    modifyPassword,
+    saveResetToken
+};
