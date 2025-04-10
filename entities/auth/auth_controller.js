@@ -199,13 +199,50 @@ function getPasswordForgotten(req, res) {
     res.render('auth/mdp_oublie');
 }
 
-async function postPasswordForgottenSuccess(req, res) {
+function getPasswordForgottenVerif(req, res) {
+    res.render('auth/mdp_oublie_succes');
+}
+
+async function postPasswordForgotten(req, res) {
     const { email } = req.body;
-    try {
-        Auth.sendPasswordForgottenEmail(email);
-        res.render('auth/mdp_oublie_succes');
-    } catch (error) {
-        res.render('auth/mdp_oublie_succes');
+
+    let result = await Auth.sendPasswordForgottenEmail(email);
+    if (result) {
+        res.redirect('/auth/mdp_oublie/verification');
+    } else {
+        res.render('auth/mdp_oublie', {
+            error: "Cet email n'existe pas."
+        });
+    }
+}
+
+async function getPasswordReset(req, res) {
+    const token = req.query.token;
+    if (!token) {
+        return res.redirect('/auth/mdp_oublie/'); 
+    }
+    
+    let result = await Auth.checkToken(token);
+    if (result.rows.length === 0) {
+        res.redirect('/auth/mdp_oublie/');
+    } else {
+        res.render('auth/reinitialisation', { token });
+    }
+}
+
+async function postPasswordResetVerif(req, res) {
+    const { password } = req.body;
+    const token = req.body.token;
+    if (!token) {
+        return res.redirect('/auth/mdp_oublie/'); 
+    }
+    
+    let result = await Auth.checkToken(token);
+    if (result.rows.length === 0) {
+        res.redirect('/auth/mdp_oublie/');
+    } else {
+        await Auth.updatePassword(result.rows[0].email, password);
+        res.redirect('/auth/connexion');
     }
 }
 
@@ -233,7 +270,11 @@ module.exports = {
     postConnectionVerif,
 
     getPasswordForgotten,
-    postPasswordForgottenSuccess,
+    getPasswordForgottenVerif,
+    postPasswordForgotten,
+
+    getPasswordReset,
+    postPasswordResetVerif,
 
     getDisconnection
 };

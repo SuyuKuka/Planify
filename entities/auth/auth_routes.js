@@ -12,7 +12,11 @@ router.get('/connexion/verification', controller.getConnectionVerif);
 router.post('/connexion/verification', controller.postConnectionVerif);
 
 router.get('/mdp_oublie', controller.getPasswordForgotten);
-router.post('/mdp_oublie/succes', controller.postPasswordForgottenSuccess);
+router.get('/mdp_oublie/verification', controller.getPasswordForgottenVerif);
+router.post('/mdp_oublie', controller.postPasswordForgotten);
+
+router.get('/reinitialisation', controller.getPasswordReset);
+router.post('/reinitialisation/verification', controller.postPasswordResetVerif);
 
 router.get('/deconnexion', controller.getDisconnection);
 

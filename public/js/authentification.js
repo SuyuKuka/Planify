@@ -4,6 +4,7 @@ const birthdate = $('#birthdate');
 const username = $('#username');
 const email = $('#email');
 const password = $('#password');
+const password_confirm = $('#password_confirm');
 
 function verificate(input, method) {
     if (input.length == 0) {
@@ -59,4 +60,5 @@ function verificateForm() {
     verificate(username, isUsernameValid);
     verificate(email, isEmailValid);
     verificate(password, isPasswordValid);
+    verificate(password_confirm, isPasswordValid);
 }
