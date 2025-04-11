@@ -79,17 +79,16 @@ async function postParametersChangesVerif(req, res) {
     }
 
     try {
-        console.log(verifyUsername(username));
         if (verifyUsername(username)) {
             await User.modifyUsername(session_username, username);
             // TODO: req.session.username = username; quand remplacer session_username par token
-            console.log("after");
             req.session.username = username;
             req.session.usernameChanged = messages.success;
         }
         if (verifyEmail(email)) {
             const emailUsed = await User.modifyEmail(session_username, email);
             if (emailUsed) {
+                req.session.email = email;
                 req.session.emailChanged = messages.success;
             } else {
                 req.session.emailError = messages.alreadyUsedEmail;
@@ -99,7 +98,6 @@ async function postParametersChangesVerif(req, res) {
             await User.modifyPassword(session_username, new_password);
             req.session.passwordChanged = messages.success;
         }
-        console.log(req.session);
         res.redirect('/user/parametres');
     } catch (error) {
         req.session.error = messages.default;

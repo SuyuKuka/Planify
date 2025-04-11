@@ -163,7 +163,6 @@ function getConnectionVerif(req, res) {
 async function postConnectionVerif(req, res) {
     const ret = verifyConnection(req.body);
     const { email, password } = req.body;
-    console.log(email, password);
     try {
         if (ret) {
             const user = await Auth.getUser(email, password);
