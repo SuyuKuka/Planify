@@ -55,7 +55,7 @@ async function saveResetToken(email) {
         await client.query("DELETE FROM token WHERE expire_at < NOW()");
         await client.query("INSERT INTO token (email, token, expire_at) VALUES ($1, $2, $3)", [email, token, expirationDate]);
     } catch (err) {
-        console.error(err);
+        throw err;
     } finally {
         client.release();
     }
@@ -78,7 +78,7 @@ async function sendPasswordForgottenEmail(email_oublie) {
                        <a href="http://localhost:8080/auth/mdp_reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
             });
         } catch (error) {
-            console.error(error);
+            throw error;
         }
     }
 }
@@ -89,7 +89,7 @@ async function checkToken(token) {
         let result = await client.query("SELECT * FROM token WHERE token = $1 AND expire_at > NOW()", [token]);
         return result;
     } catch (err) {
-        console.error(err);
+        throw err;
     } finally {
         client.release();
     }
@@ -102,7 +102,7 @@ async function updatePassword(email, password) {
         await client.query("DELETE FROM token WHERE email = $1", [email]);
         await client.query("DELETE FROM token WHERE expire_at < NOW()");
     } catch (err) {
-        console.error(err);
+        throw err;
     } finally {
         client.release();
     }
