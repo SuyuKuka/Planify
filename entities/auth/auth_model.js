@@ -1,9 +1,9 @@
-const db = require('../../services/database/db');
+const { getPool } = require('../../config/database/db');
 const encrypt = require('../../services/encryption/encrypt');
 const mail = require('../../services/mailer/mailer');
 
 async function isEmailAlreadyUsed(email) {
-    let client = await db.pool.connect();
+    let client = await getPool().connect();
     try {
         let res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
         return res.rowCount > 0;
@@ -15,7 +15,7 @@ async function isEmailAlreadyUsed(email) {
 }
 
 async function getUser(email, password) {
-    const client = await db.pool.connect();
+    const client = await getPool().connect();
     try {
         const res = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND password = $2", [email, password]);
         if (res.rows.length == 0) {
@@ -29,14 +29,14 @@ async function getUser(email, password) {
     }
 }
 
-async function addUser(nom, prenom, date, pseudo, email, mdp) {
-    const client = await db.pool.connect();
+async function addUser(surname, name, birthdate, username, email, password) {
+    const client = await getPool().connect();
     try {
         let res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
         if (res.rows.length > 0) {
             return false;
         }
-        await client.query("INSERT INTO utilisateur (surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6)", [nom, prenom, date, pseudo, email, mdp]);
+        client.query("INSERT INTO utilisateur (surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6)", [surname, name, birthdate, username, email, password]);
         return true;
     } catch (err) {
         throw err;
@@ -49,7 +49,7 @@ async function saveResetToken(email) {
     let token = encrypt.generateToken();
     let expirationDate = new Date(Date.now() + 5 * 60 * 1000); 
 
-    let client = await db.pool.connect();
+    let client = await getPool().connect();
     try {
         await client.query("DELETE FROM token WHERE email = $1", [email]);
         await client.query("DELETE FROM token WHERE expire_at < NOW()");
@@ -63,7 +63,7 @@ async function saveResetToken(email) {
 }
 
 async function sendPasswordForgottenEmail(email_oublie) {
-    let client = await db.pool.connect();
+    let client = await getPool().connect();
     let result = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email_oublie]);
     client.release();
 
@@ -84,7 +84,7 @@ async function sendPasswordForgottenEmail(email_oublie) {
 }
 
 async function checkToken(token) {
-    let client = await db.pool.connect();
+    let client = await getPool().connect();
     try {
         let result = await client.query("SELECT * FROM token WHERE token = $1 AND expire_at > NOW()", [token]);
         return result;
@@ -95,10 +95,10 @@ async function checkToken(token) {
     }
 }
 
-async function updatePassword(email, mdp) {
-    let client = await db.pool.connect();
+async function updatePassword(email, password) {
+    let client = await getPool().connect();
     try {
-        await client.query("UPDATE utilisateur SET password = $1 WHERE email = $2", [mdp, email]);
+        await client.query("UPDATE utilisateur SET password = $1 WHERE email = $2", [password, email]);
         await client.query("DELETE FROM token WHERE email = $1", [email]);
         await client.query("DELETE FROM token WHERE expire_at < NOW()");
     } catch (err) {
