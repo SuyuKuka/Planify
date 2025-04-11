@@ -84,7 +84,7 @@ async function sendPasswordForgottenEmail(email_forgotten) {
                 to: email_forgotten,
                 subject: 'Réinitialisation de votre mot de passe',
                 html: `<p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>
-                       <a href="http://localhost:8080/auth/mdp_reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
+                       <a href="http://localhost:8080/auth/mot_de_passe_reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
             });
         } catch (error) {
             throw error;
