@@ -1,4 +1,4 @@
-const { getPool } = require('../../services/database/db');
+const { getPool } = require('../../config/database/db');
 
 async function isEmailAlreadyUsed(email) {
     let client = await getPool().connect();

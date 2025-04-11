@@ -1,4 +1,4 @@
-const db = require('../../services/database/db');
+const db = require('../../config/database/db');
 const encrypt = require('../../services/encryption/encrypt');
 
 async function modifyUser(pseudo, email, mdp) {
