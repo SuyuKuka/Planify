@@ -17,7 +17,7 @@ $("#form").on('submit', (e) => {
         password.css("border", "2px solid red");
         valid = false;
     }
-    if (!isPasswordValid()) {
+    if (!isPasswordConfirmValid()) {
         password_confirm.css("border", "2px solid red");
         valid = false;
     }

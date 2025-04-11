@@ -53,6 +53,12 @@ function isPasswordValid() {
     return length >= 8 && length <= 32;
 }
 
+function isPasswordConfirmValid() {
+    const val = password_confirm.val();
+    const length = val.length;
+    return length >= 8 && length <= 32;
+}
+
 function verificateForm() {
     verificate(surname, isSurnameValid);
     verificate(name, isNameValid);

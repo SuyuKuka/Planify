@@ -160,8 +160,7 @@ async function postConnectionVerif(req, res) {
             } else {
                 Object.assign(req.session, {
                     email,
-                    // TODO: CHANGER pseudo -> username dans db
-                    username: user.pseudo
+                    username: user.username
                 });
                 res.redirect('/');
             }
@@ -199,20 +198,24 @@ function getPasswordForgotten(req, res) {
     res.render('auth/mdp_oublie');
 }
 
-function getPasswordForgottenVerif(req, res) {
+function getPasswordForgottenSuccess(req, res) {
     res.render('auth/mdp_oublie_succes');
 }
 
-async function postPasswordForgotten(req, res) {
+async function postPasswordForgottenSuccess(req, res) {
     const { email } = req.body;
-
-    let result = await Auth.sendPasswordForgottenEmail(email);
-    if (result) {
-        res.redirect('/auth/mdp_oublie/verification');
-    } else {
-        res.render('auth/mdp_oublie', {
-            error: "Cet email n'existe pas."
-        });
+    const ret = verifyEmail(email);
+    try {
+        if (ret) {
+            await Auth.sendPasswordForgottenEmail(email);
+            res.redirect('/auth/mdp_oublie_succes');
+        } else {
+            req.session.error = errorMessages.invalidQuery;
+            res.redirect('/auth/mdp_oublie');
+        }
+    } catch (error) {
+        req.session.error = errorMessages.default;
+        res.redirect('/auth/mdp_oublie');
     }
 }
 
@@ -221,28 +224,38 @@ async function getPasswordReset(req, res) {
     if (!token) {
         return res.redirect('/auth/mdp_oublie/'); 
     }
-    
-    let result = await Auth.checkToken(token);
-    if (result.rows.length === 0) {
+    try {
+        let result = await Auth.checkToken(token);
+        if (result.rows.length === 0) {
+            res.redirect('/auth/mdp_oublie/');
+        } else {
+            res.render('auth/mdp_reinitialisation', { token });
+        }
+    } catch (error) {
         res.redirect('/auth/mdp_oublie/');
-    } else {
-        res.render('auth/reinitialisation', { token });
     }
+}
+
+function getPasswordResetVerif(req, res) {
+    res.redirect('/auth/mdp_oublie/');
 }
 
 async function postPasswordResetVerif(req, res) {
     const { password } = req.body;
     const token = req.body.token;
     if (!token) {
-        return res.redirect('/auth/mdp_oublie/'); 
+        res.redirect('/auth/mdp_oublie/'); 
     }
-    
-    let result = await Auth.checkToken(token);
-    if (result.rows.length === 0) {
-        res.redirect('/auth/mdp_oublie/');
-    } else {
-        await Auth.updatePassword(result.rows[0].email, password);
-        res.redirect('/auth/connexion');
+    try {
+        let result = await Auth.checkToken(token);
+        if (result.rows.length === 0) {
+            res.redirect('/auth/mdp_oublie/');
+        } else {
+            await Auth.updatePassword(result.rows[0].email, password);
+            res.redirect('/auth/connexion');
+        }
+    } catch (error) {
+        res.redirect('/auth/mdp_oublie/'); 
     }
 }
 
@@ -270,10 +283,13 @@ module.exports = {
     postConnectionVerif,
 
     getPasswordForgotten,
-    getPasswordForgottenVerif,
-    postPasswordForgotten,
+
+    getPasswordForgottenSuccess,
+    postPasswordForgottenSuccess,
 
     getPasswordReset,
+
+    getPasswordResetVerif,
     postPasswordResetVerif,
 
     getDisconnection

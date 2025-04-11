@@ -14,10 +14,10 @@ async function isEmailAlreadyUsed(email) {
     }
 }
 
-async function getUser(email, mdp) {
+async function getUser(email, password) {
     const client = await db.pool.connect();
     try {
-        const res = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND mot_de_passe = $2", [email, mdp]);
+        const res = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND password = $2", [email, password]);
         if (res.rows.length == 0) {
             return null;
         }
@@ -36,17 +36,13 @@ async function addUser(nom, prenom, date, pseudo, email, mdp) {
         if (res.rows.length > 0) {
             return false;
         }
-        await client.query("INSERT INTO utilisateur (nom, prenom, date_de_naissance, pseudo, email, mot_de_passe) VALUES ($1, $2, $3, $4, $5, $6)", [nom, prenom, date, pseudo, email, mdp]);
+        await client.query("INSERT INTO utilisateur (name, surname, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6)", [nom, prenom, date, pseudo, email, mdp]);
         return true;
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
-}
-
-async function disconnectSession() {
-
 }
 
 async function saveResetToken(email) {
@@ -79,14 +75,11 @@ async function sendPasswordForgottenEmail(email_oublie) {
                 to: email_oublie,
                 subject: 'Réinitialisation de votre mot de passe',
                 html: `<p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>
-                       <a href="http://localhost:8080/auth/reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
+                       <a href="http://localhost:8080/auth/mdp_reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
             });
-            return true;
         } catch (error) {
             console.error(error);
         }
-    } else {
-        return false;
     }
 }
 
@@ -115,4 +108,11 @@ async function updatePassword(email, mdp) {
     }
 }
 
-module.exports = { isEmailAlreadyUsed, getUser, addUser, sendPasswordForgottenEmail, checkToken, updatePassword };
+module.exports = {
+    isEmailAlreadyUsed,
+    getUser,
+    addUser,
+    sendPasswordForgottenEmail,
+    checkToken,
+    updatePassword
+};
