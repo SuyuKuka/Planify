@@ -4,29 +4,36 @@ const mail = require('../../services/mailer/mailer');
 
 async function isEmailAlreadyUsed(email) {
     let client = await getPool().connect();
+    let res;
     try {
-        let res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
-        return res.rowCount > 0;
+        res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
+    return res.rowCount > 0;
 }
 
 async function getUser(email, password) {
     const client = await getPool().connect();
+    let res;
     try {
-        const res = await client.query("SELECT * FROM utilisateur WHERE email = $1 AND password = $2", [email, password]);
+        res = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email]);
         if (res.rows.length == 0) {
             return null;
         }
-        return res.rows[0];
+
+        const verify = await encrypt.checkPassword(password, res.rows[0].password);
+        if (!verify) {
+            return null;
+        }
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
+    return res.rows[0];
 }
 
 async function addUser(surname, name, birthdate, username, email, password) {
@@ -36,13 +43,15 @@ async function addUser(surname, name, birthdate, username, email, password) {
         if (res.rows.length > 0) {
             return false;
         }
-        client.query("INSERT INTO utilisateur (surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6)", [surname, name, birthdate, username, email, password]);
-        return true;
+
+        let hashedPassword = await encrypt.hashPassword(password);
+        client.query("INSERT INTO utilisateur (surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6)", [surname, name, birthdate, username, email, hashedPassword]);
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
+    return true;
 }
 
 async function saveResetToken(email) {
@@ -62,17 +71,17 @@ async function saveResetToken(email) {
     return token;
 }
 
-async function sendPasswordForgottenEmail(email_oublie) {
+async function sendPasswordForgottenEmail(email_forgotten) {
     let client = await getPool().connect();
-    let result = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email_oublie]);
+    let result = await client.query("SELECT * FROM utilisateur WHERE email = $1", [email_forgotten]);
     client.release();
 
     if (result.rows.length > 0) {
         try {
-            let token = await saveResetToken(email_oublie);
+            let token = await saveResetToken(email_forgotten);
             await mail.transporter.sendMail({
                 from: 'programmationwebprojet@gmail.com',
-                to: email_oublie,
+                to: email_forgotten,
                 subject: 'Réinitialisation de votre mot de passe',
                 html: `<p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>
                        <a href="http://localhost:8080/auth/mdp_reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
@@ -85,20 +94,22 @@ async function sendPasswordForgottenEmail(email_oublie) {
 
 async function checkToken(token) {
     let client = await getPool().connect();
+    let result;
     try {
-        let result = await client.query("SELECT * FROM token WHERE token = $1 AND expire_at > NOW()", [token]);
-        return result;
+        result = await client.query("SELECT * FROM token WHERE token = $1 AND expire_at > NOW()", [token]);
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
+    return result;
 }
 
 async function updatePassword(email, password) {
     let client = await getPool().connect();
     try {
-        await client.query("UPDATE utilisateur SET password = $1 WHERE email = $2", [password, email]);
+        let hashedPassword = await encrypt.hashPassword(password);
+        await client.query("UPDATE utilisateur SET password = $1 WHERE email = $2", [hashedPassword, email]);
         await client.query("DELETE FROM token WHERE email = $1", [email]);
         await client.query("DELETE FROM token WHERE expire_at < NOW()");
     } catch (err) {
@@ -106,6 +117,7 @@ async function updatePassword(email, password) {
     } finally {
         client.release();
     }
+    return true;
 }
 
 module.exports = {
