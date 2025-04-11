@@ -14,12 +14,8 @@ const errorMessages = Object.freeze({
         code: 2,
         msg: "L'adresse email spécifiée est déjà associé à un compte."
     },
-    emptyQuery: {
-        code: 3,
-        msg: "Veuillez remplir tous les champs."
-    },
     invalidQuery: {
-        code: 4,
+        code: 3,
         msg: "Les données spécifiées ne sont pas valides."
     }
 });
@@ -27,35 +23,48 @@ const errorMessages = Object.freeze({
 
 //#region Vérif Authentification
 function verifySurname(surname) {
-    return /^[A-Z][A-Za-z'éèëêîïç -]{1,31}$/.test(surname);
+    return surname && /^[A-Z][A-Za-z'éèëêîïç -]{1,31}$/.test(surname.trim());
 }
 
 function verifyName(name) {
-    return /^[A-Z][A-Za-z'éèëêîïç -]{1,31}$/.test(name);
+    return name && /^[A-Z][A-Za-z'éèëêîïç -]{1,31}$/.test(name.trim());
 }
 
 function verifyBirthdate(birthdate) {
-    const inputDate = new Date(birthdate);
-    const minDate = new Date('1900-01-01');
-    const maxDate = new Date();
-    return (inputDate >= minDate && inputDate < maxDate);
+    if (birthdate) {
+        const inputDate = new Date(birthdate);
+        const minDate = new Date('1900-01-01');
+        const maxDate = new Date();
+        return (inputDate >= minDate && inputDate < maxDate);
+    } else {
+        return false;
+    }
 }
 
 function verifyUsername(username) {
-    return /^[A-Z][A-Za-z' -]{1,31}$/.test(username);
+    return username && /^[A-Z][A-Za-z' -]{1,31}$/.test(username.trim());
 }
 
 function verifyEmail(email) {
-    return /^\S+@\S+\.\S+$/.test(email);
+    return email && /^\S+@\S+\.\S+$/.test(email.trim());
 }
 
 function verifyPassword(password) {
-    return password.length >= 8 && password.length <= 32;
+    if (password) {
+        const trimmed = password.trim();
+        return trimmed.length >= 8 && trimmed.length <= 32;
+    }
+    return false;
 }
+
+//#endregion
 
 //#region Inscription
 function getRegistration(req, res) {
     const { surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
+    if (req.session) {
+        destroySession(req, res);
+    }
     res.render('auth/inscription', {
         surname, name, birthdate, username, email,
         error_step1, error_step2
@@ -70,7 +79,7 @@ async function postRegistrationVerif(req, res) {
     const ret = verifyRegistration(req.body);
     const { surname, name, birthdate, username, email, password } = req.body;
     try {
-        if (ret) {
+        if (ret.size == 0) {
             const emailUsed = await Auth.isEmailAlreadyUsed(email);
             if (emailUsed) { // Cas email déjà utilisé
                 Object.assign(req.session, {
@@ -81,14 +90,17 @@ async function postRegistrationVerif(req, res) {
             } else { // Cas succès
                 await Auth.addUser(surname, name, birthdate, username, email, password);
                 Object.assign(req.session, {
-                    username, email
+                    surname, name, birthdate, username, email
                 });
                 res.redirect('/');
             }
         } else { // Cas au moins une valeur non valide
             Object.assign(req.session, {
-                surname, name, birthdate, username, email
+                surname, name, birthdate, username, email,
+                error_step1: ret.has(1) ? errorMessages.invalidQuery : undefined,
+                error_step2: ret.has(2) ? errorMessages.invalidQuery : undefined
             });
+
             res.redirect('/auth/inscription');
         }
     } catch (error) {
@@ -103,32 +115,32 @@ async function postRegistrationVerif(req, res) {
  * @returns true si aucun problème, false sinon
  */
 function verifyRegistration(req_body) {
-    let valid = true;
+    const errorSteps = new Set();
     if (!verifySurname(req_body.surname)) {
         req_body.surname = '';
-        valid = false;
+        errorSteps.add(1);
     }
     if (!verifyName(req_body.name)) {
         req_body.name = '';
-        valid = false;
+        errorSteps.add(1);
     }
     if (!verifyBirthdate(req_body.birthdate)) {
         req_body.birthdate = '';
-        valid = false;
+        errorSteps.add(1);
     }
     if (!verifyUsername(req_body.username)) {
         req_body.username = '';
-        valid = false;
+        errorSteps.add(2);
     }
     if (!verifyEmail(req_body.email)) {
         req_body.email = '';
-        valid = false;
+        errorSteps.add(2);
     }
     if (!verifyPassword(req_body.password)) {
         req_body.password = '';
-        valid = false;
+        errorSteps.add(2);
     }
-    return valid;
+    return errorSteps;
 }
 
 //#endregion
@@ -136,6 +148,9 @@ function verifyRegistration(req_body) {
 //#region Connexion
 function getConnection(req, res) {
     const { email, error } = req.session;
+    if (req.session) {
+        destroySession(req, res);
+    }
     res.render('auth/connexion', {
         email, error
     });
@@ -151,20 +166,21 @@ async function postConnectionVerif(req, res) {
     try {
         if (ret) {
             const user = await Auth.getUser(email, password);
-            if (user === null) {
+            if (user === null) { // Cas email ou mot de passe incorrect
                 Object.assign(req.session, {
                     email,
                     error:errorMessages.wrongEmailOrPassword
                 });
                 res.redirect('/auth/connexion');
-            } else {
+            } else { // Cas succes
+                const { username, surname, name, birthdate } = user;
                 Object.assign(req.session, {
-                    email,
+                    surname, name, birthdate, email,
                     username: user.username
                 });
                 res.redirect('/');
             }
-        } else {
+        } else { // Cas au moins une valeur non valide
             Object.assign(req.session, {
                 email,
                 error: errorMessages.invalidQuery
@@ -268,6 +284,14 @@ function getDisconnection(req, res) {
         }
         res.clearCookie('connect.sid');
         res.redirect('/');
+    });
+}
+
+function destroySession(req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send('Erreur');
+        }
     });
 }
 

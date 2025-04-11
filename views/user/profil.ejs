@@ -2,7 +2,7 @@
 <html lang="fr">
 	<head>
 		<meta charset="UTF-8">
-        <title>Inscription - Planify</title>
+        <title>Profil - Planify</title>
         <link rel="shortcut icon" href="/images/favicon.ico">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		<!-- script -->
@@ -14,6 +14,36 @@
 	</head>
 	<body>
 		<%- include('../nav') %>
+        <div class="container-fluid">
+            <form>
+                <header class="profil">
+                    <h1>Profil</h1>
+                </header>
+                <h3>> Informations personnelles</h3>
+                <div>
+                    <label for="nom_pa">Nom :</label><br>
+                    <input type="text" name="nom" id="nom" value="<%= surname %>" disabled="disabled"/>
+                </div>
+                <div>
+                    <label for="prenom_pa">Prénom :</label><br>
+                    <input type="text" name="prenom" id="prenom" value="<%= name %>" disabled="disabled"/>
+                </div>
+                <div class="date">
+                    <label for="date_pa">Date de naissance :</label><br>
+                    <input type="date" name="date" id="date" value="<%= birthdate %>" disabled="disabled"/>
+                </div>
+                <h3 id="separateur">> Informations de connexion</h3>
+                <div>
+                    <label for="pseudo_pa">Pseudo :</label><br>
+                    <input type="text" name="pseudo" id="pseudo" value="<%= username %>" disabled="disabled"/>
+                </div>
+                <div>
+                    <label for="email_pa">Adresse e-mail :</label><br>
+                    <input type="email" name="email" id="email" value="<%= email %>" disabled="disabled"/>
+                </div>
+            </form>
+            <div id="vide"></div>
+        </div>
 	</body>
 	<script src="/js/bootstrap.bundle.min.js"></script>
 </html>

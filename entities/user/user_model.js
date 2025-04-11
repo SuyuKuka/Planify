@@ -1,13 +1,42 @@
 const db = require('../../services/database/db');
 const encrypt = require('../../services/encryption/encrypt');
 
-async function modifyUser(pseudo, email, mdp) {
+// TODO: changer session_username par token
+async function modifyUsername(session_username, username) {
+    const client = await db.pool.connect();
     try {
-        return await db.clientConnect(async client => {
-            return client.query("UPDATE utilisateur SET pseudo = $1, email = $2, mot_de_passe = $3 WHERE email = $4", [pseudo, email, mdp, email]);
-        }, pseudo, email, mdp);
-    } catch (error) {
-        throw error;
+        const res = await client.query("UPDATE utilisateur SET username = $1 WHERE username = $2", [username, session_username]);
+        return res.rowCount > 0;
+    } catch (err) {
+        throw err;
+    } finally {
+        client.release();
+    }
+}
+
+// TODO: changer session_username par token
+async function modifyEmail(session_username, email) {
+    const client = await db.pool.connect();
+    try {
+        const res = await client.query("UPDATE utilisateur SET email = $1 WHERE username = $2", [email, session_username]);
+        return res.rowCount > 0;
+    } catch (err) {
+        throw err;
+    } finally {
+        client.release();
+    }
+}
+
+// TODO: changer session_username par token
+async function modifyPassword(session_username, password) {
+    const client = await db.pool.connect();
+    try {
+        const res = await client.query("UPDATE utilisateur SET password = $1 WHERE username = $2", [password, session_username]);
+        return res.rowCount > 0;
+    } catch (err) {
+        throw err;
+    } finally {
+        client.release();
     }
 }
 
@@ -29,4 +58,9 @@ async function saveResetToken(email) {
     }
 }
 
-module.exports = { modifyUser, saveResetToken };
+module.exports = {
+    modifyUsername,
+    modifyEmail,
+    modifyPassword,
+    saveResetToken
+};
