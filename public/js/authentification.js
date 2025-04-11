@@ -4,7 +4,7 @@ const birthdate = $('#birthdate');
 const username = $('#username');
 const email = $('#email');
 const password = $('#password');
-const new_password = $('#new_password');
+const password_confirm = $('#password_confirm');
 
 function verificate(input, method) {
     if (input.length == 0) {
@@ -53,6 +53,12 @@ function isPasswordValid() {
     return length >= 8 && length <= 32;
 }
 
+function isPasswordConfirmValid() {
+    const val = password_confirm.val();
+    const length = val.length;
+    return length >= 8 && length <= 32;
+}
+
 function verificateForm() {
     verificate(surname, isSurnameValid);
     verificate(name, isNameValid);
@@ -60,5 +66,5 @@ function verificateForm() {
     verificate(username, isUsernameValid);
     verificate(email, isEmailValid);
     verificate(password, isPasswordValid);
-    verificate(new_password, isPasswordValid);
+    verificate(password_confirm, isPasswordValid);
 }
