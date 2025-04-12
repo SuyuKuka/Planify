@@ -9,6 +9,17 @@ $(document).ready(function() {
 });
 
 //#region step1
+$("#surname").on('input', function() {
+    const uppercase = $(this).val().toUpperCase();
+    $(this).val(uppercase);
+});
+
+$("#name").on('input', function() {
+    let val = $(this).val();
+    val = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase();
+    $(this).val(val);
+});
+
 $("#suivant").click(function() {
     $('#server_error1').css('display', 'none');
     let step1 = true;
@@ -62,9 +73,23 @@ $(document).on('keydown', function(e) {
     }
 });
 
+$("#id_user").on('input', function() {
+    const lowercase = $(this).val().toLowerCase();
+    $(this).val(lowercase);
+});
+
+$("#email").on('input', function() {
+    const lowercase = $(this).val().toLowerCase();
+    $(this).val(lowercase);
+});
+
 $("#form").on('submit', (e) => {
     $('#server_error2').css('display', 'none');
     let step2 = true;
+    if (!isIdUserValid()) {
+        id_user.css("border", "2px solid red");
+        step2 = false;
+    }
     if (!isUsernameValid()) {
         username.css("border", "2px solid red");
         step2 = false;

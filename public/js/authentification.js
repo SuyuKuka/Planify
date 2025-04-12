@@ -1,6 +1,7 @@
 const surname = $('#surname');
 const name = $('#name');
 const birthdate = $('#birthdate');
+const id_user = $('#id_user');
 const username = $('#username');
 const email = $('#email');
 const password = $('#password');
@@ -40,8 +41,12 @@ function isBirthdateValid() {
     return inputDate >= minDate && inputDate < maxDate;
 }
 
+function isIdUserValid() {
+    return  /^[A-Za-z][A-Za-z'éèëêîïç -]{1,31}$$/.test(id_user.val());
+}
+
 function isUsernameValid() {
-    return /^[A-Z][A-Za-z' -]{3,31}$/.test(username.val());
+    return /^[A-Za-z][A-Za-z' -]{3,31}$/.test(username.val());
 }
 
 function isEmailValid() {
@@ -67,6 +72,7 @@ function isNewPasswordValid() {
 }
 
 function verificateForm() {
+    verificate(id_user, isIdUserValid);
     verificate(surname, isSurnameValid);
     verificate(name, isNameValid);
     verificate(birthdate, isBirthdateValid);

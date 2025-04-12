@@ -5,15 +5,15 @@ function generateToken() {
     return crypto.randomBytes(20).toString('hex');
 }
 
-async function hashPassword(password) {
+async function hash(content) {
     const times = 10; // Nombre de fois que le mot de passe est haché
-    const hashed = await bcrypt.hash(password, times);
+    const hashed = await bcrypt.hash(content, times);
     return hashed;
 }
 
-async function checkPassword(password, hashed) {
-    const verify = await bcrypt.compare(password, hashed);
+async function check(content, hashed) {
+    const verify = await bcrypt.compare(content, hashed);
     return verify;
 }
 
-module.exports = { generateToken, hashPassword, checkPassword };
+module.exports = { generateToken, hash, check };

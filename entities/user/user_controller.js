@@ -39,23 +39,27 @@ function verifyPassword(password) {
 }
 //#endregion
 
-function getProfile(req, res) {
-    const { surname, name, birthdate, username, email } = req.session;
-    if (surname === undefined || name === undefined || birthdate === undefined || username === undefined || email === undefined) {
+async function getProfile(req, res) {
+    const token = req.session.token;
+    if (token === undefined || token === null) {
         res.redirect('/auth/connexion');
     } else {
+        let result = await User.getInfo(token);
+        const { id_user, surname, name, birthdate, username, email } = result;
         res.render('user/profil', {
-            surname, name, birthdate, username, email
+            id_user, surname, name, birthdate, username, email
         });
     }
 }
 
-function getParameters(req, res) {
-    const { username, email, error,
-        usernameChanged, emailChanged, emailError, passwordChanged } = req.session;
-    if (username === undefined || email === undefined) {
+async function getParameters(req, res) {
+    const token = req.session.token;
+    if (token === undefined || token === null) {
         res.redirect('/auth/connexion');
     } else {
+        const { error, usernameChanged, emailChanged, emailError, passwordChanged } = req.session;
+        let result = await User.getInfo(token);
+        const { username, email } = result;
         res.render('user/parametres', {
             username, email, error,
             usernameChanged, emailChanged, emailError, passwordChanged
@@ -64,52 +68,67 @@ function getParameters(req, res) {
 }
 
 function getParametersChangesVerif(req, res) {
+    destroyError(req);
     res.redirect('/auth/connexion');
 }
 
 async function postParametersChangesVerif(req, res) {
-    // TODO: remplacer session_username, session_password par token + call model
-    const session_username = req.session.username;
-    const session_password = req.session.password;
-    const { username, email, password, new_password } = req.body;
-
-    if (!password == session_password) {
-        req.session.error = messages.wrongPassword;
+    const token = req.session.token;
+    let result = await User.getInfo(token);
+    if (token === undefined || token === null) {
         res.redirect('/auth/connexion');
     }
 
-    try {
-        if (verifyUsername(username)) {
-            await User.modifyUsername(session_username, username);
-            // TODO: req.session.username = username; quand remplacer session_username par token
-            req.session.username = username;
-            req.session.usernameChanged = messages.success;
-        }
-        if (verifyEmail(email)) {
-            const emailUsed = await User.modifyEmail(session_username, email);
-            if (emailUsed) {
-                req.session.email = email;
-                req.session.emailChanged = messages.success;
-            } else {
-                req.session.emailError = messages.alreadyUsedEmail;
+    const id_user = result.id_user;
+    const password_user = result.password;
+    const { username, email, password, new_password } = req.body;
+
+    destroyError(req);
+    const verify = await User.checkPassword(password, password_user);
+    if (!verify) {
+        req.session.error = messages.wrongPassword;
+        res.redirect('/user/parametres');
+    } else {
+        try {
+            if (verifyUsername(username)) {
+                await User.modifyUsername(id_user, username);
+                req.session.usernameChanged = messages.success;
             }
+            if (verifyEmail(email)) {
+                const emailUsed = await User.modifyEmail(id_user, email);
+                if (emailUsed) {
+                    req.session.emailChanged = messages.success;
+                } else {
+                    req.session.emailError = messages.alreadyUsedEmail;
+                }
+            }
+            if (verifyPassword(new_password)) {
+                await User.modifyPassword(id_user, new_password);
+                req.session.passwordChanged = messages.success;
+            }
+            res.redirect('/user/parametres');
+        } catch (error) {
+            req.session.error = messages.default;
+            res.redirect('/user/parametres');
         }
-        if (verifyPassword(new_password)) {
-            await User.modifyPassword(session_username, new_password);
-            req.session.passwordChanged = messages.success;
-        }
-        res.redirect('/user/parametres');
-    } catch (error) {
-        req.session.error = messages.default;
-        res.redirect('/user/parametres');
-    }
+    }   
 }
 
-function getPasswordReset(req, res) {
-    const { username, email } = req.session;
+async function getPasswordReset(req, res) {
+    const token = req.session.token;
+    let result = await User.getInfo(token);
+    const { username, email } = result;
     res.render('user/mdp_reinitialisation', {
         username, email
     });
+}
+
+function destroyError(req) {
+    req.session.error = undefined;
+    req.session.usernameChanged = undefined;
+    req.session.emailChanged = undefined;
+    req.session.emailError = undefined;
+    req.session.passwordChanged = undefined;
 }
 
 module.exports = {

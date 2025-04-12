@@ -51,6 +51,11 @@
 
             <div id="step2">
                 <div>
+                    <label for="id_user">Identifiant :</label><br>
+                    <input type="text" name="id_user" id="id_user"
+                        value="<%= typeof id_user !== 'undefined' ? id_user : '' %>"/>
+                </div>
+                <div>
                     <label for="username">Pseudo :</label><br>
                     <input type="text" name="username" id="username"
                         value="<%= typeof username !== 'undefined' ? username : '' %>"/>
