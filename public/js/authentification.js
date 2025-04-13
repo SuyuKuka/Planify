@@ -42,11 +42,11 @@ function isBirthdateValid() {
 }
 
 function isIdUserValid() {
-    return  /^[A-Za-z][A-Za-z'éèëêîïç -]{1,31}$$/.test(id_user.val());
+    return /^@[A-Za-z0-9][A-Za-z0-9' -]{2,31}$/.test(id_user.val());
 }
 
 function isUsernameValid() {
-    return /^[A-Za-z][A-Za-z' -]{3,31}$/.test(username.val());
+    return /^[A-Za-z0-9][A-Za-z0-9' -]{2,31}$/.test(username.val());
 }
 
 function isEmailValid() {
@@ -72,10 +72,10 @@ function isNewPasswordValid() {
 }
 
 function verificateForm() {
-    verificate(id_user, isIdUserValid);
     verificate(surname, isSurnameValid);
     verificate(name, isNameValid);
     verificate(birthdate, isBirthdateValid);
+    verificate(id_user, isIdUserValid);
     verificate(username, isUsernameValid);
     verificate(email, isEmailValid);
     verificate(password, isPasswordValid);

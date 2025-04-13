@@ -19,13 +19,19 @@ async function modifyEmail(id_user, email) {
     const client = await getPool().connect();
     let res;
     try {
-        res = await client.query('UPDATE "user" SET email = $1 WHERE id_user = $2', [email, id_user]);
+        let email_lower = email.toLowerCase();
+        res = await client.query('SELECT * FROM "user" WHERE email = $1', [email_lower]);
+        if (res.rows.length > 0) {
+            return false;
+        }
+
+        res = await client.query('UPDATE "user" SET email = $1 WHERE id_user = $2', [email_lower, id_user]);
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
-    return res.rowCount > 0;
+    return true;
 }
 
 async function modifyPassword(id_user, password) {

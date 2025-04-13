@@ -6,6 +6,12 @@ $(document).ready(function() {
     } else {
         $('#step2').css('display', 'none');
     }
+
+    let val = $("#id_user").val();
+    if (!val.startsWith('@')) {
+        val = '@' + val.replace(/^@+/, '');
+        $("#id_user").val(val);
+    }
 });
 
 //#region step1
@@ -74,8 +80,12 @@ $(document).on('keydown', function(e) {
 });
 
 $("#id_user").on('input', function() {
-    const lowercase = $(this).val().toLowerCase();
-    $(this).val(lowercase);
+    let val = $(this).val().toLowerCase();
+
+    if (!val.startsWith('@')) {
+        val = '@' + val.replace(/^@+/, '');
+    }
+    $(this).val(val);
 });
 
 $("#email").on('input', function() {

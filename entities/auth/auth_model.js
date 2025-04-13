@@ -42,9 +42,7 @@ async function getUser(email, password) {
 async function addUser(id_user, surname, name, birthdate, username, email, password) {
     const client = await getPool().connect();
     try {
-        let id = id_user.toLowerCase();
-        let res = await client.query('SELECT * FROM "user" WHERE id_user = $1', [id]);
-
+        let res = await client.query('SELECT * FROM "user" WHERE id_user = $1', [id_user]);
         if (res.rows.length > 0) {
             return false;
         }
@@ -133,10 +131,9 @@ async function addIDtoToken(id_user) {
         await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
 
-        let id = id_user.toLowerCase();
         token = encrypt.generateToken();
         let expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id, token, expirationDate]);
+        await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
     } catch (err) {
         throw err;
     } finally {

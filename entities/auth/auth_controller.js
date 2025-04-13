@@ -26,10 +26,6 @@ const errorMessages = Object.freeze({
 //#endregion
 
 //#region Vérif Authentification
-function verifyIDUser(id_user) {
-    return id_user && /^[A-Za-z0-9]{1,31}$/.test(id_user.trim());
-}
-
 function verifySurname(surname) {
     return surname && /^[A-Z][A-Za-z'éèëêîïç -]{1,31}$/.test(surname.trim());
 }
@@ -49,8 +45,12 @@ function verifyBirthdate(birthdate) {
     }
 }
 
+function verifyIDUser(id_user) {
+    return id_user && /^@[A-Za-z0-9][A-Za-z0-9' -]{2,31}$/.test(id_user.trim());
+}
+
 function verifyUsername(username) {
-    return username && /^[A-Z][A-Za-z' -]{1,31}$/.test(username.trim());
+    return username && /^[A-Za-z0-9][A-Za-z0-9' -]{2,31}$/.test(username.trim());
 }
 
 function verifyEmail(email) {
@@ -70,8 +70,10 @@ function verifyPassword(password) {
 //#region Inscription
 function getRegistration(req, res) {
     if (req.session === undefined || req.session === null) {
+        console.log("destroy session");
         destroySession(req, res);
     }
+    console.log(req.session);
     const { id_user, surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
     res.render('auth/inscription', {
         id_user, surname, name, birthdate, username, email,
@@ -86,9 +88,13 @@ function getRegistrationVerif(req, res) {
 async function postRegistrationVerif(req, res) {
     const ret = verifyRegistration(req.body);
     const { id_user, surname, name, birthdate, username, email, password } = req.body;
+    console.log("id_user : " + id_user.trim());
+    console.log("username : " + username);
+    console.log("ret : " + ret.size);
     try {
         if (ret.size == 0) {
-            const emailUsed = await Auth.isEmailAlreadyUsed(email);
+            let email_lower = email.toLowerCase();
+            const emailUsed = await Auth.isEmailAlreadyUsed(email_lower);
             if (emailUsed) { // Cas email déjà utilisé
                 Object.assign(req.session, {
                     id_user, surname, name, birthdate, username, email,
@@ -96,12 +102,13 @@ async function postRegistrationVerif(req, res) {
                 });
                 res.redirect('/auth/inscription');
             } else { // Cas succès
-                let verify = await Auth.addUser(id_user, surname, name, birthdate, username, email, password);
+                let verify = await Auth.addUser(id_user, surname, name, birthdate, username, email_lower, password);
                 if (!verify) {
                     Object.assign(req.session, {
                         id_user, surname, name, birthdate, username, email,
                         error_step2: errorMessages.alreadyUsedIDUser
                     });
+                    console.log("redirection");
                     res.redirect('/auth/inscription');
                 }
 
@@ -131,10 +138,6 @@ async function postRegistrationVerif(req, res) {
  */
 function verifyRegistration(req_body) {
     const errorSteps = new Set();
-    if (!verifyIDUser(req_body.id_user)) {
-        req_body.id_user = '';
-        errorSteps.add(1);
-    }
     if (!verifySurname(req_body.surname)) {
         req_body.surname = '';
         errorSteps.add(1);
@@ -146,6 +149,10 @@ function verifyRegistration(req_body) {
     if (!verifyBirthdate(req_body.birthdate)) {
         req_body.birthdate = '';
         errorSteps.add(1);
+    }
+    if (!verifyIDUser(req_body.id_user)) {
+        req_body.id_user = '';
+        errorSteps.add(2);
     }
     if (!verifyUsername(req_body.username)) {
         req_body.username = '';
@@ -184,7 +191,8 @@ async function postConnectionVerif(req, res) {
     const { email, password } = req.body;
     try {
         if (ret) {
-            const user = await Auth.getUser(email, password);
+            let email_lower = email.toLowerCase();
+            const user = await Auth.getUser(email_lower, password);
             if (user === undefined) { // Cas email ou mot de passe incorrect
                 Object.assign(req.session, {
                     email,
