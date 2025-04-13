@@ -5,15 +5,13 @@
         <title>Mot de passe oublié - Planify</title>
         <link rel="shortcut icon" href="/images/favicon.ico">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- script -->
-        <script src="/js/jquery.js"></script>
         <!-- css -->
         <link href="/css/bootstrap.min.css" rel="stylesheet">
         <link href="/css/authentification.css" rel="stylesheet">
         <link href="/css/mdp_oublie.css" rel="stylesheet">
     </head>
     <body>
-        <form autocomplete="off" action="/auth/mdp_oublie_succes" method="post" id="form">
+        <form autocomplete="off" action="/auth/mot_de_passe_oublie_succes" method="post" id="form">
             <header class="authentification">
                 <h2>Mot de passe oublié</h2>
             </header>
@@ -33,8 +31,11 @@
                 <input type="submit" id="oublie" value="Envoyer">
             </div>
         </form>
+        <!-- script -->
+        <script src="/js/jquery.js"></script>
         <script src="/js/bootstrap.bundle.min.js"></script>
-        <script src="/js/authentification.js"></script>
-        <script src="/js/mdp_oublie.js"></script>
+        <script src="/js/shared/auth.js"></script>
+        <script src="/js/auth/authentification.js"></script>
+        <script src="/js/auth/mdp_oublie.js"></script>
     </body>
 </html>

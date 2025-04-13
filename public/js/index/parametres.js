@@ -21,7 +21,7 @@ $("#form").on('submit', (e) => {
         valid = false;
     }
     if ($('#new_password').val() !== '') {
-        if (!isPasswordValid()) {
+        if (!isNewPasswordValid()) {
             new_password.css("border", "2px solid red");
             valid = false;
         }

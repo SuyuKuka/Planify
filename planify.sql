@@ -1,14 +1,14 @@
 -- psql -U postgres -d planify
 DROP DATABASE IF EXISTS planify;
-DROP TABLE IF EXISTS utilisateur CASCADE;
+DROP TABLE IF EXISTS "user" CASCADE;
 DROP TABLE IF EXISTS token CASCADE;
 
 CREATE DATABASE planify;
 
 \c planify;
 
-CREATE TABLE utilisateur (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE "user" (
+    id_user VARCHAR(32) PRIMARY KEY,
     name VARCHAR(32),
     surname VARCHAR(32),
     birthdate DATE,
@@ -18,7 +18,7 @@ CREATE TABLE utilisateur (
 );
 
 CREATE TABLE token (
-    email VARCHAR(32),
+    id_user VARCHAR(32),
     token TEXT NOT NULL,
     expire_at TIMESTAMP
 );

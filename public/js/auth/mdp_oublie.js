@@ -1,4 +1,4 @@
-verificateForm();
+const email = createInput('email', auth.isEmailValid);
 
 $(document).on('keydown', function(e) {
     if (e.key === 'Enter') {
@@ -10,7 +10,7 @@ $(document).on('keydown', function(e) {
 
 $("#form").on('submit', (e) => {
     $('#error_step').css('display', 'none');
-    if (!isEmailValid()) {
+    if (!auth.isEmailValid(email.val())) {
         email.css("border", "2px solid red");
         $('#error_form').css('display', 'block');
         e.preventDefault();

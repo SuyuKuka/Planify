@@ -5,8 +5,6 @@
         <title>Inscription - Planify</title>
         <link rel="shortcut icon" href="/images/favicon.ico">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- script -->
-        <script src="/js/jquery.js"></script>
         <!-- css -->
         <link href="/css/bootstrap.min.css" rel="stylesheet">
         <link href="/css/authentification.css" rel="stylesheet">
@@ -51,6 +49,11 @@
 
             <div id="step2">
                 <div>
+                    <label for="id_user">Identifiant :</label><br>
+                    <input type="text" name="id_user" id="id_user"
+                        value="<%= typeof id_user !== 'undefined' ? id_user : '' %>"/>
+                </div>
+                <div>
                     <label for="username">Pseudo :</label><br>
                     <input type="text" name="username" id="username"
                         value="<%= typeof username !== 'undefined' ? username : '' %>"/>
@@ -82,8 +85,11 @@
                 </div>
             </div>
         </form>
+        <!-- script -->
         <script src="/js/bootstrap.bundle.min.js"></script>
-        <script src="/js/authentification.js"></script>
-        <script src="/js/inscription.js"></script>
+        <script src="/js/jquery.js"></script>
+        <script src="/js/shared/auth.js"></script>
+        <script src="/js/auth/authentification.js"></script>
+        <script src="/js/auth/inscription.js"></script>
     </body>
 </html>

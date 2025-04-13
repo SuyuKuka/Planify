@@ -1,4 +1,5 @@
-verificateForm();
+const password = createInput('password', auth.isPasswordValid);
+const password_confirm = createInput('password_confirm', auth.isPasswordValid);
 
 $(document).on('keydown', function(e) {
     if (e.key === 'Enter') {
@@ -13,11 +14,11 @@ $("#form").on('submit', (e) => {
     $('#client_error').css('display', 'none');
 
     let valid = true;
-    if (!isPasswordValid()) {
+    if (!auth.isPasswordValid(password.val())) {
         password.css("border", "2px solid red");
         valid = false;
     }
-    if (!isPasswordConfirmValid()) {
+    if (!auth.isPasswordValid(password_confirm.val())) {
         password_confirm.css("border", "2px solid red");
         valid = false;
     }
