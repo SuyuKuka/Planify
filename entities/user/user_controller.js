@@ -1,43 +1,5 @@
 const User = require('./user_model');
-
-//#region Erreurs
-const messages = Object.freeze({
-    default: {
-        code: 0,
-        msg: "Une erreur est survenue. Veuillez réessayer plus tard."
-    },
-    wrongPassword: {
-        code: 1,
-        msg: "Le mot de passe est erroné."
-    },
-    alreadyUsedEmail: {
-        code: 2,
-        msg: "L'adresse email spécifiée est déjà associé à un compte."
-    },
-    success: {
-        code: 3,
-        msg: "Modifié avec succès !"
-    }
-});
-//#endregion
-
-//#region Vérif Authentification
-function verifyUsername(username) {
-    return username && /^[A-Z][A-Za-z' -]{1,31}$/.test(username.trim());
-}
-
-function verifyEmail(email) {
-    return email && /^\S+@\S+\.\S+$/.test(email.trim());
-}
-
-function verifyPassword(password) {
-    if (password) {
-        const trimmed = password.trim();
-        return trimmed.length >= 8 && trimmed.length <= 32;
-    }
-    return false;
-}
-//#endregion
+const authVerif = require('../../public/js/shared/auth');
 
 async function getProfile(req, res) {
     const token = req.session.token;
@@ -90,11 +52,11 @@ async function postParametersChangesVerif(req, res) {
         res.redirect('/user/parametres');
     } else {
         try {
-            if (verifyUsername(username)) {
+            if (authVerif.verifyUsername(username)) {
                 await User.modifyUsername(id_user, username);
                 req.session.usernameChanged = messages.success;
             }
-            if (verifyEmail(email)) {
+            if (authVerif.verifyEmail(email)) {
                 const emailUsed = await User.modifyEmail(id_user, email);
                 if (emailUsed) {
                     req.session.emailChanged = messages.success;
@@ -102,7 +64,7 @@ async function postParametersChangesVerif(req, res) {
                     req.session.emailError = messages.alreadyUsedEmail;
                 }
             }
-            if (verifyPassword(new_password)) {
+            if (authVerif.verifyPassword(new_password)) {
                 await User.modifyPassword(id_user, new_password);
                 req.session.passwordChanged = messages.success;
             }

@@ -1,7 +1,15 @@
-verificateForm();
+const surname = createInput('surname', auth.isSurnameValid);
+const name = createInput('name', auth.isNameValid);
+const birthdate = createInput('birthdate', auth.isBirthdateValid);
+const id_user = createInput('id_user', auth.isIdUserValid);
+const username = createInput('username', auth.isUsernameValid);
+const email = createInput('email', auth.isEmailValid);
+const password = createInput('password', auth.isPasswordValid);
 
 $(document).ready(function() {
-    if (isSurnameValid() && isNameValid() && isBirthdateValid()) {
+    if (auth.isSurnameValid(surname.val())
+            && auth.isNameValid(name.val())
+            && auth.isBirthdateValid(birthdate.val())) {
         $('#step1').css('display', 'none');
     } else {
         $('#step2').css('display', 'none');
@@ -29,15 +37,15 @@ $("#name").on('input', function() {
 $("#suivant").click(function() {
     $('#server_error1').css('display', 'none');
     let step1 = true;
-    if (!isSurnameValid()) {
+    if (!auth.isSurnameValid(surname.val())) {
         surname.css("border", "2px solid red");
         step1 = false;
     }
-    if (!isNameValid()) {
+    if (!auth.isNameValid(name.val())) {
         name.css("border", "2px solid red");
         step1 = false;
     }
-    if (!isBirthdateValid()) {
+    if (!auth.isBirthdateValid(birthdate.val())) {
         birthdate.css("border", "2px solid red");
         step1 = false;
     }
@@ -96,19 +104,19 @@ $("#email").on('input', function() {
 $("#form").on('submit', (e) => {
     $('#server_error2').css('display', 'none');
     let step2 = true;
-    if (!isIdUserValid()) {
+    if (!auth.isIdUserValid(id_user.val())) {
         id_user.css("border", "2px solid red");
         step2 = false;
     }
-    if (!isUsernameValid()) {
+    if (!auth.isUsernameValid(username.val())) {
         username.css("border", "2px solid red");
         step2 = false;
     }
-    if (!isEmailValid()) {
+    if (!auth.isEmailValid(email.val())) {
         email.css("border", "2px solid red");
         step2 = false;
     }
-    if (!isPasswordValid()) {
+    if (!auth.isPasswordValid(password.val())) {
         password.css("border", "2px solid red");
         step2 = false;
     }

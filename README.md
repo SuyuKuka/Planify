@@ -1,5 +1,34 @@
 # programmation-web
 
+## Membres
+|  Nom  | Prénom | N° étudiant |
+| :---: | :----: | :---------: |
+| CHIV  | Henri  |  22205265   |
+| CHEN  | Michel |  22202655   |
+
+## Structure du code
+
+```
+📁 programmation-web/
+├── 📄 app.js
+│
+├── 📁 config/database
+│   └── 📄 db.js
+│
+├── 📁 entities/
+│
+├── 📁 services/
+│
+├── 📁 views/
+│
+└── 📁 public/
+    ├── 📁 js/
+    │
+    ├── 📁 css/
+    │
+    └── 📁 images/
+```
+
 ## Manuel d'utilisation
 
 ### Configuration Base de données PostGreSQL
@@ -29,9 +58,3 @@ Lancez le serveur avec `node app.js`.
 ### Modules utilisés
 
 `npm list` pour voir les modules utilisés.
-
-## Membres
-|  Nom  | Prénom | N° étudiant |
-| :---: | :----: | :---------: |
-| CHIV  | Henri  |  22205265   |
-| CHEN  | Michel |  22202655   |

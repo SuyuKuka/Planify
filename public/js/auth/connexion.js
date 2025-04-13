@@ -1,4 +1,5 @@
-verificateForm();
+const email = createInput('email', auth.isEmailValid);
+const password = createInput('password', auth.isPasswordValid);
 
 $("#show_password").click(function() {
     if (password.attr('type') === 'password') {
@@ -19,11 +20,11 @@ $(document).on('keydown', function(e) {
 $("#form").on('submit', (e) => {
     $('#server_error').css('display', 'none');
     let valid = true;
-    if (!isEmailValid()) {
+    if (!auth.isEmailValid(email.val())) {
         email.css("border", "2px solid red");
         valid = false;
     }
-    if (!isPasswordValid()) {
+    if (!auth.isPasswordValid(password.val())) {
         password.css("border", "2px solid red");
         valid = false;
     }

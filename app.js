@@ -19,9 +19,9 @@ initDatabase()
     app.use(express.static(path.join(__dirname, 'public')));
 
     app.use(session({
-        secret: generateToken(),
+        secret: process.env.SESSION_SECRET || 'supersecret',
         resave: false,
-        saveUninitialized: true,
+        saveUninitialized: false,
         cookie: { httpOnly: true, secure: false } 
     }));
 
