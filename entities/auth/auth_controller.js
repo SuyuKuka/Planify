@@ -21,7 +21,7 @@ const errorMessages = Object.freeze({
     alreadyUsedIDUser: {
         code: 4,
         msg: "L'identifiant specifié est deja utilisé."
-    }   
+    }
 });
 //#endregion
 
@@ -70,10 +70,8 @@ function verifyPassword(password) {
 //#region Inscription
 function getRegistration(req, res) {
     if (req.session === undefined || req.session === null) {
-        console.log("destroy session");
         destroySession(req, res);
     }
-    console.log(req.session);
     const { id_user, surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
     res.render('auth/inscription', {
         id_user, surname, name, birthdate, username, email,
@@ -88,9 +86,6 @@ function getRegistrationVerif(req, res) {
 async function postRegistrationVerif(req, res) {
     const ret = verifyRegistration(req.body);
     const { id_user, surname, name, birthdate, username, email, password } = req.body;
-    console.log("id_user : " + id_user.trim());
-    console.log("username : " + username);
-    console.log("ret : " + ret.size);
     try {
         if (ret.size == 0) {
             let email_lower = email.toLowerCase();
@@ -108,13 +103,12 @@ async function postRegistrationVerif(req, res) {
                         id_user, surname, name, birthdate, username, email,
                         error_step2: errorMessages.alreadyUsedIDUser
                     });
-                    console.log("redirection");
                     res.redirect('/auth/inscription');
+                } else {
+                    const token = await Auth.addIDtoToken(id_user);
+                    Object.assign(req.session, { token });
+                    res.redirect('/');
                 }
-
-                const token = await Auth.addIDtoToken(id_user);
-                Object.assign(req.session, { token });
-                res.redirect('/');
             }
         } else { // Cas au moins une valeur non valide
             Object.assign(req.session, {
