@@ -1,4 +1,5 @@
 const Auth = require('./index_model');
+const vueList = ['jour', 'semaine', 'mois', 'annee'];
 
 async function getIndex(req, res) {
     const token = req.session.token;
@@ -8,7 +9,8 @@ async function getIndex(req, res) {
         username = undefined;
         res.render('index', {
             email: email,
-            username: username
+            username: username,
+            vue: 'mois'
         });
     } else {
         res.render('index', {

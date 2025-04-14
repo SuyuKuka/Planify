@@ -10,8 +10,42 @@
         <link href="/css/index.css" rel="stylesheet">
 	</head>
 	<body>
-		<%- include('../nav') %>
-		<div class="container-fluid bg-warning" id="center-bar">
+		<div class="d-flex vh-100 flex-column">
+			<%- include('../nav') %>
+			<div class="d-flex flex-column flex-sm-row flex-grow-1">
+				<div class="d-flex flex-column bg-primary col-12 col-sm-2">
+					<button>Mon calendrier</button>
+					<!-- https://getbootstrap.com/docs/5.3/components/collapse/ -->
+					<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+						Button with data-bs-target
+					  </button>
+					  <div class="collapse" id="collapseExample">
+						<div class="card card-body">
+						  Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+						</div>
+					</div>
+				</div>
+				<div class="p-1 bg-warning text-dark col-12 col-sm flex-grow-1" id="calendar">
+					Centre
+				</div>
+				<div class="p-1 bg-success text-white col-12 col-sm-2">
+					Droite
+				</div>
+			</div>
+		</div>
+		<%
+			const vues = ["jour", "semaine", "mois", "annee"];
+			const vueChoisie = vues.includes(vue) ? vue : "semaine";
+		%>
+		<!-- script -->
+		<script src="/js/jquery.js"></script>
+		<script src="/js/bootstrap.bundle.min.js"></script>
+        <script src="/js/index/index.js"></script>
+		<script src="/js/index/<%= vueChoisie %>.js"></script>
+	</body>
+</html>
+
+<!-- <div class="container-fluid bg-warning" id="center-bar">
 			<div class="row">
 				<p>
 					<a class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#left-bar" aria-expanded="false" aria-controls="left-bar">
@@ -30,10 +64,4 @@
 					3 of 3
 				</div>
 			</div>
-		</div>
-		<!-- script -->
-		<script src="/js/jquery.js"></script>
-		<script src="/js/bootstrap.bundle.min.js"></script>
-        <script src="/js/index.js"></script>
-	</body>
-</html>
+		</div> -->

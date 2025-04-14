@@ -48,29 +48,29 @@ async function postParametersChangesVerif(req, res) {
     destroyError(req);
     const verify = await User.checkPassword(password, password_user);
     if (!verify) {
-        req.session.error = messages.wrongPassword;
+        req.session.error = authVerif.messages.wrongPassword
         res.redirect('/user/parametres');
     } else {
         try {
             if (authVerif.verifyUsername(username)) {
                 await User.modifyUsername(id_user, username);
-                req.session.usernameChanged = messages.success;
+                req.session.usernameChanged = authVerif.messages.modifiedWithSuccess
             }
             if (authVerif.verifyEmail(email)) {
                 const emailUsed = await User.modifyEmail(id_user, email);
                 if (emailUsed) {
-                    req.session.emailChanged = messages.success;
+                    req.session.emailChanged = authVerif.messages.modifiedWithSuccess
                 } else {
-                    req.session.emailError = messages.alreadyUsedEmail;
+                    req.session.emailError = authVerif.messages.alreadyUsedEmail
                 }
             }
             if (authVerif.verifyPassword(new_password)) {
                 await User.modifyPassword(id_user, new_password);
-                req.session.passwordChanged = messages.success;
+                req.session.passwordChanged = authVerif.messages.modifiedWithSuccess
             }
             res.redirect('/user/parametres');
         } catch (error) {
-            req.session.error = messages.default;
+            req.session.error = authVerif.messages.defaultError
             res.redirect('/user/parametres');
         }
     }   

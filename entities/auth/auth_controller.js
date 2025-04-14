@@ -36,7 +36,7 @@ async function postRegistrationVerif(req, res) {
             if (isEmailUsed) { // Cas email déjà utilisé
                 Object.assign(req.session, {
                     id_user, surname, name, birthdate, username, email,
-                    error_step2: errorMessages.alreadyUsedEmail
+                    error_step2: authVerif.messages.alreadyUsedEmail
                 });
                 res.redirect('/auth/inscription');
             } else { // Cas succès
@@ -44,7 +44,7 @@ async function postRegistrationVerif(req, res) {
                 if (!verif) {
                     Object.assign(req.session, {
                         id_user, surname, name, birthdate, username, email,
-                        error_step2: errorMessages.alreadyUsedIDUser
+                        error_step2: authVerif.messages.alreadyUsedUserID
                     });
                     res.redirect('/auth/inscription');
                 } else {
@@ -133,7 +133,7 @@ async function postConnectionVerif(req, res) {
             if (user === undefined) { // Cas email ou mot de passe incorrect
                 Object.assign(req.session, {
                     email,
-                    error:errorMessages.wrongEmailOrPassword
+                    error: authVerif.messages.wrongEmailOrPassword
                 });
                 res.redirect('/auth/connexion');
             } else { // Cas succes
@@ -145,12 +145,12 @@ async function postConnectionVerif(req, res) {
         } else { // Cas au moins une valeur non valide
             Object.assign(req.session, {
                 email,
-                error: errorMessages.invalidQuery
+                error: authVerif.messages.invalidQueries
             });
             res.redirect('/auth/connexion');
         }
     } catch (e) {
-        req.session.error = errorMessages.default;
+        req.session.error = authVerif.messages.defaultError;
         res.redirect('/auth/connexion');
     }
 }
