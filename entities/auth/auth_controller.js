@@ -182,9 +182,8 @@ function getPasswordForgottenSuccess(req, res) {
 
 async function postPasswordForgottenSuccess(req, res) {
     const { email } = req.body;
-    const ret = verifyEmail(email);
     try {
-        if (ret) {
+        if (authVerif.isEmailValid(email)) {
             await Auth.sendPasswordForgottenEmail(email);
             res.redirect('/auth/mot_de_passe_oublie_succes');
         } else {

@@ -62,14 +62,6 @@ $("#suivant").click(function() {
 
 //#region step 2
 
-$("#show_password").click(function() {
-    if (password.attr('type') === 'password') {
-        password.attr('type', 'text');
-    } else {
-        password.attr('type', 'password');
-    }
-});
-
 $("#retour").click(function() {
     $('#step2').css('display', 'none');
     $('#step1').css('display', 'block');

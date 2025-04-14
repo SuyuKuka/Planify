@@ -12,23 +12,33 @@
     </head>
     <body>
         <form autocomplete="off" action="/auth/mot_de_passe_oublie_succes" method="post" id="form">
-            <header class="authentification">
-                <h2>Mot de passe oublié</h2>
-            </header>
-            <div>
-                <label for="email">Adresse e-mail :</label><br>
-                <input type="email" name="email" id="email"/>
-            </div>
-            <div class="error" id="client_error" style="display: none;">
-                <label class="error_msg">Veuillez remplir tous les champs.</label>
-            </div>
-            <% if (typeof error !== 'undefined') { %>
-                <div class="error" id="server_error">
-                    <label class="error_msg"><%= error %></label>
+            <div class="container">
+                <div class="information">
+                    <a href="/">
+                        <img class="logo" src="/images/logo.png" width="200" height="50">
+                    </a>
+                    <h2>Mot de passe oublié</h2>
+                    <p>Retrouvez l’accès à votre planning.</p>
                 </div>
-            <% } %>
-            <div>
-                <input type="submit" id="oublie" value="Envoyer">
+
+                <div class="authentification">
+                    <div class="email-container">
+                        <label for="email">Adresse e-mail :</label><br>
+                        <input type="email" name="email" id="email"/>
+                    </div>
+                    <div class="error" id="client_error" style="display: none;">
+                        <label class="error_msg">Veuillez remplir tous les champs.</label>
+                    </div>
+                    <% if (typeof error !== 'undefined') { %>
+                        <div class="error" id="server_error">
+                            <label class="error_msg"><%= error %></label>
+                        </div>
+                    <% } %>
+                    <div class="submit_div">
+                        <a href="/auth/connexion">Retour à la connexion</a>
+                        <input type="submit" id="oublie" value="Envoyer">
+                    </div>
+                </div>
             </div>
         </form>
         <!-- script -->

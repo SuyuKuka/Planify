@@ -1,0 +1,44 @@
+.email-container {
+    margin-top: 60px;
+}
+
+.password-container {
+    margin-top: 20px;
+}
+
+.submit_div {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.links {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* media queries */
+
+@media screen and (min-width: 959px) {
+    .submit_div {
+        margin-top: 16%;
+        margin-bottom: 10px;
+    }
+}
+
+@media screen and (max-width: 959px) {
+    .submit_div {
+        margin-top: 10%;
+        margin-bottom: 10px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .email-container {
+        margin-top: 0px;
+    }
+
+    .submit_div {
+        margin-top: 5%;
+        margin-bottom: 10px;
+    }
+}

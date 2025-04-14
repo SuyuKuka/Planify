@@ -1,0 +1,51 @@
+/* #step1 */
+.surname-container {
+    margin-top: 35px;
+}
+
+.name-container,
+.birthdate-container {
+    margin-top: 15px;
+}
+
+.suivant_div {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* #step2 */
+
+.id_user-container {
+    margin-top: 5px;
+}
+
+.username-container,
+.email-container,
+.password-container {
+    margin-top: 5px;
+}
+
+.submit_div {
+    margin-top: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* media queries */
+
+@media screen and (max-width: 600px) {
+    .surname-container {
+        margin-top: 0px;
+    }
+
+    .id_user-container {
+        margin-top: 0px;
+    }
+
+    .suivant_div,
+    .submit_div {
+        margin-top: 5%;
+    }
+}

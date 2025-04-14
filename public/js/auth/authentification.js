@@ -30,3 +30,13 @@ function verificate(input, method) {
         }
     });
 }
+
+$("#show_password").click(function() {
+    if (password.attr('type') === 'password') {
+        password.attr('type', 'text');
+        $("#show_password").attr('src', '/images/open.png');
+    } else {
+        password.attr('type', 'password');
+        $("#show_password").attr('src', '/images/close.png');
+    }
+});

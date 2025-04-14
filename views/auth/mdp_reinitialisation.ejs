@@ -2,49 +2,55 @@
 <html lang="fr">
     <head>
         <meta charset="UTF-8">
-        <title>Connexion - Planify</title>
+        <title>Réinitialisation de mot de passe - Planify</title>
         <link rel="shortcut icon" href="/images/favicon.ico">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- css -->
         <link href="/css/bootstrap.min.css" rel="stylesheet">
         <link href="/css/authentification.css" rel="stylesheet">
-        <link href="/css/connexion.css" rel="stylesheet">
+        <link href="/css/mdp_reinitialisation.css" rel="stylesheet">
     </head>
     <body>
         <form autocomplete="off" action="/auth/mot_de_passe_reinitialisation/verification" method="POST" id="form">
-            <header class="authentification">
-                <h2>Réinitialisation du mot de passe</h2>
-            </header>
-            <div>
-                <label for="password">Mot de passe :</label><br>
-                <input type="password" name="password" id="password"/>
-            </div>
-            <div>
-                <label for="password_confirm">Confirmer le mot de passe :</label><br>
-                <input type="password" name="password_confirm" id="password_confirm"/>
-            </div>
-            <div class="show_password_div">
-                <input type="checkbox" name="show_password" id="show_password"/>
-                <label for="show_password">Afficher le mot de passe</label>
-            </div>
-            <div class="error" id="client_error" style="display: none;">
-                <label class="error_msg">Les données spécifiées ne sont pas valides.</label>
-            </div>
-            <% if (typeof error !== 'undefined') { %>
-                <div class="error" id="server_error">
-                    <label class="error_msg"><%= error.msg %></label>
+            <div class="container">
+                <div class="information">
+                    <a href="/">
+                        <img class="logo" src="/images/logo.png" width="200" height="50">
+                    </a>
+                    <h2>Réinitialisez votre mot de passe</h2>
+                    <p>Réinitialisez, et reprenez le contrôle.</p>
                 </div>
-            <% } %>
-            <div class="submit_div">
-                <input type="submit" id="reinitialisation" value="Enregistrer">
+                <div class="authentification">
+                    <div class="password-container">
+                        <label for="password">Mot de passe :</label><br>
+                        <input type="password" id="password" name="password" />
+                        <img id="show_password" src="/images/close.png" alt="Afficher le mot de passe" height="20" width="20" />
+                    </div>
+                    <div class="password_confirm-container">
+                        <label for="password_confirm">Confirmer le mot de passe :</label><br>
+                        <input type="password" name="password_confirm" id="password_confirm"/>
+                        <img id="show_password2" src="/images/close.png" alt="Afficher le mot de passe" height="20" width="20" />
+                    </div>
+                    <div class="error" id="client_error" style="display: none;">
+                        <label class="error_msg">Les données spécifiées ne sont pas valides.</label>
+                    </div>
+                    <% if (typeof error !== 'undefined') { %>
+                        <div class="error" id="server_error">
+                            <label class="error_msg"><%= error.msg %></label>
+                        </div>
+                    <% } %>
+                    <div class="submit_div">
+                        <input type="submit" id="reinitialisation" value="Enregistrer">
+                    </div>
+                    <input type="hidden" name="token" value="<%= token %>"/>
+                </div>
             </div>
-            <input type="hidden" name="token" value="<%= token %>"/>
         </form>
         <!-- script -->
         <script src="/js/jquery.js"></script>
         <script src="/js/bootstrap.bundle.min.js"></script>
         <script src="/js/shared/auth.js"></script>
         <script src="/js/auth/authentification.js"></script>
-        <script src="/js/auth/mdp_oublie.js"></script>
+        <script src="/js/auth/mdp_reinitialisation.js"></script>
     </body>
 </html>

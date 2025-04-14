@@ -1,14 +1,6 @@
 const email = createInput('email', auth.isEmailValid);
 const password = createInput('password', auth.isPasswordValid);
 
-$("#show_password").click(function() {
-    if (password.attr('type') === 'password') {
-        password.attr('type', 'text');
-    } else {
-        password.attr('type', 'password');
-    }
-});
-
 $(document).on('keydown', function(e) {
     if (e.key === 'Enter') {
         if (!$(':focus').is('input')) {
