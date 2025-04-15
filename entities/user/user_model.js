@@ -1,4 +1,4 @@
-const { getPool } = require('../../config/database/db');
+const { getPool, dbQuery } = require('../../config/database/db');
 const encrypt = require('../../services/encryption/encrypt');
 
 
@@ -7,8 +7,8 @@ async function modifyUsername(id_user, username) {
     let res;
     try {
         res = await client.query('UPDATE "user" SET username = $1 WHERE id_user = $2', [username, id_user]);
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }
@@ -26,8 +26,8 @@ async function modifyEmail(id_user, email) {
         }
 
         res = await client.query('UPDATE "user" SET email = $1 WHERE id_user = $2', [email_lower, id_user]);
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }
@@ -40,8 +40,8 @@ async function modifyPassword(id_user, password) {
     try {
         hashedPassword = await encrypt.hash(password);
         res = await client.query('UPDATE "user" SET password = $1 WHERE id_user = $2', [hashedPassword, id_user]);
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }
@@ -57,7 +57,7 @@ async function saveResetToken(id_user) {
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
         await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
     } catch (error) {
-        throw error;
+        console.error(error);
     } finally {
         client.release();
     }
@@ -75,8 +75,8 @@ async function getInfo(token) {
         } else {
             return undefined;
         }
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }

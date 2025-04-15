@@ -2,60 +2,102 @@ const { getPool } = require('../../config/database/db');
 const encrypt = require('../../services/encryption/encrypt');
 const mail = require('../../services/mailer/mailer');
 
-async function isEmailAlreadyUsed(email) {
-    let client = await getPool().connect();
-    let res;
+//#region Inscription
+
+async function addUser(data) {
+    const client = await getPool().connect();
     try {
-        res = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
-    } catch (err) {
-        throw err;
+        // Vérification email est déjà utilisé
+        const emailUsed = await client.query('SELECT 1 FROM "user" WHERE email = $1 LIMIT 1', [data.email]).rowCount > 0;
+        if (emailUsed) {
+            data.emailUsed = true;
+        }
+        // Vérification id est déjà utilisé
+        const idUsed = await client.query('SELECT 1 FROM "user" WHERE id_user = $1 LIMIT 1', [data.id_user]).rowCount > 0;
+        if (idUsed) {
+            data.idUsed = true;
+        }
+
+        if (emailUsed || idUsed) {
+            return undefined;
+        }
+    
+        // Ajoute l'utilisateur dans la db
+        const { id_user, surname, name, birthdate, username, email, password } = userData;
+        const hashedPassword = await encrypt.hash(password);
+        const insertQuery = 'INSERT INTO "user" (id_user, surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+        const dataList = [id_user, surname, name, birthdate, username, email, hashedPassword];
+        await client.query(insertQuery, dataList);
+    
+        // Par sécurité, on retire les potentiels tokens 99.9% impossible
+        await destroyOldIDToken(id_user, client);
+    
+        // On crée et retourne le token
+        return await createIDToken(id_user, client);
+    } catch (error) {
+        console.error(error);
+        throw error;
     } finally {
         client.release();
     }
-    return res.rowCount > 0;
 }
+//#endregion
 
+//#region Connexion
+
+/**
+ * Donnés un email et un mot de passe, regarde dans la db si un utilisateur y est associé.
+ * @description connexion
+ * @param {*} email 
+ * @param {*} password 
+ * @returns un tuple contenant les attributs de la table user ou undefined
+ */
 async function getUser(email, password) {
     const client = await getPool().connect();
-    let res;
     try {
-        res = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
-        if (res.rows.length === 0) { // Si y'a pas de user avec cet email
+        const query = await client.query('SELECT * FROM "user" WHERE email = $1 LIMIT 1', [email]);
+        let user = undefined;
+        if (query.rowCount > 0) {
+            user = query.rows[0];
+        }
+    
+        // Vérifie si un utilisateur est associé au mail
+        if (user === undefined) {
             return undefined;
-        } else if (res.rows.length > 1) { // Si y'a plus d'un user avec cet email
-            await client.query('DELETE FROM "user" WHERE email = $1', [email]);
+        }
+        // Vérifie si le mot de passe spécifié est le bon
+        if (!await encrypt.check(password, user.password)) {
             return undefined;
         }
 
-        const verify = await encrypt.check(password, res.rows[0].password);
-        if (!verify) {
-            return undefined;
+        const userIdQuery = await client.query('SELECT token FROM token WHERE user_id = $1 LIMIT 1', [user.user_id]);
+        if (userIdQuery.rowCount > 0) {
+            return userIdQuery.rows[0].token;
         }
-    } catch (err) {
-        throw err;
+        return createIDToken(user.id_user, client);
+    } catch (error) {
+        console.error(error);
+        throw error;
     } finally {
         client.release();
     }
-    return res.rows[0];
 }
 
-async function addUser(id_user, surname, name, birthdate, username, email, password) {
-    const client = await getPool().connect();
-    try {
-        let res = await client.query('SELECT * FROM "user" WHERE id_user = $1', [id_user]);
-        if (res.rows.length > 0) {
-            return false;
-        }
+//#endregion
 
-        let hashedPassword = await encrypt.hash(password);
-        client.query('INSERT INTO "user" (id_user, surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6, $7)', [id, surname, name, birthdate, username, email, hashedPassword]);
-    } catch (err) {
-        throw err;
-    } finally {
-        client.release();
-    }
-    return true;
+//#region TOKENS
+async function createIDToken(id_user, client) {
+    const token = encrypt.generateToken();
+    const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
+    return token;
 }
+
+async function destroyOldIDToken(id_user, client) {
+    await client.query('DELETE FROM token WHERE id_user = $1 OR expire_at < NOW()', [id_user]);
+}
+
+//#endregion
 
 async function saveResetToken(id_user) {
     let token = encrypt.generateToken();
@@ -66,8 +108,8 @@ async function saveResetToken(id_user) {
         await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
         await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }
@@ -90,7 +132,7 @@ async function sendPasswordForgottenEmail(email) {
                        <a href="http://localhost:8080/auth/mot_de_passe_reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
             });
         } catch (error) {
-            throw error;
+            console.error(error);
         }
     }
 }
@@ -100,8 +142,8 @@ async function checkToken(token) {
     let result;
     try {
         result = await client.query('SELECT * FROM token WHERE token = $1 AND expire_at > NOW()', [token]);
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }
@@ -116,8 +158,8 @@ async function updatePassword(id_user, password) {
 
         await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }
@@ -129,13 +171,14 @@ async function addIDtoToken(id_user) {
     let token;
     try {
         await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
+
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
 
         token = encrypt.generateToken();
         let expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
         await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }
@@ -143,9 +186,8 @@ async function addIDtoToken(id_user) {
 }
 
 module.exports = {
-    isEmailAlreadyUsed,
-    getUser,
     addUser,
+    getUser,
     sendPasswordForgottenEmail,
     checkToken,
     updatePassword,

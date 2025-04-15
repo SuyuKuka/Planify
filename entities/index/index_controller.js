@@ -2,20 +2,25 @@ const Auth = require('./index_model');
 const vueList = ['jour', 'semaine', 'mois', 'annee'];
 
 async function getIndex(req, res) {
+    let vue = req.query.vue;
+    if (!vueList.includes(vue)) {
+        vue = "semaine";
+    }
     const token = req.session.token;
     let result = await Auth.getInfo(token);
+    console.log(result);
     if (token === undefined || token === null) {
         email = undefined;
         username = undefined;
+        
         res.render('index', {
-            email: email,
-            username: username,
-            vue: 'mois'
+            email, username, vue
         });
     } else {
         res.render('index', {
             email: result.email,
-            username: result.username
+            username: result.username,
+            vue
         });
     }
 }

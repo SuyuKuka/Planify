@@ -8,11 +8,11 @@ const daysDiv = $("<div id='#calendar-days'></div>");
 for (let i = 0; i < cells; i++) {
     const val = i - day + 2;
     if (val <= 0) {
-        daysDiv.append(`<button class='prev-calendar'>${prevMonth - val}</button>`);
+        daysDiv.append(createPrevButton(prevMonth - val));
     } else if (val > days[month]) {
-        daysDiv.append(`<button class='next-calendar'>${val - days[month]}</button>`);
+        daysDiv.append(createNextButton(val - days[month]));
     } else {
-        daysDiv.append(`<button class='curr-calendar'>${val}</button>`);
+        daysDiv.append(createCurrButton(val));
     }
 }
 

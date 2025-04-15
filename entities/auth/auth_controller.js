@@ -28,38 +28,32 @@ function getRegistrationVerif(req, res) {
  * @param {*} res 
  */
 async function postRegistrationVerif(req, res) {
-    const ret = verifyRegistration(req.body);
+    const retSet = verifyRegistration(req.body);
     const { id_user, surname, name, birthdate, username, email, password } = req.body;
+    if (retSet.size !== 0) {
+        Object.assign(req.session, {
+            id_user, surname, name, birthdate, username, email,
+            error_step1: retSet.has(1) ? authVerif.messages.invalidQueries : undefined,
+            error_step2: retSet.has(2) ? authVerif.messages.invalidQueries : undefined
+        });
+        res.redirect('/auth/inscription');
+        return;
+    } 
     try {
-        if (ret.size == 0) { // Aucun problème de syntaxe
-            const isEmailUsed = await Auth.isEmailAlreadyUsed(email);
-            if (isEmailUsed) { // Cas email déjà utilisé
-                Object.assign(req.session, {
-                    id_user, surname, name, birthdate, username, email,
-                    error_step2: authVerif.messages.alreadyUsedEmail
-                });
-                res.redirect('/auth/inscription');
-            } else { // Cas succès
-                let verif = await Auth.addUser(id_user, surname, name, birthdate, username, email, password);
-                if (!verif) {
-                    Object.assign(req.session, {
-                        id_user, surname, name, birthdate, username, email,
-                        error_step2: authVerif.messages.alreadyUsedUserID
-                    });
-                    res.redirect('/auth/inscription');
-                } else {
-                    const token = await Auth.addIDtoToken(id_user);
-                    Object.assign(req.session, { token });
-                    res.redirect('/');
-                }
-            }
-        } else { // Erreur de syntaxe detectée
+        const data = {
+            id_user, surname, name, birthdate, username, email, password
+        };
+        const tokenCreated = await Auth.addUser(data);
+        if (!tokenCreated) {
             Object.assign(req.session, {
-                id_user, surname, name, birthdate, username, email,
-                error_step1: ret.has(1) ? authVerif.messages.invalidQueries : undefined,
-                error_step2: ret.has(2) ? authVerif.messages.invalidQueries : undefined
+                id_user, surname, name, birthdate, username, email
             });
             res.redirect('/auth/inscription');
+        } else {
+            Object.assign(req.session, {
+                token: tokenCreated
+            });
+            res.redirect('/');
         }
     } catch (error) {
         req.session.error_step1 = authVerif.messages.defaultError;
@@ -126,30 +120,29 @@ function getConnectionVerif(req, res) {
 async function postConnectionVerif(req, res) {
     const ret = verifyConnection(req.body);
     const { email, password } = req.body;
+    if (!ret) {
+        Object.assign(req.session, {
+            email,
+            error: authVerif.messages.invalidQueries
+        });
+        res.redirect('/auth/connexion');
+        return;
+    }
     try {
-        if (ret) {
-            let email_lower = email.toLowerCase();
-            const user = await Auth.getUser(email_lower, password);
-            if (user === undefined) { // Cas email ou mot de passe incorrect
-                Object.assign(req.session, {
-                    email,
-                    error: authVerif.messages.wrongEmailOrPassword
-                });
-                res.redirect('/auth/connexion');
-            } else { // Cas succes
-                const { id_user } = user;
-                const token = await Auth.addIDtoToken(id_user);
-                Object.assign(req.session, { token });
-                res.redirect('/');
-            }
-        } else { // Cas au moins une valeur non valide
+        const email_lower = email.toLowerCase();
+        const user = await Auth.getUser(email_lower, password);
+        if (user === undefined) { // Cas email ou mot de passe incorrect
             Object.assign(req.session, {
                 email,
-                error: authVerif.messages.invalidQueries
+                error: authVerif.messages.wrongEmailOrPassword
             });
             res.redirect('/auth/connexion');
+        } else { // Cas succes
+            const token = await Auth.addIDtoToken(user.id_user);
+            Object.assign(req.session, { token });
+            res.redirect('/');
         }
-    } catch (e) {
+    } catch (error) {
         req.session.error = authVerif.messages.defaultError;
         res.redirect('/auth/connexion');
     }
