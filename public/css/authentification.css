@@ -50,6 +50,21 @@ input[type="submit"] {
     padding: 8px 30px;
     border: 1px solid gray;
     cursor: pointer;
+    background-color: rgb(13, 110, 252);
+    color: white;
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+}
+  
+button:hover,
+input[type="submit"]:hover {
+    background-color: rgb(14, 99, 228);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+button:active,
+input[type="submit"]:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .error {
