@@ -11,6 +11,7 @@ $(document).on('keydown', function(e) {
 
 $("#form").on('submit', (e) => {
     $('#server_error').css('display', 'none');
+    $('#server_success').css('display', 'none');
     let valid = true;
     if (!auth.isEmailValid(email.val())) {
         email.css("border", "2px solid red");

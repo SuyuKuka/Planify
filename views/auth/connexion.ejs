@@ -38,6 +38,19 @@
                         <div class="error" id="server_error">
                         <label class="error_msg"><%= error.msg %></label>
                         </div>
+                    <% } else { %>
+                        <div class="error" id="server_error" style="display: none;">
+                            <label class="error_msg"></label>
+                        </div>
+                    <% } %>
+                    <% if (typeof success !== 'undefined') { %>
+                        <div class="success" id="server_success">
+                        <label class="success_msg"><%= success %></label>
+                        </div>
+                    <% } else { %>
+                        <div class="success" id="server_success" style="display: none;">
+                            <label class="success_msg"></label>
+                        </div>
                     <% } %>
                     <div class="submit_div">
                         <input type="submit" id="connexion" value="Connexion">

@@ -11,7 +11,9 @@ $(document).ready(function() {
             && auth.isNameValid(name.val())
             && auth.isBirthdateValid(birthdate.val())) {
         $('#step1').css('display', 'none');
+        $('#step2').css('display', 'block');
     } else {
+        $('#step1').css('display', 'block');
         $('#step2').css('display', 'none');
     }
 

@@ -47,6 +47,10 @@
                             <div class="error" id="server_error1">
                                 <label class="error_msg"><%= error_step1.msg %></label>
                             </div>
+                        <% } else { %>
+                            <div class="error" id="server_error1" style="display: none;">
+                                <label class="error_msg"></label>
+                            </div>
                         <% } %>
                         <div class="suivant_div">
                             <a href="/auth/connexion">Déjà un compte ?</a>
@@ -81,6 +85,10 @@
                         <% if (typeof error_step2 !== 'undefined') { %>
                             <div class="error" id="server_error2">
                                 <label class="error_msg"><%= error_step2.msg %></label>
+                            </div>
+                        <% } else { %>
+                            <div class="error" id="server_error2" style="display: none;">
+                                <label class="error_msg"></label>
                             </div>
                         <% } %>
                         <div class="submit_div">

@@ -3,23 +3,21 @@ const encrypt = require('../../services/encryption/encrypt');
 const mail = require('../../services/mailer/mailer');
 
 async function isEmailAlreadyUsed(email) {
-    let client = await getPool().connect();
-    let res;
+    const client = await getPool().connect();
     try {
-        res = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
+        const res = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
+        return res.rowCount > 0;
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
-    return res.rowCount > 0;
 }
 
 async function getUser(email, password) {
     const client = await getPool().connect();
-    let res;
     try {
-        res = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
+        const res = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
         if (res.rows.length === 0) { // Si y'a pas de user avec cet email
             return undefined;
         } else if (res.rows.length > 1) { // Si y'a plus d'un user avec cet email
@@ -31,57 +29,57 @@ async function getUser(email, password) {
         if (!verify) {
             return undefined;
         }
+        return res.rows[0];
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
-    return res.rows[0];
 }
 
 async function addUser(id_user, surname, name, birthdate, username, email, password) {
     const client = await getPool().connect();
     try {
-        let res = await client.query('SELECT * FROM "user" WHERE id_user = $1', [id_user]);
+        const res = await client.query('SELECT * FROM "user" WHERE id_user = $1', [id_user]);
         if (res.rows.length > 0) {
             return false;
         }
 
-        let hashedPassword = await encrypt.hash(password);
+        const hashedPassword = await encrypt.hash(password);
         client.query('INSERT INTO "user" (id_user, surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6, $7)', [id, surname, name, birthdate, username, email, hashedPassword]);
+        return true;
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
-    return true;
 }
 
 async function saveResetToken(id_user) {
-    let token = encrypt.generateToken();
-    let expirationDate = new Date(Date.now() + 5 * 60 * 1000); 
-
-    let client = await getPool().connect();
+    const client = await getPool().connect();
     try {
+        const token = encrypt.generateToken();
+        const expirationDate = new Date(Date.now() + 5 * 60 * 1000); 
+
         await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
         await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
+        return token;
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
-    return token;
 }
 
 async function sendPasswordForgottenEmail(email) {
-    let client = await getPool().connect();
-    let result = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
+    const client = await getPool().connect();
+    const result = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
     client.release();
 
     if (result.rows.length > 0) {
         try {
-            let token = await saveResetToken(result.rows[0].id_user);
+            const token = await saveResetToken(result.rows[0].id_user);
             await mail.transporter.sendMail({
                 from: 'programmationwebprojet@gmail.com',
                 to: email,
@@ -96,50 +94,48 @@ async function sendPasswordForgottenEmail(email) {
 }
 
 async function checkToken(token) {
-    let client = await getPool().connect();
-    let result;
+    const client = await getPool().connect();
     try {
-        result = await client.query('SELECT * FROM token WHERE token = $1 AND expire_at > NOW()', [token]);
+        const result = await client.query('SELECT * FROM token WHERE token = $1 AND expire_at > NOW()', [token]);
+        return result;
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
-    return result;
 }
 
 async function updatePassword(id_user, password) {
-    let client = await getPool().connect();
+    const client = await getPool().connect();
     try {
-        let hashedPassword = await encrypt.hash(password);
+        const hashedPassword = await encrypt.hash(password);
         await client.query('UPDATE "user" SET password = $1 WHERE id_user = $2', [hashedPassword, id_user]);
 
         await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
+        return true;
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
-    return true;
 }
 
 async function addIDtoToken(id_user) {
-    let client = await getPool().connect();
-    let token;
+    const client = await getPool().connect();
     try {
         await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
 
-        token = encrypt.generateToken();
-        let expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const token = encrypt.generateToken();
+        const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
         await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
+        return token;
     } catch (err) {
         throw err;
     } finally {
         client.release();
     }
-    return token;
 }
 
 module.exports = {

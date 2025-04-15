@@ -17,6 +17,11 @@
 
 /* #step2 */
 
+#step2 {
+    display: none;
+}
+
+
 .id_user-container {
     margin-top: 5px;
 }
