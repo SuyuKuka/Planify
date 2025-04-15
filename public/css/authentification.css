@@ -3,72 +3,179 @@
 }
 
 body {
-    background-color: rgb(225, 225, 225);
+    display: flex;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.container {
+    display: flex;
+}
+
+.information {
+    flex: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.information h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
 }
 
 .authentification {
-    text-align: center;
-    padding-bottom: 5%;
-}
-
-form {
-    background-color: white;
-    padding: 3% 2%;
+    flex: 2;
+    padding: 15px;
     display: flex;
-    align-items: center;
     flex-direction: column;
-    width: 340px;
-    border-radius: 10px; 
-    box-shadow: 0px 2px 4px black; 
+}
+
+.password_confirm-container,
+.password-container {
+    position: relative;
+}
+
+.password_confirm-container img,
+.password-container img {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin-top: 2%;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
 }
 
-div {
-    margin: 10px;
-}
-
-input {
-    margin: auto 0px;
-    text-decoration: none;
-    border-radius: 30px;
-    padding: 6px 30px;
-    border: 1px solid gray;
-}
-
+button,
 input[type="submit"] {
-    margin: auto 0px;
-    text-decoration: none;
-    text-align: center;
     border-radius: 30px;
     padding: 8px 30px;
     border: 1px solid gray;
     cursor: pointer;
+    background-color: rgb(13, 110, 252);
+    color: white;
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+}
+  
+button:hover,
+input[type="submit"]:hover {
+    background-color: rgb(14, 99, 228);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.afficher {
-    display: flex;
-    font-size: small;
-    align-items: center;
-}
-
-.afficher input {
-    margin: 0px 8px 0px 5px;
+button:active,
+input[type="submit"]:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .error {
     color: red;
-    font-size: smaller;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 10px;
 }
 
-.submit_div,
-.forgotten_password_div,
-.error_connexion,
-.error_message,
-.show_password_div {
-    align-self: flex-start;
-    margin-left: 14%;
+.success {
+    color: rgb(0, 206, 0);
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* media queries */
+
+@media screen and (min-width: 959px) {
+    body {
+        background-color: lightgray;
+        min-height: 100vh;
+        justify-content: center;
+    }
+    
+    form {
+        background-color: white;
+        width: 800px;
+        border-radius: 10px; 
+        box-shadow: 0px 2px 4px black;
+        padding: 20px;
+    }
+
+    .container {
+        gap: 22.5%;
+    }
+
+    .password_confirm-container img,
+    .password-container img {
+        top: 55%;
+        right: 6.5%;
+    }
+
+    input[type="date"],
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+        width: 300px;
+        height: 35px;
+        border: 1px solid gray;
+    }
+}
+
+@media screen and (max-width: 959px) {
+    body {
+        background-color: white;
+        min-height: 100vh;
+    }
+
+    form {
+        width: 100%;
+        padding: 20px;
+    }
+
+    .container {
+        gap: 20%;
+    }
+
+    .logo {
+        width: 100%;
+        height: 100%;
+    }
+
+    .password_confirm-container img,
+    .password-container img {
+        top: 55%;
+        right: 4%;
+    }
+
+    input[type="date"],
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+        width: 100%;
+        height: 35px;
+        border: 1px solid gray;
+    }
+
+    .surname-container,
+    .id_user-container,
+    .email-container {
+        margin-top: 0px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    body {
+        min-height: 100svh;
+    }
+
+    .container {
+        flex-direction: column;
+        gap: 0px;
+    }
+
+    .logo {
+        width: 100%;
+        height: 100%;
+    }
 }

@@ -3,10 +3,9 @@ const authVerif = require('../../public/js/shared/auth');
 
 //#region Inscription
 function getRegistration(req, res) {
-    if (req.session === undefined || req.session === null) {
-        destroySession(req, res);
-    }
     const { id_user, surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
+
+    destroy(req);
     res.render('auth/inscription', {
         id_user, surname, name, birthdate, username, email,
         error_step1, error_step2
@@ -31,21 +30,18 @@ async function postRegistrationVerif(req, res) {
     const ret = verifyRegistration(req.body);
     const { id_user, surname, name, birthdate, username, email, password } = req.body;
     try {
-        if (ret.size == 0) { // Aucun problème de syntaxe
+        if (ret.size === 0) { // Aucun problème de syntaxe
             const isEmailUsed = await Auth.isEmailAlreadyUsed(email);
             if (isEmailUsed) { // Cas email déjà utilisé
                 Object.assign(req.session, {
                     id_user, surname, name, birthdate, username, email,
-                    error_step2: errorMessages.alreadyUsedEmail
+                    error_step2: authVerif.messages.alreadyUsedEmail
                 });
                 res.redirect('/auth/inscription');
             } else { // Cas succès
                 let verif = await Auth.addUser(id_user, surname, name, birthdate, username, email, password);
                 if (!verif) {
-                    Object.assign(req.session, {
-                        id_user, surname, name, birthdate, username, email,
-                        error_step2: errorMessages.alreadyUsedIDUser
-                    });
+                    Object.assign(req.session, { id_user, surname, name, birthdate, username, email, error_step2: authVerif.messages.alreadyUsedID });
                     res.redirect('/auth/inscription');
                 } else {
                     const token = await Auth.addIDtoToken(id_user);
@@ -109,13 +105,13 @@ function verifyRegistration(req_body) {
 //#endregion
 
 //#region Connexion
+
 function getConnection(req, res) {
-    if (req.session === undefined || req.session === null) {
-        destroySession(req, res);
-    }
-    const { email, error } = req.session;
+    const { email, error, success } = req.session;
+
+    destroy(req);
     res.render('auth/connexion', {
-        email, error
+        email, error, success
     });
 }
 
@@ -133,7 +129,7 @@ async function postConnectionVerif(req, res) {
             if (user === undefined) { // Cas email ou mot de passe incorrect
                 Object.assign(req.session, {
                     email,
-                    error:errorMessages.wrongEmailOrPassword
+                    error: authVerif.messages.wrongEmailOrPassword
                 });
                 res.redirect('/auth/connexion');
             } else { // Cas succes
@@ -145,12 +141,12 @@ async function postConnectionVerif(req, res) {
         } else { // Cas au moins une valeur non valide
             Object.assign(req.session, {
                 email,
-                error: errorMessages.invalidQuery
+                error: authVerif.messages.invalidQueries
             });
             res.redirect('/auth/connexion');
         }
     } catch (e) {
-        req.session.error = errorMessages.default;
+        req.session.error = authVerif.messages.default;
         res.redirect('/auth/connexion');
     }
 }
@@ -173,7 +169,12 @@ function verifyConnection(req_body) {
 //#region Mot de passe oublié
 
 function getPasswordForgotten(req, res) {
-    res.render('auth/mdp_oublie');
+    const { email, error } = req.session;
+    
+    destroy(req);
+    res.render('auth/mdp_oublie', {
+        email, error
+    });
 }
 
 function getPasswordForgottenSuccess(req, res) {
@@ -182,17 +183,18 @@ function getPasswordForgottenSuccess(req, res) {
 
 async function postPasswordForgottenSuccess(req, res) {
     const { email } = req.body;
-    const ret = verifyEmail(email);
     try {
-        if (ret) {
+        if (authVerif.isEmailValid(email)) {
             await Auth.sendPasswordForgottenEmail(email);
             res.redirect('/auth/mot_de_passe_oublie_succes');
         } else {
-            req.session.error = errorMessages.invalidQuery;
+            Object.assign(req.session, {
+                error: authVerif.messages.invalidQueries
+            });
             res.redirect('/auth/mot_de_passe_oublie');
         }
     } catch (error) {
-        req.session.error = errorMessages.default;
+        req.session.error = authVerif.messages.default;
         res.redirect('/auth/mot_de_passe_oublie');
     }
 }
@@ -203,18 +205,25 @@ async function postPasswordForgottenSuccess(req, res) {
 
 async function getPasswordReset(req, res) {
     const token = req.query.token;
-    if (!token) {
-        return res.redirect('/auth/mot_de_passe_oublie/'); 
-    }
-    try {
-        let result = await Auth.checkToken(token);
-        if (result.rows.length === 0) {
-            res.redirect('/auth/mot_de_passe_oublie/');
-        } else {
-            res.render('auth/mdp_reinitialisation', { token });
-        }
-    } catch (error) {
+    const error = req.session.error;
+
+    destroy(req);
+    if (token === undefined || token === null) {
+        Object.assign(req.session, {
+            error: authVerif.messages.tokenInvalid
+        });
         res.redirect('/auth/mot_de_passe_oublie/');
+    } else {
+        const result = await Auth.checkToken(token);
+        if (result.rows.length === 0) {
+            Object.assign(req.session, {
+                error: authVerif.messages.tokenExpired
+            });
+            res.redirect('/auth/mot_de_passe_oublie/'); 
+        } else {
+            Object.assign(req.session, { token });
+            res.render('auth/mdp_reinitialisation', { error });
+        }
     }
 }
 
@@ -224,21 +233,31 @@ function getPasswordResetVerif(req, res) {
 
 async function postPasswordResetVerif(req, res) {
     const { password } = req.body;
-    const token = req.body.token;
+    const token = req.session.token;
+    req.session.token = undefined;
     if (!token) { // Cas le token n'existe pas (passage par l'url)
+        Object.assign(req.session, {
+            error: authVerif.messages.tokenInvalid
+        });
         res.redirect('/auth/mot_de_passe_oublie/'); 
     }
     try {
         let result = await Auth.checkToken(token);
-        // TODO : mettre une erreur si le token a expiré (flm pour le moment)
         if (result.rows.length === 0) { // Cas le token n'existe pas (il a expiré) 
+            Object.assign(req.session, {
+                error: authVerif.messages.tokenInvalid
+            });
             res.redirect('/auth/mot_de_passe_oublie/');
         } else {
             await Auth.updatePassword(result.rows[0].id_user, password);
+            Object.assign(req.session, {
+                email: result.rows[0].email,
+                success: "Le mot de passe a bien été changé."
+            });
             res.redirect('/auth/connexion');
         }
     } catch (error) {
-        console.error(error);
+        Object.assign(req.session, { error: authVerif.messages.default });
         res.redirect('/auth/mot_de_passe_oublie/'); 
     }
 }
@@ -263,6 +282,19 @@ function destroySession(req, res) {
             return res.status(500).send('Erreur');
         }
     });
+}
+
+function destroy(req) {
+    req.session.id_user = undefined;
+    req.session.surname = undefined;
+    req.session.name = undefined;
+    req.session.birthdate = undefined;
+    req.session.username = undefined;
+    req.session.email = undefined;
+    req.session.error = undefined;
+    req.session.error_step1 = undefined;
+    req.session.error_step2 = undefined;
+    req.session.success = undefined;
 }
 
 //#endregion
