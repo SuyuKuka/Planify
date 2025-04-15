@@ -24,7 +24,7 @@
         },
         invalidQueries: {
             code: 5,
-            msg: "Les données spécifiées ne sont pas valides."
+            msg: "La ou les données spécifiées ne sont pas valides."
         },
         alreadyUsedUserID: {
             code: 6,

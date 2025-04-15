@@ -4,15 +4,15 @@ async function getInfo(token) {
     const client = await getPool().connect();
     try {
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
-        let id_user = await client.query('SELECT * FROM token WHERE token = $1', [token]);
-        if (id_user.rows.length > 0) {
-            const res = await client.query('SELECT * FROM "user" WHERE id_user = $1', [id_user.rows[0].id_user]);
-            return res.rows[0];
-        } else {
-            return undefined;
-        }
+        const result = await client.query(`
+            SELECT u.username, u.email
+            FROM token t
+            JOIN "user" u ON t.id_user = u.id_user
+            WHERE t.token = $1 LIMIT 1`, [token]);
+        return result.rowCount > 0 ? result.rows[0] : undefined;
     } catch (error) {
         console.error(error);
+        throw error;
     } finally {
         client.release();
     }

@@ -3,9 +3,6 @@ const authVerif = require('../../public/js/shared/auth');
 
 //#region Inscription
 function getRegistration(req, res) {
-    if (req.session === undefined || req.session === null) {
-        destroySession(req, res);
-    }
     const { id_user, surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
     res.render('auth/inscription', {
         id_user, surname, name, birthdate, username, email,
@@ -30,6 +27,7 @@ function getRegistrationVerif(req, res) {
 async function postRegistrationVerif(req, res) {
     const retSet = verifyRegistration(req.body);
     const { id_user, surname, name, birthdate, username, email, password } = req.body;
+    // Erreurs de syntaxes
     if (retSet.size !== 0) {
         Object.assign(req.session, {
             id_user, surname, name, birthdate, username, email,
@@ -44,15 +42,16 @@ async function postRegistrationVerif(req, res) {
             id_user, surname, name, birthdate, username, email, password
         };
         const tokenCreated = await Auth.addUser(data);
-        if (!tokenCreated) {
+        if (!tokenCreated) { // Cas erreur
             Object.assign(req.session, {
-                id_user, surname, name, birthdate, username, email
+                id_user, surname, name, birthdate, username, email,
+                emailUsed: data.emailUsed ? authVerif.messages.alreadyUsedEmail : undefined,
+                idUsed: data.idUsed ? authVerif.messages.alreadyUsedUserID : undefined,
+                error_step2: authVerif.messages.invalidQueries
             });
             res.redirect('/auth/inscription');
-        } else {
-            Object.assign(req.session, {
-                token: tokenCreated
-            });
+        } else { // Succès
+            Object.assign(req.session, { token: tokenCreated });
             res.redirect('/');
         }
     } catch (error) {
@@ -60,6 +59,153 @@ async function postRegistrationVerif(req, res) {
         res.redirect('/auth/inscription');
     }
 }
+
+//#endregion
+
+//#region Connexion
+function getConnection(req, res) {
+    if (req.session === undefined || req.session === null) {
+        destroySession(req, res);
+    }
+    const { email, error } = req.session;
+    res.render('auth/connexion', {
+        email, error
+    });
+}
+
+function getConnectionVerif(req, res) {
+    res.redirect('/auth/connexion');
+}
+
+async function postConnectionVerif(req, res) {
+    const ret = verifyConnection(req.body);
+    const { email, password } = req.body;
+    // Erreurs de syntaxes
+    if (!ret) {
+        Object.assign(req.session, {
+            email,
+            error: authVerif.messages.invalidQueries
+        });
+        res.redirect('/auth/connexion');
+        return;
+    }
+    try {
+        const email_lower = email.toLowerCase();
+        const tokenCreated = await Auth.getUser(email_lower, password);
+        if (!tokenCreated) { // Cas email ou mot de passe incorrect
+            Object.assign(req.session, {
+                email,
+                error: authVerif.messages.wrongEmailOrPassword
+            });
+            res.redirect('/auth/connexion');
+        } else { // Cas succes
+            Object.assign(req.session, { token: tokenCreated });
+            res.redirect('/');
+        }
+    } catch (error) {
+        req.session.error = authVerif.messages.defaultError;
+        res.redirect('/auth/connexion');
+    }
+}
+
+
+//#endregion
+
+//#region Mot de passe oublié
+
+function getPasswordForgotten(req, res) {
+    res.render('auth/mdp_oublie');
+}
+
+function getPasswordForgottenSuccess(req, res) {
+    res.render('auth/mdp_oublie_succes');
+}
+
+async function postPasswordForgottenSuccess(req, res) {
+    const { email } = req.body;
+    // Erreurs de syntaxes
+    if (!authVerif.isEmailValid(email)) {
+        req.session.error = authVerif.messages.invalidQueries;
+        res.redirect('/auth/mot_de_passe_oublie');
+        return;
+    }
+    try {
+        // L'utilisateur ne sera pas notifié de si l'email spécifié existe ou pas.
+        await Auth.sendPasswordForgottenEmail(email);
+        res.redirect('/auth/mot_de_passe_oublie_succes');
+    } catch (error) {
+        req.session.error = errorMessages.default;
+        res.redirect('/auth/mot_de_passe_oublie');
+    }
+}
+
+//#endregion
+
+//#region Reinitialisation
+
+async function getPasswordReset(req, res) {
+    const token = req.query.token;
+    try {
+        if (!token || !await Auth.isIDTokenValid(token)) {
+            return res.redirect('/auth/mot_de_passe_oublie/'); 
+        } else {
+            res.render('auth/mdp_reinitialisation', { token });
+        }
+    } catch (error) {
+        res.redirect('/auth/mot_de_passe_oublie/');
+    }
+}
+
+function getPasswordResetVerif(req, res) {
+    res.redirect('/auth/mot_de_passe_oublie/');
+}
+
+async function postPasswordResetVerif(req, res) {
+    const { token, password } = req.body;
+    // Cas le token n'existe pas (passage par l'url)
+    if (!token || !authVerif.isPasswordValid(password)) {
+        res.redirect('/auth/mot_de_passe_oublie/'); 
+    }
+    try {
+        // Aucun token trouvé
+        if (!await Auth.isIDTokenValid(token)) {
+            res.status(401).send("Erreur: le token n'existe pas ou a expiré.");
+            return;
+        }
+        if (!await Auth.updatePassword(token, password)) {
+            req.session.error = authVerif.messages.defaultError;
+        }
+        res.redirect('/auth/connexion');
+    } catch (error) {
+        res.redirect('/auth/mot_de_passe_oublie/'); 
+    }
+}
+
+//#endregion
+
+//#region Deconnexion
+
+function getDisconnection(req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send('Erreur');
+        }
+        res.clearCookie('connect.sid');
+        res.redirect('/');
+    });
+}
+
+function destroySession(req, res) {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send('Erreur');
+        }
+    });
+}
+
+//#endregion
+
+//#region Vérification Inscriptions/Connexion
 
 /**
  * Vérifie la validité des données du form
@@ -100,54 +246,6 @@ function verifyRegistration(req_body) {
     return errorSteps;
 }
 
-//#endregion
-
-//#region Connexion
-function getConnection(req, res) {
-    if (req.session === undefined || req.session === null) {
-        destroySession(req, res);
-    }
-    const { email, error } = req.session;
-    res.render('auth/connexion', {
-        email, error
-    });
-}
-
-function getConnectionVerif(req, res) {
-    res.redirect('/auth/connexion');
-}
-
-async function postConnectionVerif(req, res) {
-    const ret = verifyConnection(req.body);
-    const { email, password } = req.body;
-    if (!ret) {
-        Object.assign(req.session, {
-            email,
-            error: authVerif.messages.invalidQueries
-        });
-        res.redirect('/auth/connexion');
-        return;
-    }
-    try {
-        const email_lower = email.toLowerCase();
-        const user = await Auth.getUser(email_lower, password);
-        if (user === undefined) { // Cas email ou mot de passe incorrect
-            Object.assign(req.session, {
-                email,
-                error: authVerif.messages.wrongEmailOrPassword
-            });
-            res.redirect('/auth/connexion');
-        } else { // Cas succes
-            const token = await Auth.addIDtoToken(user.id_user);
-            Object.assign(req.session, { token });
-            res.redirect('/');
-        }
-    } catch (error) {
-        req.session.error = authVerif.messages.defaultError;
-        res.redirect('/auth/connexion');
-    }
-}
-
 function verifyConnection(req_body) {
     let valid = true;
     if (!authVerif.isEmailValid(req_body.email)) {
@@ -159,103 +257,6 @@ function verifyConnection(req_body) {
         valid = false;
     }
     return valid;
-}
-
-//#endregion
-
-//#region Mot de passe oublié
-
-function getPasswordForgotten(req, res) {
-    res.render('auth/mdp_oublie');
-}
-
-function getPasswordForgottenSuccess(req, res) {
-    res.render('auth/mdp_oublie_succes');
-}
-
-async function postPasswordForgottenSuccess(req, res) {
-    const { email } = req.body;
-    const ret = verifyEmail(email);
-    try {
-        if (ret) {
-            await Auth.sendPasswordForgottenEmail(email);
-            res.redirect('/auth/mot_de_passe_oublie_succes');
-        } else {
-            req.session.error = errorMessages.invalidQuery;
-            res.redirect('/auth/mot_de_passe_oublie');
-        }
-    } catch (error) {
-        req.session.error = errorMessages.default;
-        res.redirect('/auth/mot_de_passe_oublie');
-    }
-}
-
-//#endregion
-
-//#region Reinitialisation
-
-async function getPasswordReset(req, res) {
-    const token = req.query.token;
-    if (!token) {
-        return res.redirect('/auth/mot_de_passe_oublie/'); 
-    }
-    try {
-        let result = await Auth.checkToken(token);
-        if (result.rows.length === 0) {
-            res.redirect('/auth/mot_de_passe_oublie/');
-        } else {
-            res.render('auth/mdp_reinitialisation', { token });
-        }
-    } catch (error) {
-        res.redirect('/auth/mot_de_passe_oublie/');
-    }
-}
-
-function getPasswordResetVerif(req, res) {
-    res.redirect('/auth/mot_de_passe_oublie/');
-}
-
-async function postPasswordResetVerif(req, res) {
-    const { password } = req.body;
-    const token = req.body.token;
-    if (!token) { // Cas le token n'existe pas (passage par l'url)
-        res.redirect('/auth/mot_de_passe_oublie/'); 
-    }
-    try {
-        let result = await Auth.checkToken(token);
-        // TODO : mettre une erreur si le token a expiré (flm pour le moment)
-        if (result.rows.length === 0) { // Cas le token n'existe pas (il a expiré) 
-            res.redirect('/auth/mot_de_passe_oublie/');
-        } else {
-            await Auth.updatePassword(result.rows[0].id_user, password);
-            res.redirect('/auth/connexion');
-        }
-    } catch (error) {
-        console.error(error);
-        res.redirect('/auth/mot_de_passe_oublie/'); 
-    }
-}
-
-//#endregion
-
-//#region Deconnexion
-
-function getDisconnection(req, res) {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).send('Erreur');
-        }
-        res.clearCookie('connect.sid');
-        res.redirect('/');
-    });
-}
-
-function destroySession(req, res) {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).send('Erreur');
-        }
-    });
 }
 
 //#endregion

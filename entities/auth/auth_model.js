@@ -33,7 +33,8 @@ async function addUser(data) {
         await destroyOldIDToken(id_user, client);
     
         // On crée et retourne le token
-        return await createIDToken(id_user, client);
+        const duration = 24 * 60 * 60 * 1000; // = 24h
+        return await createIDToken(user.id_user, duration, client);
     } catch (error) {
         console.error(error);
         throw error;
@@ -41,7 +42,7 @@ async function addUser(data) {
         client.release();
     }
 }
-//#endregion
+//#endregioncreateIDToken
 
 //#region Connexion
 
@@ -70,11 +71,13 @@ async function getUser(email, password) {
             return undefined;
         }
 
-        const userIdQuery = await client.query('SELECT token FROM token WHERE user_id = $1 LIMIT 1', [user.user_id]);
+        const userIdQuery = await client.query('SELECT token FROM token WHERE id_user = $1 LIMIT 1', [user.id_user]);
         if (userIdQuery.rowCount > 0) {
             return userIdQuery.rows[0].token;
         }
-        return createIDToken(user.id_user, client);
+
+        const duration = 24 * 60 * 60 * 1000; // = 24h
+        return await createIDToken(user.id_user, duration, client);
     } catch (error) {
         console.error(error);
         throw error;
@@ -85,10 +88,48 @@ async function getUser(email, password) {
 
 //#endregion
 
-//#region TOKENS
-async function createIDToken(id_user, client) {
+//#region sendPasswordResetEmail
+
+async function sendPasswordForgottenEmail(email) {
+    const client = await getPool().connect();
+    try {
+        // Vérifie si l'email spécifié existe dans la db
+        const result = await client.query('SELECT id_user FROM "user" WHERE email = $1 LIMIT 1', [data.email]);
+        if (!result.rowCount > 0) {
+            return;
+        }
+        const id_user = result.id_user;
+        await destroyOldIDToken(id_user, client);
+
+        // L'email expire après 5 minutes
+        const duration = 5 * 60 * 1000; // = 5min
+        await createIDToken(id_user, duration, client);
+        await mail.transporter.sendMail({
+            from: 'programmationwebprojet@gmail.com',
+            to: email,
+            subject: 'Réinitialisation de votre mot de passe',
+            html: `<p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>
+                   <a href="http://localhost:8080/auth/mot_de_passe_reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
+        });
+    } catch (error) {
+        console.error(error);
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+//#endregion
+
+//#region passwordReset
+
+//#endregion
+
+//#region Tokens
+async function createIDToken(id_user, durationInMS, client) {
     const token = encrypt.generateToken();
-    const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const expirationDate = new Date(Date.now() + durationInMS);
+    console.log(id_user, token, expirationDate);
     await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
     return token;
 }
@@ -97,99 +138,49 @@ async function destroyOldIDToken(id_user, client) {
     await client.query('DELETE FROM token WHERE id_user = $1 OR expire_at < NOW()', [id_user]);
 }
 
+async function isIDTokenValid(token) {
+    const client = await getPool().connect();
+    try {
+        const result = await client.query('SELECT 1 FROM token WHERE token = $1 AND expire_at > NOW() LIMIT 1', [token]);
+        return result.rowCount > 0;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
 //#endregion
 
-async function saveResetToken(id_user) {
-    let token = encrypt.generateToken();
-    let expirationDate = new Date(Date.now() + 5 * 60 * 1000); 
+//#region Réinitialisation mot de passe
 
-    let client = await getPool().connect();
+async function updatePassword(token, password) {
+    const client = await getPool().connect();
     try {
-        await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
-        await client.query('DELETE FROM token WHERE expire_at < NOW()');
-        await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
-    } catch (error) {
-        console.error(error);
-    } finally {
-        client.release();
-    }
-    return token;
-}
-
-async function sendPasswordForgottenEmail(email) {
-    let client = await getPool().connect();
-    let result = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
-    client.release();
-
-    if (result.rows.length > 0) {
-        try {
-            let token = await saveResetToken(result.rows[0].id_user);
-            await mail.transporter.sendMail({
-                from: 'programmationwebprojet@gmail.com',
-                to: email,
-                subject: 'Réinitialisation de votre mot de passe',
-                html: `<p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>
-                       <a href="http://localhost:8080/auth/mot_de_passe_reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
-            });
-        } catch (error) {
-            console.error(error);
+        const result = await client.query('SELECT id_user FROM token WHERE token = $1 LIMIT 1', [token]);
+        if (res.rowCount < 1) {
+            return false;
         }
-    }
-}
-
-async function checkToken(token) {
-    let client = await getPool().connect();
-    let result;
-    try {
-        result = await client.query('SELECT * FROM token WHERE token = $1 AND expire_at > NOW()', [token]);
-    } catch (error) {
-        console.error(error);
-    } finally {
-        client.release();
-    }
-    return result;
-}
-
-async function updatePassword(id_user, password) {
-    let client = await getPool().connect();
-    try {
-        let hashedPassword = await encrypt.hash(password);
+        const id_user = result.rows[0].id_user;
+        await destroyOldIDToken(id_user, client);
+        const hashedPassword = await encrypt.hash(password);
         await client.query('UPDATE "user" SET password = $1 WHERE id_user = $2', [hashedPassword, id_user]);
-
-        await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
-        await client.query('DELETE FROM token WHERE expire_at < NOW()');
+        return true;
     } catch (error) {
         console.error(error);
+        throw error;
     } finally {
         client.release();
     }
-    return true;
 }
 
-async function addIDtoToken(id_user) {
-    let client = await getPool().connect();
-    let token;
-    try {
-        await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
-
-        await client.query('DELETE FROM token WHERE expire_at < NOW()');
-
-        token = encrypt.generateToken();
-        let expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
-    } catch (error) {
-        console.error(error);
-    } finally {
-        client.release();
-    }
-    return token;
-}
+//#endregion
 
 module.exports = {
     addUser,
     getUser,
     sendPasswordForgottenEmail,
-    checkToken,
-    updatePassword,
-    addIDtoToken
+    isIDTokenValid,
+    updatePassword
 };

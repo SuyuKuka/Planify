@@ -7,14 +7,12 @@ async function getIndex(req, res) {
         vue = "semaine";
     }
     const token = req.session.token;
-    let result = await Auth.getInfo(token);
-    console.log(result);
-    if (token === undefined || token === null) {
-        email = undefined;
-        username = undefined;
-        
+    const result = await Auth.getInfo(token);
+    if (!result) {
         res.render('index', {
-            email, username, vue
+            email: undefined,
+            username: undefined,
+            vue
         });
     } else {
         res.render('index', {
@@ -25,22 +23,4 @@ async function getIndex(req, res) {
     }
 }
 
-async function postIndex(req, res) {
-    const token = req.session.token;
-    let result = await Auth.getInfo(token);
-    if (token === undefined || token === null) {
-        email = undefined;
-        username = undefined;
-        res.render('index', {
-            email: email,
-            username: username
-        });
-    } else {
-        res.render('index', {
-            email: result.email,
-            username: result.username
-        });
-    }
-}
-
-module.exports = { getIndex, postIndex }; 
+module.exports = { getIndex }; 
