@@ -5,7 +5,6 @@ const authVerif = require('../../public/js/shared/auth');
 function getRegistration(req, res) {
     const { id_user, surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
 
-    destroy(req);
     res.render('auth/inscription', {
         id_user, surname, name, birthdate, username, email,
         error_step1, error_step2
@@ -46,7 +45,9 @@ async function postRegistrationVerif(req, res) {
         const tokenCreated = await Auth.addUser(data);
         if (!tokenCreated) { // Cas erreur
             Object.assign(req.session, {
-                id_user, surname, name, birthdate, username, email,
+                surname, name, birthdate, username,
+                id_user: data.id_user,
+                email: data.email,
                 emailUsed: data.emailUsed ? authVerif.messages.alreadyUsedEmail : undefined,
                 idUsed: data.idUsed ? authVerif.messages.alreadyUsedUserID : undefined,
                 error_step2: authVerif.messages.invalidQueries
@@ -171,7 +172,7 @@ async function postPasswordResetVerif(req, res) {
     try {
         // Aucun token trouvé
         if (!await Auth.isIDTokenValid(token)) {
-            res.status(401).send("Erreur: le token n'existe pas ou a expiré.");
+            res.status(401).send(authVerif.messages.tokenExpired);
             return;
         }
         if (!await Auth.updatePassword(token, password)) {
