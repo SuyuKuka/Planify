@@ -11,7 +11,9 @@ $(document).ready(function() {
             && auth.isNameValid(name.val())
             && auth.isBirthdateValid(birthdate.val())) {
         $('#step1').css('display', 'none');
+        $('#step2').css('display', 'block');
     } else {
+        $('#step1').css('display', 'block');
         $('#step2').css('display', 'none');
     }
 
@@ -61,14 +63,6 @@ $("#suivant").click(function() {
 //#endregion
 
 //#region step 2
-
-$("#show_password").click(function() {
-    if (password.attr('type') === 'password') {
-        password.attr('type', 'text');
-    } else {
-        password.attr('type', 'password');
-    }
-});
 
 $("#retour").click(function() {
     $('#step2').css('display', 'none');

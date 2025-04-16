@@ -1,0 +1,22 @@
+.email-container {
+    margin-top: 25%;
+}
+
+.submit_div {
+    margin-top: 47%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* media queries */
+
+@media screen and (max-width: 600px) {
+    .email-container {
+        margin-top: 0px;
+    }
+
+    .submit_div {
+        margin-top: 5%;
+    }
+}

@@ -4,7 +4,6 @@ const encrypt = require('../../services/encryption/encrypt');
 
 async function modifyUsername(id_user, username) {
     const client = await getPool().connect();
-    let res;
     try {
         res = await client.query('UPDATE "user" SET username = $1 WHERE id_user = $2', [username, id_user]);
     } catch (error) {
@@ -12,15 +11,13 @@ async function modifyUsername(id_user, username) {
     } finally {
         client.release();
     }
-    return res.rowCount > 0;
 }
 
 async function modifyEmail(id_user, email) {
     const client = await getPool().connect();
-    let res;
     try {
-        let email_lower = email.toLowerCase();
-        res = await client.query('SELECT * FROM "user" WHERE email = $1', [email_lower]);
+        const email_lower = email.toLowerCase();
+        const res = await client.query('SELECT * FROM "user" WHERE email = $1', [email_lower]);
         if (res.rows.length > 0) {
             return false;
         }
@@ -31,12 +28,10 @@ async function modifyEmail(id_user, email) {
     } finally {
         client.release();
     }
-    return true;
 }
 
 async function modifyPassword(id_user, password) {
     const client = await getPool().connect();
-    let res;
     try {
         hashedPassword = await encrypt.hash(password);
         res = await client.query('UPDATE "user" SET password = $1 WHERE id_user = $2', [hashedPassword, id_user]);
@@ -46,23 +41,23 @@ async function modifyPassword(id_user, password) {
     } finally {
         client.release();
     }
-    return res.rowCount > 0;
 }
 
 async function saveResetToken(id_user) {
-    const token = encrypt.generateToken();
-    const expirationDate = new Date(Date.now() + 5 * 60 * 1000);
     const client = await getPool().connect();
     try {
         await client.query('DELETE FROM token WHERE id_user = $1', [id_user]);
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
+
+        const token = encrypt.generateToken();
+        const expirationDate = new Date(Date.now() + 5 * 60 * 1000);
         await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
+        return token;
     } catch (error) {
         console.error(error);
     } finally {
         client.release();
     }
-    return token;
 }
 
 async function getInfo(token) {

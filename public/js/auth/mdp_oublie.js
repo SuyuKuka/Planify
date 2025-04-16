@@ -12,7 +12,7 @@ $("#form").on('submit', (e) => {
     $('#error_step').css('display', 'none');
     if (!auth.isEmailValid(email.val())) {
         email.css("border", "2px solid red");
-        $('#error_form').css('display', 'block');
+        $('#client_error').css('display', 'block');
         e.preventDefault();
     }
 });

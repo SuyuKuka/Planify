@@ -4,6 +4,8 @@ const authVerif = require('../../public/js/shared/auth');
 //#region Inscription
 function getRegistration(req, res) {
     const { id_user, surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
+
+    destroy(req);
     res.render('auth/inscription', {
         id_user, surname, name, birthdate, username, email,
         error_step1, error_step2

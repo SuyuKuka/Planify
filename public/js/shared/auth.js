@@ -22,13 +22,21 @@
             code: 4,
             msg: "L'email ou le mot de passe est erroné."
         },
-        invalidQueries: {
+        alreadyUsedID: {
             code: 5,
+            msg: "L'identifiant spécifié est deja utilisé."
+        },
+        invalidQueries: {
+            code: 6,
             msg: "La ou les données spécifiées ne sont pas valides."
         },
-        alreadyUsedUserID: {
-            code: 6,
-            msg: "L'identifiant specifié est deja utilisé."
+        tokenExpired: {
+            code: 7,
+            msg: "Le lien de réinitialisation a expiré."
+        },
+        tokenInvalid: {
+            code: 8,
+            msg: "Le lien de réinitialisation n'existe pas."
         }
     });
 

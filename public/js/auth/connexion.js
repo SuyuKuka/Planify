@@ -1,14 +1,6 @@
 const email = createInput('email', auth.isEmailValid);
 const password = createInput('password', auth.isPasswordValid);
 
-$("#show_password").click(function() {
-    if (password.attr('type') === 'password') {
-        password.attr('type', 'text');
-    } else {
-        password.attr('type', 'password');
-    }
-});
-
 $(document).on('keydown', function(e) {
     if (e.key === 'Enter') {
         if (!$(':focus').is('input')) {
@@ -19,6 +11,7 @@ $(document).on('keydown', function(e) {
 
 $("#form").on('submit', (e) => {
     $('#server_error').css('display', 'none');
+    $('#server_success').css('display', 'none');
     let valid = true;
     if (!auth.isEmailValid(email.val())) {
         email.css("border", "2px solid red");

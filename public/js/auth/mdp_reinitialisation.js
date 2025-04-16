@@ -36,12 +36,12 @@ $("#form").on('submit', (e) => {
     }
 });
 
-$("#show_password").click(function() {
-    if (password.attr('type') === 'password') {
-        password.attr('type', 'text');
+$("#show_password2").click(function() {
+    if (password_confirm.attr('type') === 'password') {
         password_confirm.attr('type', 'text');
+        $("#show_password2").attr('src', '/images/open.png');
     } else {
-        password.attr('type', 'password');
         password_confirm.attr('type', 'password');
+        $("#show_password2").attr('src', '/images/close.png');
     }
 });
