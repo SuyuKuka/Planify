@@ -16,6 +16,11 @@
 │   └── 📄 db.js
 │
 ├── 📁 entities/
+│   ├── 📁 auth/
+│   │
+│   ├── 📁 index/
+│   │
+│   └── 📁 user/
 │
 ├── 📁 services/
 │

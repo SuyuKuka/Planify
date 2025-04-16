@@ -3,7 +3,6 @@ const express = require('express');
 const { initDatabase } = require('./config/database/db');
 const session = require('express-session');
 const path = require('path');
-const { generateToken } = require('./services/encryption/encrypt');
 
 initDatabase()
 .then(() => {
@@ -21,7 +20,7 @@ initDatabase()
     app.use(session({
         secret: process.env.SESSION_SECRET || 'supersecret',
         resave: false,
-        saveUninitialized: false,
+        saveUninitialized: true,
         cookie: { httpOnly: true, secure: false } 
     }));
 

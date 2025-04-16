@@ -28,15 +28,15 @@
         },
         invalidQueries: {
             code: 6,
-            msg: "Les données spécifiées ne sont pas valides."
+            msg: "La ou les données spécifiées ne sont pas valides."
         },
         tokenExpired: {
             code: 7,
-            msg: "Le lien de reinitialisation est expiré."
+            msg: "Le lien de réinitialisation a expiré."
         },
         tokenInvalid: {
             code: 8,
-            msg: "Le lien de reinitialisation n'existe pas."
+            msg: "Le lien de réinitialisation n'existe pas."
         }
     });
 

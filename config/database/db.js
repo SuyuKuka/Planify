@@ -17,6 +17,6 @@ async function initDatabase() {
 }
 
 module.exports = {
-    getPool: () => pool, 
-    initDatabase 
+    initDatabase,
+    getPool: () => pool
 };

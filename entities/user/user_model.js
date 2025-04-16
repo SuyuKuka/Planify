@@ -5,10 +5,9 @@ const encrypt = require('../../services/encryption/encrypt');
 async function modifyUsername(id_user, username) {
     const client = await getPool().connect();
     try {
-        const res = await client.query('UPDATE "user" SET username = $1 WHERE id_user = $2', [username, id_user]);
-        return res.rowCount > 0;
-    } catch (err) {
-        throw err;
+        res = await client.query('UPDATE "user" SET username = $1 WHERE id_user = $2', [username, id_user]);
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }
@@ -23,10 +22,9 @@ async function modifyEmail(id_user, email) {
             return false;
         }
 
-        await client.query('UPDATE "user" SET email = $1 WHERE id_user = $2', [email_lower, id_user]);
-        return true;
-    } catch (err) {
-        throw err;
+        res = await client.query('UPDATE "user" SET email = $1 WHERE id_user = $2', [email_lower, id_user]);
+    } catch (error) {
+        console.error(error);
     } finally {
         client.release();
     }
@@ -35,11 +33,11 @@ async function modifyEmail(id_user, email) {
 async function modifyPassword(id_user, password) {
     const client = await getPool().connect();
     try {
-        const hashedPassword = await encrypt.hash(password);
-        const res = await client.query('UPDATE "user" SET password = $1 WHERE id_user = $2', [hashedPassword, id_user]);
-        return res.rowCount > 0;
-    } catch (err) {
-        throw err;
+        hashedPassword = await encrypt.hash(password);
+        res = await client.query('UPDATE "user" SET password = $1 WHERE id_user = $2', [hashedPassword, id_user]);
+    } catch (error) {
+        console.error(error);
+        throw error;
     } finally {
         client.release();
     }
@@ -56,7 +54,7 @@ async function saveResetToken(id_user) {
         await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
         return token;
     } catch (error) {
-        throw error;
+        console.error(error);
     } finally {
         client.release();
     }
@@ -66,15 +64,15 @@ async function getInfo(token) {
     const client = await getPool().connect();
     try {
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
-        const id_user = await client.query('SELECT * FROM token WHERE token = $1', [token]);
-        if (id_user.rows.length > 0) {
-            const res = await client.query('SELECT * FROM "user" WHERE id_user = $1', [id_user.rows[0].id_user]);
-            return res.rows[0];
-        } else {
-            return undefined;
-        }
-    } catch (err) {
-        throw err;
+        const result = await client.query(`
+            SELECT *
+            FROM token t
+            JOIN "user" u ON t.id_user = u.id_user
+            WHERE t.token = $1 LIMIT 1`, [token]);
+        return result.rowCount > 0 ? result.rows[0] : undefined;
+    } catch (error) {
+        console.error(error);
+        throw error;
     } finally {
         client.release();
     }

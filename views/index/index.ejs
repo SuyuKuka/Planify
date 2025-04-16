@@ -1,39 +1,62 @@
 <!DOCTYPE html>
 <html lang="fr">
 	<head>
-		<meta charset="UTF-8"/>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Planify</title>
 		<link rel="shortcut icon" href="/images/favicon.ico">
         <!-- css -->
+		<script>
+			const vueList = ['jour', 'semaine', 'mois', 'annee'];
+			const url = new URL(window.location.href);
+
+			if (!vueList.includes(url.searchParams.get('vue'))) {
+				url.searchParams.set('vue', 'semaine');
+				window.history.replaceState({}, '', url);
+			}
+		</script>
         <link href="/css/bootstrap.min.css" rel="stylesheet">
         <link href="/css/nav.css" rel="stylesheet">
         <link href="/css/index.css" rel="stylesheet">
 	</head>
 	<body>
-		<%- include('../nav') %>
-		<div class="container-fluid bg-warning" id="center-bar">
-			<div class="row">
-				<p>
-					<a class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#left-bar" aria-expanded="false" aria-controls="left-bar">
-						Toggle
-					</a>
-				</p>				  
-			</div>
-			<div class="row">
-				<div class="bar col-sm-3 collapse collapse-horizontal" id="left-bar">
-					1 of 3
+		<div class="d-flex vh-100 flex-column">
+			<%- include('../nav') %>
+			<div class="d-flex flex-column flex-sm-row flex-grow-1">
+				<div class="d-flex flex-column bg-primary col-12 col-sm-2">
+					<button>Mon calendrier</button>
+					<!-- https://getbootstrap.com/docs/5.3/components/collapse/ -->
+					<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+						Button with data-bs-target
+					  </button>
+					  <div class="collapse" id="collapseExample">
+						<div class="card card-body">
+						  Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+						</div>
+					</div>
 				</div>
-				<div class="bar col-sm" id="center-bar">
-					2 of 3
+				<div class="p-1 bg-warning text-dark col-12 col-sm flex-grow-1" id="calendar">
+					<div class="dropdown">
+						<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="vue-dropdown" aria-expanded="false">
+						</button>
+						<ul class="dropdown-menu" id="vue-dropdown-menu">
+						</ul>
+					</div>
+					Centre
 				</div>
-				<div class="bar col-sm-3" id="right-bar">
-					3 of 3
+				<div class="p-1 bg-success text-white col-12 col-sm-2">
+					Droite
 				</div>
 			</div>
 		</div>
 		<!-- script -->
 		<script src="/js/jquery.js"></script>
 		<script src="/js/bootstrap.bundle.min.js"></script>
-        <script src="/js/index.js"></script>
+        <script src="/js/index/index.js"></script>
+		<%
+			const vues = ["jour", "semaine", "mois", "annee"];
+			const vueChoisie = vues.includes(vue) ? vue : "semaine";
+		%>
+		<script src="/js/index/<%= vueChoisie %>.js"></script>
 	</body>
 </html>
