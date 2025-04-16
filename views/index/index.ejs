@@ -6,6 +6,15 @@
 		<title>Planify</title>
 		<link rel="shortcut icon" href="/images/favicon.ico">
         <!-- css -->
+		<script>
+			const vueList = ['jour', 'semaine', 'mois', 'annee'];
+			const url = new URL(window.location.href);
+
+			if (!vueList.includes(url.searchParams.get('vue'))) {
+				url.searchParams.set('vue', 'semaine');
+				window.history.replaceState({}, '', url);
+			}
+		</script>
         <link href="/css/bootstrap.min.css" rel="stylesheet">
         <link href="/css/nav.css" rel="stylesheet">
         <link href="/css/index.css" rel="stylesheet">
@@ -40,35 +49,14 @@
 				</div>
 			</div>
 		</div>
-		<%
-			const vues = ["jour", "semaine", "mois", "annee"];
-			const vueChoisie = vues.includes(vue) ? vue : "semaine";
-		%>
 		<!-- script -->
 		<script src="/js/jquery.js"></script>
 		<script src="/js/bootstrap.bundle.min.js"></script>
         <script src="/js/index/index.js"></script>
+		<%
+			const vues = ["jour", "semaine", "mois", "annee"];
+			const vueChoisie = vues.includes(vue) ? vue : "semaine";
+		%>
 		<script src="/js/index/<%= vueChoisie %>.js"></script>
 	</body>
 </html>
-
-<!-- <div class="container-fluid bg-warning" id="center-bar">
-			<div class="row">
-				<p>
-					<a class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#left-bar" aria-expanded="false" aria-controls="left-bar">
-						Toggle
-					</a>
-				</p>				  
-			</div>
-			<div class="row">
-				<div class="bar col-sm-3 collapse collapse-horizontal" id="left-bar">
-					1 of 3
-				</div>
-				<div class="bar col-sm" id="center-bar">
-					2 of 3
-				</div>
-				<div class="bar col-sm-3" id="right-bar">
-					3 of 3
-				</div>
-			</div>
-		</div> -->

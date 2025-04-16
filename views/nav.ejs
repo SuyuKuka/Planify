@@ -1,34 +1,36 @@
-<nav class="navbar navbar-expand-sm">
-    <div class="container-fluid">
+<nav class="navbar navbar-expand ">
+    <div class="container-fluid d-flex justify-content-between">
+        <!-- logo -->
         <a class="navbar-brand" href="/">
             <img class="logo" src="/images/logo.png" width="170" height="40">
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                <% if (typeof email === 'undefined' && typeof username === 'undefined') { %>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-dark" aria-current="page" href="/auth/connexion" id="connexion-b">Se connecter</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-primary" href="/auth/inscription" id="inscription-b">S'inscrire</a>
-                    </li>
-                <% } else { %>
-                    <label class="username"><%= username %></label>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"></a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/user/">Mon profil</a></li>
-                            <li><a class="dropdown-item" href="/user/parametres">Paramètres</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/auth/deconnexion">Se déconnecter</a></li>
-                        </ul>
-                    </li>
-                <% } %>
-            </ul>
+        <!-- search bar -->
+        <div class="w-50 me-3">
+            <input class="form-control" type="search" placeholder="Recherche" aria-label="Recherche">
         </div>
+        <!-- navbar -->
+        <ul class="navbar-nav">
+            <% if (typeof email === 'undefined' || typeof username === 'undefined') { %>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-dark" aria-current="page" href="/auth/connexion" id="connexion-b">Se connecter</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-primary" href="/auth/inscription" id="inscription-b">S'inscrire</a>
+                </li>
+            <% } else { %>
+                <li class="nav-item dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <%= username %>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/user/">Mon profil</a></li>
+                        <li><a class="dropdown-item" href="/user/parametres">Paramètres</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/auth/deconnexion">Se déconnecter</a></li>
+                    </ul>
+                </li>
+            <% } %>
+        </ul>
     </div>
 </nav>
 <style>
