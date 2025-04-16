@@ -1,7 +1,7 @@
 const surname = createInput('surname', auth.isSurnameValid);
 const name = createInput('name', auth.isNameValid);
 const birthdate = createInput('birthdate', auth.isBirthdateValid);
-const id_user = createInput('id_user', auth.isIdUserValid);
+const user_id = createInput('user_id', auth.isIdUserValid);
 const username = createInput('username', auth.isUsernameValid);
 const email = createInput('email', auth.isEmailValid);
 const password = createInput('password', auth.isPasswordValid);
@@ -17,10 +17,10 @@ $(document).ready(function() {
         $('#step2').css('display', 'none');
     }
 
-    let val = $("#id_user").val();
+    let val = $("#user_id").val();
     if (!val.startsWith('@')) {
         val = '@' + val.replace(/^@+/, '');
-        $("#id_user").val(val);
+        $("#user_id").val(val);
     }
 });
 
@@ -81,7 +81,7 @@ $(document).on('keydown', function(e) {
     }
 });
 
-$("#id_user").on('input', function() {
+$("#user_id").on('input', function() {
     let val = $(this).val().toLowerCase();
 
     if (!val.startsWith('@')) {
@@ -98,8 +98,8 @@ $("#email").on('input', function() {
 $("#form").on('submit', (e) => {
     $('#server_error2').css('display', 'none');
     let step2 = true;
-    if (!auth.isIdUserValid(id_user.val())) {
-        id_user.css("border", "2px solid red");
+    if (!auth.isIdUserValid(user_id.val())) {
+        user_id.css("border", "2px solid red");
         step2 = false;
     }
     if (!auth.isUsernameValid(username.val())) {

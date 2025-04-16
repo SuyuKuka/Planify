@@ -26,9 +26,9 @@ async function addUser(data) {
             data.emailUsed = true;
         }
         // Vérification id est déjà utilisé
-        const idUsed = (await client.query('SELECT 1 FROM "user" WHERE id_user = $1 LIMIT 1', [data.id_user])).rowCount > 0;
+        const idUsed = (await client.query('SELECT 1 FROM "user" WHERE user_id = $1 LIMIT 1', [data.user_id])).rowCount > 0;
         if (idUsed) {
-            data.id_user = "";
+            data.user_id = "";
             data.idUsed = true;
         }
 
@@ -37,17 +37,17 @@ async function addUser(data) {
         }
     
         // Ajoute l'utilisateur avec mot de passe crypté dans la db
-        const { id_user, surname, name, birthdate, username, email, password } = data;
+        const { user_id, surname, name, birthdate, username, email, password } = data;
         const hashedPassword = await encrypt.hash(password);
-        const insertQuery = 'INSERT INTO "user" (id_user, surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6, $7)';
-        const dataList = [id_user, surname, name, birthdate, username, email, hashedPassword];
+        const insertQuery = 'INSERT INTO "user" (user_id, surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6, $7)';
+        const dataList = [user_id, surname, name, birthdate, username, email, hashedPassword];
         await client.query(insertQuery, dataList);
     
         // Par sécurité, on retire les potentiels tokens 99.9% impossible
-        await destroyOldIDToken(id_user, client);
+        await destroyOldIDToken(user_id, client);
     
         // On crée et retourne le token associé à l'utilisateur
-        return await createIDToken(id_user, connectSessionDuration, client);
+        return await createIDToken(user_id, connectSessionDuration, client);
     } catch (error) {
         console.error(error);
         throw error;
@@ -83,13 +83,13 @@ async function getUser(email, password) {
         }
 
         // Si un token non expiré existe déjà, le renvoie
-        const userIdQuery = await client.query('SELECT token FROM token WHERE id_user = $1 AND expire_at > NOW() LIMIT 1', [user.id_user]);
+        const userIdQuery = await client.query('SELECT token FROM token WHERE user_id = $1 AND expire_at > NOW() LIMIT 1', [user.user_id]);
         if (userIdQuery.rowCount > 0) {
             return userIdQuery.rows[0].token;
         }
 
         // Sinon, en génère un nouveau et le renvoie
-        return await createIDToken(user.id_user, connectSessionDuration, client);
+        return await createIDToken(user.user_id, connectSessionDuration, client);
     } catch (error) {
         console.error(error);
         throw error;
@@ -110,15 +110,15 @@ async function sendPasswordForgottenEmail(email) {
     const client = await getPool().connect();
     try {
         // Vérifie si l'email spécifié existe dans la db
-        const result = await client.query('SELECT id_user FROM "user" WHERE email = $1 LIMIT 1', [data.email]);
+        const result = await client.query('SELECT user_id FROM "user" WHERE email = $1 LIMIT 1', [data.email]);
         if (result.rowCount < 1) {
             return;
         }
-        const id_user = result.id_user;
-        await destroyOldIDToken(id_user, client);
+        const user_id = result.user_id;
+        await destroyOldIDToken(user_id, client);
 
         // L'email expire après 5 minutes
-        await createIDToken(id_user, resetSessionDuration, client);
+        await createIDToken(user_id, resetSessionDuration, client);
         // TODO: envoyer le mail depuis services/mailer ?
         await mail.transporter.sendMail({
             from: 'programmationwebprojet@gmail.com',
@@ -148,14 +148,14 @@ async function updatePassword(token, password) {
         // Retire les anciens tokens
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
         // Vérifie si le token est vrai
-        const result = await client.query('SELECT id_user FROM token WHERE token = $1 LIMIT 1', [token]);
+        const result = await client.query('SELECT user_id FROM token WHERE token = $1 LIMIT 1', [token]);
         if (res.rowCount < 1) {
             return false;
         }
-        const id_user = result.rows[0].id_user;
-        await destroyOldIDToken(id_user, client);
+        const user_id = result.rows[0].user_id;
+        await destroyOldIDToken(user_id, client);
         const hashedPassword = await encrypt.hash(password);
-        await client.query('UPDATE "user" SET password = $1 WHERE id_user = $2', [hashedPassword, id_user]);
+        await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [hashedPassword, user_id]);
         return true;
     } catch (error) {
         console.error(error);
@@ -185,15 +185,15 @@ async function isIDTokenValid(token) {
 //#endregion
 
 //#region Tokens
-async function createIDToken(id_user, durationInMS, client) {
+async function createIDToken(user_id, durationInMS, client) {
     const token = encrypt.generateToken();
     const expirationDate = new Date(Date.now() + durationInMS);
-    await client.query('INSERT INTO token (id_user, token, expire_at) VALUES ($1, $2, $3)', [id_user, token, expirationDate]);
+    await client.query('INSERT INTO token (user_id, token, expire_at) VALUES ($1, $2, $3)', [user_id, token, expirationDate]);
     return token;
 }
 
-async function destroyOldIDToken(id_user, client) {
-    await client.query('DELETE FROM token WHERE id_user = $1 OR expire_at < NOW()', [id_user]);
+async function destroyOldIDToken(user_id, client) {
+    await client.query('DELETE FROM token WHERE user_id = $1 OR expire_at < NOW()', [user_id]);
 }
 
 //#endregion

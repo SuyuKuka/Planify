@@ -1,5 +1,5 @@
 CREATE TABLE user (
-    id_user VARCHAR(32) PRIMARY KEY,
+    user_id VARCHAR(32) PRIMARY KEY,
     name VARCHAR(32),
     surname VARCHAR(32),
     birthdate DATE,
@@ -9,7 +9,7 @@ CREATE TABLE user (
 );
 
 CREATE TABLE token (
-    id_user VARCHAR(32),
+    user_id VARCHAR(32),
     token TEXT NOT NULL,
     expire_at TIMESTAMP
 );
@@ -29,7 +29,7 @@ CREATE TABLE user_calendar (
 
 CREATE TABLE message (
     id SERIAL PRIMARY KEY,
-    id_user VARCHAR(32),
+    user_id VARCHAR(32),
     content TEXT,
     time TIME,
     calendar_id INT,

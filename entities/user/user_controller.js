@@ -10,12 +10,12 @@ async function getProfile(req, res) {
     }
     try {
         const user = await User.getInfo(token);
-        const { id_user, surname, name, birthdate, username, email } = user;
+        const { user_id, surname, name, birthdate, username, email } = user;
         const utc2Birthdate = new Date(birthdate).toLocaleDateString('en-CA', {
             timeZone: 'Europe/Bucharest'
         });
         res.render('user/profil', {
-            id_user, surname, name, username, email,
+            user_id, surname, name, username, email,
             birthdate: utc2Birthdate
         });
     } catch (error) {
@@ -56,7 +56,7 @@ async function postParametersChangesVerif(req, res) {
     destroyError(req);
     try {
         const user = await User.getInfo(token);
-        const id_user = user.id_user;
+        const user_id = user.user_id;
         const password_user = user.password;
         const { username, email, password, new_password } = req.body;
         const verify = await User.checkPassword(password, password_user);
@@ -66,11 +66,11 @@ async function postParametersChangesVerif(req, res) {
             return;
         }
         if (authVerif.verifyUsername(username)) {
-            await User.modifyUsername(id_user, username);
+            await User.modifyUsername(user_id, username);
             req.session.usernameChanged = authVerif.messages.modifiedWithSuccess
         }
         if (authVerif.verifyEmail(email)) {
-            const emailUsed = await User.modifyEmail(id_user, email);
+            const emailUsed = await User.modifyEmail(user_id, email);
             if (emailUsed) {
                 req.session.emailChanged = authVerif.messages.modifiedWithSuccess
             } else {
@@ -78,7 +78,7 @@ async function postParametersChangesVerif(req, res) {
             }
         }
         if (authVerif.verifyPassword(new_password)) {
-            await User.modifyPassword(id_user, new_password);
+            await User.modifyPassword(user_id, new_password);
             req.session.passwordChanged = authVerif.messages.modifiedWithSuccess
         }
         res.redirect('/user/parametres');

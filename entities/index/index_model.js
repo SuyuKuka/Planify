@@ -7,7 +7,7 @@ async function getInfo(token) {
         const result = await client.query(`
             SELECT u.username, u.email
             FROM token t
-            JOIN "user" u ON t.id_user = u.id_user
+            JOIN "user" u ON t.user_id = u.user_id
             WHERE t.token = $1 LIMIT 1`, [token]);
         return result.rowCount > 0 ? result.rows[0] : undefined;
     } catch (error) {
