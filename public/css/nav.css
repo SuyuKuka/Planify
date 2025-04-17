@@ -6,3 +6,20 @@ nav {
     border: 1px solid gray;
     border-radius: 20px; 
 }
+
+#results {
+    z-index: 1;
+}
+
+#search {
+    padding-left: 40px;
+}
+
+#search-icon {
+    height: 25px;
+    width: 25px;
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+}

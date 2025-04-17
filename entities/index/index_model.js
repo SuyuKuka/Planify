@@ -18,18 +18,6 @@ async function getInfo(token) {
     }
 }
 
-async function search(user_id, email) {
-    const client = await getPool().connect();
-    try {
-        const res = await client.query('SELECT * FROM "user" WHERE user_id = $1 OR email = $2', [user_id, email]);
-        return res.rows.length > 0;
-    } catch (error) {
-        throw error;
-    } finally {
-        client.release();
-    }
-}
-
 async function prefixSearch(user_id, email) {
     const client = await getPool().connect();
     try {
@@ -44,4 +32,4 @@ async function prefixSearch(user_id, email) {
     }
 }
 
-module.exports = { getInfo, search, prefixSearch };
+module.exports = { getInfo, prefixSearch };

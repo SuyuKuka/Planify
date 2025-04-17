@@ -25,14 +25,8 @@ async function getIndex(req, res) {
 
 async function search(req, res) {
     const { word } = req.query;
-    console.log("Recherche reçue :", word);
     const results = await Auth.prefixSearch(word, word);
     res.json(results);
 }
 
-function test(req, res) {
-    console.log("test");
-    res.render('index');
-}
-
-module.exports = { getIndex, search, test }; 
+module.exports = { getIndex, search }; 
