@@ -18,4 +18,30 @@ async function getInfo(token) {
     }
 }
 
-module.exports = { getInfo };
+async function search(user_id, email) {
+    const client = await getPool().connect();
+    try {
+        const res = await client.query('SELECT * FROM "user" WHERE user_id = $1 OR email = $2', [user_id, email]);
+        return res.rows.length > 0;
+    } catch (error) {
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+async function prefixSearch(user_id, email) {
+    const client = await getPool().connect();
+    try {
+        const user_id_query = user_id + "%";
+        const email_query = email + "%";
+        const res = await client.query('SELECT * FROM "user" WHERE user_id LIKE $1 OR email LIKE $2', [user_id_query, email_query]);
+        return res.rows;
+    } catch (error) {
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = { getInfo, search, prefixSearch };
