@@ -13,37 +13,68 @@
 	<body>
 		<%- include('../nav') %>
         <div class="container-fluid">
-            <form>
+            <% if (email === undefined) { %>
                 <header class="profil">
                     <h1>Profil</h1>
                 </header>
-                <h3>> Informations personnelles</h3>
                 <div>
-                    <label for="nom_pa">Nom :</label><br>
-                    <input type="text" name="nom" id="nom" value="<%= surname %>" disabled="disabled"/>
+                    <img src="<%= profilepicture %>" alt="Photo de profil" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
                 </div>
-                <div>
-                    <label for="prenom_pa">Prénom :</label><br>
-                    <input type="text" name="prenom" id="prenom" value="<%= name %>" disabled="disabled"/>
-                </div>
-                <div class="date">
-                    <label for="date_pa">Date de naissance :</label><br>
-                    <input type="date" name="date" id="date" value="<%= birthdate %>" disabled="disabled"/>
-                </div>
-                <h3 id="separateur">> Informations de connexion</h3>
-                <div>
-                    <label for="pseudo_pa">Pseudo :</label><br>
-                    <input type="text" name="pseudo" id="pseudo" value="<%= username %>" disabled="disabled"/>
                 </div>
                 <div>
-                    <label for="email_pa">Adresse e-mail :</label><br>
-                    <input type="email" name="email" id="email" value="<%= email %>" disabled="disabled"/>
+                    <label for="username">Pseudo :</label><br>
+                    <input type="text" name="username" id="username" value="<%= username %>" class="form-control" disabled="disabled"/>
                 </div>
-            </form>
-            <div id="vide"></div>
+                <div>
+                    <label for="user_id">Identifiant :</label><br>
+                    <input type="text" name="user_id" id="user_id" value="<%= user_id %>" class="form-control" disabled="disabled"/>
+                </div>
+            <% } else { %>
+                <form action="/user/profil" method="POST" enctype="multipart/form-data">
+                    <header>
+                        <h1>Profil</h1>
+                    </header>
+                
+                    <div>
+                        <img src="<%= profilepicture %>" alt="Photo de profil" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                        <input type="file" name="profile_picture" accept="image/*" required>
+                        <button type="submit">Mettre à jour</button>
+                    </div>
+            
+                        <div>
+                            <h2>Informations personnelles</h2>
+                            <div>
+                                <div>
+                                    <label for="surname" class="form-label">Nom :</label><br>
+                                    <input type="text" name="surname" id="surname" class="form-control" value="<%= surname %>" disabled>
+                                </div>
+                                <div>
+                                    <label for="name" class="form-label">Prénom :</label><br>
+                                    <input type="text" name="name" id="name" class="form-control" value="<%= name %>" disabled>
+                                </div>
+                                <div>
+                                    <label for="birthdate" class="form-label">Date de naissance :</label><br>
+                                    <input type="date" name="birthdate" id="birthdate" class="form-control" value="<%= birthdate %>" disabled>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div>
+                            <h2>Informations de connexion</h2>
+                                <div>
+                                    <label for="username" class="form-label">Pseudo :</label><br>
+                                    <input type="text" name="username" id="username" class="form-control" value="<%= username %>" disabled>
+                                </div>
+                                <div>
+                                    <label for="email" class="form-label">Adresse e-mail :</label><br>
+                                    <input type="email" name="email" id="email" class="form-control" value="<%= email %>" disabled>
+                                </div>
+                        </div>
+                </form>
+            <% } %>
         </div>
 	</body>
     <!-- script -->
-    <script src="/js/jquery.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="/js/bootstrap.bundle.min.js"></script>
 </html>

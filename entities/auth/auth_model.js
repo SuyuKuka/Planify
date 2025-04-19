@@ -39,8 +39,9 @@ async function addUser(data) {
         // Ajoute l'utilisateur avec mot de passe crypté dans la db
         const { user_id, surname, name, birthdate, username, email, password } = data;
         const hashedPassword = await encrypt.hash(password);
-        const insertQuery = 'INSERT INTO "user" (user_id, surname, name, birthdate, username, email, password) VALUES ($1, $2, $3, $4, $5, $6, $7)';
-        const dataList = [user_id, surname, name, birthdate, username, email, hashedPassword];
+        const profilepicture = "/images/profile/default.png";
+        const insertQuery = 'INSERT INTO "user" (user_id, surname, name, birthdate, username, email, password, profilepicture) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
+        const dataList = [user_id, surname, name, birthdate, username, email, hashedPassword, profilepicture];
         await client.query(insertQuery, dataList);
     
         // Par sécurité, on retire les potentiels tokens 99.9% impossible
@@ -110,7 +111,7 @@ async function sendPasswordForgottenEmail(email) {
     const client = await getPool().connect();
     try {
         // Vérifie si l'email spécifié existe dans la db
-        const result = await client.query('SELECT user_id FROM "user" WHERE email = $1 LIMIT 1', [data.email]);
+        const result = await client.query('SELECT user_id FROM "user" WHERE email = $1 LIMIT 1', [email]);
         if (result.rowCount < 1) {
             return;
         }
@@ -118,7 +119,7 @@ async function sendPasswordForgottenEmail(email) {
         await destroyOldIDToken(user_id, client);
 
         // L'email expire après 5 minutes
-        await createIDToken(user_id, resetSessionDuration, client);
+        const token = await createIDToken(user_id, resetSessionDuration, client);
         // TODO: envoyer le mail depuis services/mailer ?
         await mail.transporter.sendMail({
             from: 'programmationwebprojet@gmail.com',

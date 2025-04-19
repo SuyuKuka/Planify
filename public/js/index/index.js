@@ -15,7 +15,6 @@ vues.forEach(element => {
 
 const today = new Date();
 const year = today.getFullYear();
-console.log(today);
 
 function estBissextile(annee) {
     return (annee % 4 === 0 && annee % 100 !== 0) || (annee % 400 === 0);

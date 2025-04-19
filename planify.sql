@@ -14,7 +14,8 @@ CREATE TABLE "user" (
     birthdate DATE,
     username VARCHAR(32),
     email VARCHAR(32),
-    password VARCHAR(64)
+    password VARCHAR(64),
+    profilepicture TEXT
 );
 
 CREATE TABLE token (

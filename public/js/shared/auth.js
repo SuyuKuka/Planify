@@ -79,7 +79,6 @@
         if (!username) return false;
         username = username.trim();
         if (!/^[A-Za-z][A-Za-z0-9-]{2,31}$/.test(username)) return false;
-        if (username.endsWith('-')) return false;
         return true;
     };
 

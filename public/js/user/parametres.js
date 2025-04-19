@@ -6,23 +6,32 @@ const new_password = createInput('new_password', auth.isPasswordValid);
 $("#form").on('submit', (e) => {
     $('#server_error').css('display', 'none');
     let valid = true;
-    if (auth.isUsernameValid(username.val())) {
-        username.css("border", "2px solid red");
-        valid = false;
+    if (username.val() !== '') {
+        if (!auth.isUsernameValid(username.val())) {
+            username.css("border", "2px solid red");
+            valid = false;
+        }
+    }
+    
+    if (email.val() !== '') {
+        if (!auth.isEmailValid(email.val())) {
+            email.css("border", "2px solid red");
+            valid = false;
+        }
     }
 
-    if (!auth.isEmailValid(email.val())) {
-        email.css("border", "2px solid red");
-        valid = false;
-    }
     if (!auth.isPasswordValid(password.val())) {
         password.css("border", "2px solid red");
         valid = false;
     }
-    if (!auth.isNewPasswordValid(new_password.val())) {
-        new_password.css("border", "2px solid red");
-        valid = false;
+
+    if (new_password.val() !== '') {
+        if (!auth.isNewPasswordValid(new_password.val())) {
+            new_password.css("border", "2px solid red");
+            valid = false;
+        }
     }
+
     if (!valid) {
         $('#client_error').css('display', 'block');
         e.preventDefault();

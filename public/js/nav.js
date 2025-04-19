@@ -8,7 +8,6 @@ $("#search").on("input", function () {
         $.get("/search", { word: query }, function (data) {
             const ul = $('<ul class="list-unstyled m-0"></ul>');
             data.forEach(result => {
-                console.log(data);
                 ul.append(`<li class="px-3 py-2" data-user-id="${result.user_id}">
                     <strong>${result.username}</strong><br>
                     <small>${result.user_id}</small>
@@ -27,6 +26,8 @@ $("#results").on("click", "li", function () {
         $("#search").val(userId);
     }
     $("#results").empty().addClass("d-none");
+
+    window.location.href = `/user/profil?id=${userId}`;
 });
 
 $("#results").on("mouseover", "li", function () {

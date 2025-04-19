@@ -4,24 +4,75 @@ const authVerif = require('../../public/js/shared/auth');
 //#region Profil
 async function getProfile(req, res) {
     const token = req.session.token;
-    if (!token) {
-        res.redirect('/auth/connexion');
+    const { id } = req.query;
+    if (token !== undefined || token !== null) {
+        const user = await User.getUserInfoWithToken(token);
+        if (user !== undefined) {
+            if (user.user_id === id || id === undefined || id === null) {
+                try {
+                    const user = await User.getUserInfoWithToken(token);
+                    const { user_id, surname, name, birthdate, username, email, profilepicture } = user;
+                    const utc2Birthdate = new Date(birthdate).toLocaleDateString('en-CA', {
+                        timeZone: 'Europe/Bucharest'
+                    });
+                    res.render('user/profil', {
+                        token,
+                        user_username: username,
+                        user_id, surname, name, username, email,
+                        birthdate: utc2Birthdate, profilepicture
+                    });
+                } catch (error) {
+                    res.redirect('/auth/connexion');
+                } 
+                return;
+            }
+        }
+    } 
+
+    if (id === undefined || id === null) {
+        res.redirect('/');
         return;
     }
+
+    const user = await User.getPeopleInfoWithId(id);
+    if (user === undefined) {
+        // voie url? avec une personne qui n'existe pas
+        res.redirect('/user/profil');
+        return;
+    }
+
+    const user_username = await User.getUsername(token);
+    const { user_id, username, profilepicture } = user;
+    res.render('user/profil', {
+        token,
+        user_username,
+        user_id, username, profilepicture,
+        name : undefined, surname : undefined, email : undefined, birthdate : undefined
+    });
+}
+
+async function postProfile(req, res) {
+    const token = req.session.token;
+    if (!token || !req.file) {
+        // voie illégal
+        return res.redirect('/auth/connexion');
+    }
+
     try {
-        const user = await User.getInfo(token);
-        const { user_id, surname, name, birthdate, username, email } = user;
-        const utc2Birthdate = new Date(birthdate).toLocaleDateString('en-CA', {
-            timeZone: 'Europe/Bucharest'
-        });
-        res.render('user/profil', {
-            user_id, surname, name, username, email,
-            birthdate: utc2Birthdate
-        });
+        const filePath = '/images/profile/' + req.file.filename;
+        const result = await User.updateProfilePicture(token, filePath);
+        if (result) {
+            res.redirect('/user/profil');
+        } else {
+            // faire la session avec error
+            res.redirect('/user/profil');
+        }
     } catch (error) {
+        // faire la session avec error
         res.redirect('/auth/connexion');
     }
 }
+
 //#endregion
 
 //#region Paramètres
@@ -33,9 +84,11 @@ async function getParameters(req, res) {
         return;
     }
     try {
-        const user = await User.getInfo(token);
-        const { username, email } = user;
+        const user = await User.getUserInfoWithToken(token);
+        const { username, email,  } = user;
         res.render('user/parametres', {
+            token,
+            user_username: username,
             username, email
         });
     } catch (error) {
@@ -55,7 +108,7 @@ async function postParametersChangesVerif(req, res) {
     }
     destroyError(req);
     try {
-        const user = await User.getInfo(token);
+        const user = await User.getUserInfoWithToken(token);
         const user_id = user.user_id;
         const password_user = user.password;
         const { username, email, password, new_password } = req.body;
@@ -65,21 +118,30 @@ async function postParametersChangesVerif(req, res) {
             res.redirect('/user/parametres');
             return;
         }
-        if (authVerif.verifyUsername(username)) {
-            await User.modifyUsername(user_id, username);
-            req.session.usernameChanged = authVerif.messages.modifiedWithSuccess
-        }
-        if (authVerif.verifyEmail(email)) {
-            const emailUsed = await User.modifyEmail(user_id, email);
-            if (emailUsed) {
-                req.session.emailChanged = authVerif.messages.modifiedWithSuccess
-            } else {
-                req.session.emailError = authVerif.messages.alreadyUsedEmail
+
+        if (username) {
+            if (authVerif.isUsernameValid(username)) {
+                await User.modifyUsername(user_id, username);
+                req.session.usernameChanged = authVerif.messages.modifiedWithSuccess
             }
         }
-        if (authVerif.verifyPassword(new_password)) {
-            await User.modifyPassword(user_id, new_password);
-            req.session.passwordChanged = authVerif.messages.modifiedWithSuccess
+        
+        if (email) {
+            if (authVerif.isEmailValid(email)) {
+                const emailUsed = await User.modifyEmail(user_id, email);
+                if (emailUsed) {
+                    req.session.emailChanged = authVerif.messages.modifiedWithSuccess
+                } else {
+                    req.session.emailError = authVerif.messages.alreadyUsedEmail
+                }
+            }
+        }
+
+        if (new_password) {
+            if (authVerif.isPasswordValid(new_password)) {
+                await User.modifyPassword(user_id, new_password);
+                req.session.passwordChanged = authVerif.messages.modifiedWithSuccess
+            }
         }
         res.redirect('/user/parametres');
     } catch (error) {
@@ -100,6 +162,7 @@ function destroyError(req) {
 
 module.exports = {
     getProfile,
+    postProfile,
 
     getParameters,
 

@@ -137,7 +137,7 @@ async function postPasswordForgottenSuccess(req, res) {
         await Auth.sendPasswordForgottenEmail(email);
         res.redirect('/auth/mot_de_passe_oublie_succes');
     } catch (error) {
-        req.session.error = errorMessages.default;
+        req.session.error = authVerif.messages.default;
         res.redirect('/auth/mot_de_passe_oublie');
     }
 }

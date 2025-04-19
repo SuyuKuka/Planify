@@ -1,8 +1,8 @@
 nav {
     background-color: rgb(250, 250, 250);
 }
-
-.form-control {
+    
+.form-control {     
     border: 1px solid gray;
     border-radius: 20px; 
 }
@@ -22,4 +22,28 @@ nav {
     top: 50%;
     left: 10px;
     transform: translateY(-50%);
+}
+
+@media screen and (min-width: 959px) {
+    .logo {
+        content: url('/images/logo.png');
+        width: 170px;
+        height: 40px;
+    }
+}
+
+@media screen and (max-width: 959px) {
+    .logo {
+        content: url('/images/logo.png');
+        width: 140px;
+        height: 35px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .logo {
+        content: url('/images/favicon.ico');
+        width: 35px;
+        height: 35px;
+    }
 }

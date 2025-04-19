@@ -2,7 +2,7 @@
     <div class="container-fluid d-flex justify-content-between">
         <!-- logo -->
         <a class="navbar-brand" href="/">
-            <img class="logo" src="/images/logo.png" width="170" height="40">
+            <img class="logo" src="/images/logo.png" width="140" height="35">
         </a>
         <!-- search bar -->
         <div class="w-50 me-3 position-relative">
@@ -13,7 +13,7 @@
         </div>        
         <!-- navbar -->
         <ul class="navbar-nav">
-            <% if (typeof email === 'undefined' || typeof username === 'undefined') { %>
+            <% if (token === undefined || token === null) { %>
                 <li class="nav-item">
                     <a class="nav-link btn btn-dark" aria-current="page" href="/auth/connexion" id="connexion-b">Connexion</a>
                 </li>
@@ -23,10 +23,10 @@
             <% } else { %>
                 <li class="nav-item dropdown">
                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <%= username %>
+                        <%= user_username %>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="/user/">Mon profil</a></li>
+                        <li><a class="dropdown-item" href="/user/profil">Mon profil</a></li>
                         <li><a class="dropdown-item" href="/user/parametres">Paramètres</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/auth/deconnexion">Se déconnecter</a></li>
