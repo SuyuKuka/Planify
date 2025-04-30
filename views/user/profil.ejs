@@ -39,37 +39,29 @@
                         <img src="<%= profilepicture %>" alt="Photo de profil" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
                         <input type="file" name="profile_picture" accept="image/*" required>
                         <button type="submit">Mettre à jour</button>
+                        <div>
+                            <label for="username" class="form-label">Pseudo :</label><br>
+                            <input type="text" name="username" id="username" class="form-control" value="<%= username %>" disabled>
+                        </div>
                     </div>
             
+                    <div>
+                        <h2>Informations personnelles</h2>
                         <div>
-                            <h2>Informations personnelles</h2>
                             <div>
-                                <div>
-                                    <label for="surname" class="form-label">Nom :</label><br>
-                                    <input type="text" name="surname" id="surname" class="form-control" value="<%= surname %>" disabled>
-                                </div>
-                                <div>
-                                    <label for="name" class="form-label">Prénom :</label><br>
-                                    <input type="text" name="name" id="name" class="form-control" value="<%= name %>" disabled>
-                                </div>
-                                <div>
-                                    <label for="birthdate" class="form-label">Date de naissance :</label><br>
-                                    <input type="date" name="birthdate" id="birthdate" class="form-control" value="<%= birthdate %>" disabled>
-                                </div>
+                                <label for="surname" class="form-label">Nom :</label><br>
+                                <input type="text" name="surname" id="surname" class="form-control" value="<%= surname %>" disabled>
+                            </div>
+                            <div>
+                                <label for="name" class="form-label">Prénom :</label><br>
+                                <input type="text" name="name" id="name" class="form-control" value="<%= name %>" disabled>
+                            </div>
+                            <div>
+                                <label for="birthdate" class="form-label">Date de naissance :</label><br>
+                                <input type="date" name="birthdate" id="birthdate" class="form-control" value="<%= birthdate %>" disabled>
                             </div>
                         </div>
-            
-                        <div>
-                            <h2>Informations de connexion</h2>
-                                <div>
-                                    <label for="username" class="form-label">Pseudo :</label><br>
-                                    <input type="text" name="username" id="username" class="form-control" value="<%= username %>" disabled>
-                                </div>
-                                <div>
-                                    <label for="email" class="form-label">Adresse e-mail :</label><br>
-                                    <input type="email" name="email" id="email" class="form-control" value="<%= email %>" disabled>
-                                </div>
-                        </div>
+                    </div>
                 </form>
             <% } %>
         </div>
