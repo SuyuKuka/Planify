@@ -45,3 +45,53 @@ function createCurrButton(value) {
 function createNextButton(value) {
     return createButton('next-calendar', value);
 }
+
+const overlay = document.getElementById("overlay");
+const createBtn = document.getElementById("create-reunion");
+const closeBtn = document.getElementById("close-overlay");
+let displayReunion = false;
+
+function showOverlay() {
+	overlay.style.display = "flex";
+	overlay.animate([{ opacity: 0 }, { opacity: 1 }], {
+		duration: 200,
+		fill: "forwards"
+	});
+	displayReunion = true;
+}
+
+function hideOverlay() {
+	const anim = overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
+		duration: 200,
+		fill: "forwards"
+	});
+	anim.onfinish = () => {
+		overlay.style.display = "none";
+	};
+	displayReunion = false;
+}
+
+createBtn.addEventListener("click", (event) => {
+	event.stopPropagation();
+	if (!displayReunion) {
+		showOverlay();
+	} else {
+		hideOverlay();
+	}
+});
+
+closeBtn.addEventListener("click", (event) => {
+	event.stopPropagation();
+	hideOverlay();
+});
+
+document.addEventListener("click", (event) => {
+	if (!displayReunion) return;
+	if (!overlay.contains(event.target)) {
+		hideOverlay();
+	}
+});
+
+overlay.addEventListener("click", (event) => {
+	event.stopPropagation();
+});

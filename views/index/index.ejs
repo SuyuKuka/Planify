@@ -26,14 +26,15 @@
 				<div class="d-flex flex-column bg-primary col-12 col-sm-2">
 					<button>Mon calendrier</button>
 					<!-- https://getbootstrap.com/docs/5.3/components/collapse/ -->
-					<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-						Button with data-bs-target
-					  </button>
-					  <div class="collapse" id="collapseExample">
-						<div class="card card-body">
-						  Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
-						</div>
+					<!-- COMMENTAIRE POUR LES TEST -->
+					<% // if (token !== undefined && token !== null) { %>
+					<button id="create-reunion" class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+						Créer une reunion
+					</button>
+					<div id="list-reunion">
+
 					</div>
+					<% // } %>
 				</div>
 				<div class="p-1 bg-warning text-dark col-12 col-sm flex-grow-1" id="calendar">
 					<div class="dropdown">
@@ -45,7 +46,38 @@
 					Centre
 				</div>
 				<div class="p-1 bg-success text-white col-12 col-sm-2">
-					Droite
+					Right
+					<div class="info-reunion">
+
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="overlay" class="col-sm-6">
+			<div id="top-overlay">
+				<button id="close-overlay">&times;</button>
+			</div>
+			<h2>Créer une reunion</h2>
+			<form action="/create" method="POST" id="form-reunion">
+				<div class="form-group">
+					<label for="reunion-name">Nom de la reunion :</label>
+					<input type="text" class="form-control" name="name" id="name" placeholder="Nom de la reunion">
+				</div>
+				<div class="form-group">
+					<label for="reunion-date">Date de la reunion :</label>
+					<input type="date" class="form-control" name="date" id="date">
+				</div>
+				<div class="form-group">
+					<label for="reunion-time">Heure de la reunion :</label>
+					<input type="time" class="form-control" name="time" id="time">
+				</div>
+				<div class="form-group">
+					<label for="participants">Ajouter des participants (emails séparés par des virgules) :</label>
+					<input type="text" class="form-control" name="participants" id="participants" placeholder="exemple@domaine.com, autre@domaine.com">
+					(Vous pouvez toujours ajouter des participants plus tard)
+				</div>
+				<div id="bot-overlay">
+					<button type="submit" id="save-reunion">Créer la réunion</button>
 				</div>
 			</div>
 		</div>

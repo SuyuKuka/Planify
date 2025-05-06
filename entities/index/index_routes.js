@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { getIndex, search } = require('./index_controller');
+const controller = require('./index_controller');
 
-router.get('/', getIndex);
+router.get('/', controller.getIndex);
 
-router.get('/search', search);
+router.get('/search', controller.getSearchProfil);
+
+router.post('/create', controller.postCreateReunion);
 
 module.exports = router;
