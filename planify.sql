@@ -8,17 +8,18 @@ CREATE DATABASE planify;
 \c planify;
 
 CREATE TABLE "user" (
-    id_user VARCHAR(32) PRIMARY KEY,
+    user_id VARCHAR(32) PRIMARY KEY,
     name VARCHAR(32),
     surname VARCHAR(32),
     birthdate DATE,
     username VARCHAR(32),
     email VARCHAR(32),
-    password VARCHAR(64)
+    password VARCHAR(64),
+    profilepicture TEXT
 );
 
 CREATE TABLE token (
-    id_user VARCHAR(32),
+    user_id VARCHAR(32),
     token TEXT NOT NULL,
     expire_at TIMESTAMP
 );

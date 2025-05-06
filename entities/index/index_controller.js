@@ -10,17 +10,23 @@ async function getIndex(req, res) {
     const result = await Auth.getInfo(token);
     if (!result) {
         res.render('index', {
-            email: undefined,
-            username: undefined,
+            token,
+            user_username: undefined,
             vue
         });
     } else {
         res.render('index', {
-            email: result.email,
-            username: result.username,
+            token,
+            user_username: result.username,
             vue
         });
     }
 }
 
-module.exports = { getIndex }; 
+async function search(req, res) {
+    const { word } = req.query;
+    const results = await Auth.prefixSearch(word, word);
+    res.json(results);
+}
+
+module.exports = { getIndex, search }; 

@@ -71,15 +71,14 @@
         return inputDate >= minDate && inputDate < maxDate;
     };
   
-    exports.isIdUserValid = function(id_user) {
-        return id_user && /^@[a-z0-9]{3,31}$/.test(id_user.trim());
+    exports.isIdUserValid = function(user_id) {
+        return user_id && /^@[a-z0-9]{3,31}$/.test(user_id.trim());
     };
   
     exports.isUsernameValid = function(username) {
         if (!username) return false;
         username = username.trim();
         if (!/^[A-Za-z][A-Za-z0-9-]{2,31}$/.test(username)) return false;
-        if (username.endsWith('-')) return false;
         return true;
     };
 

@@ -24,7 +24,7 @@ initDatabase()
         cookie: { httpOnly: true, secure: false } 
     }));
 
-    app.get('/', require('./entities/index/index_routes'));
+    app.use('/', require('./entities/index/index_routes'));
     app.use('/auth', require('./entities/auth/auth_routes'));
     app.use('/user', require('./entities/user/user_routes'));
 

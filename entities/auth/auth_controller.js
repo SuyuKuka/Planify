@@ -1,12 +1,12 @@
 const Auth = require('./auth_model');
-const authVerif = require('../../public/js/shared/auth');
+const authVerif = require('../../public/js/client_server_shared/auth');
 
 //#region Inscription
 function getRegistration(req, res) {
-    const { id_user, surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
+    const { user_id, surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
 
     res.render('auth/inscription', {
-        id_user, surname, name, birthdate, username, email,
+        user_id, surname, name, birthdate, username, email,
         error_step1, error_step2
     });
 }
@@ -27,11 +27,11 @@ function getRegistrationVerif(req, res) {
  */
 async function postRegistrationVerif(req, res) {
     const retSet = verifyRegistration(req.body);
-    const { id_user, surname, name, birthdate, username, email, password } = req.body;
+    const { user_id, surname, name, birthdate, username, email, password } = req.body;
     // Erreurs de syntaxes
     if (retSet.size !== 0) {
         Object.assign(req.session, {
-            id_user, surname, name, birthdate, username, email,
+            user_id, surname, name, birthdate, username, email,
             error_step1: retSet.has(1) ? authVerif.messages.invalidQueries : undefined,
             error_step2: retSet.has(2) ? authVerif.messages.invalidQueries : undefined
         });
@@ -40,13 +40,13 @@ async function postRegistrationVerif(req, res) {
     } 
     try {
         const data = {
-            id_user, surname, name, birthdate, username, email, password
+            user_id, surname, name, birthdate, username, email, password
         };
         const tokenCreated = await Auth.addUser(data);
         if (!tokenCreated) { // Cas erreur
             Object.assign(req.session, {
                 surname, name, birthdate, username,
-                id_user: data.id_user,
+                user_id: data.user_id,
                 email: data.email,
                 emailUsed: data.emailUsed ? authVerif.messages.alreadyUsedEmail : undefined,
                 idUsed: data.idUsed ? authVerif.messages.alreadyUsedUserID : undefined,
@@ -137,7 +137,7 @@ async function postPasswordForgottenSuccess(req, res) {
         await Auth.sendPasswordForgottenEmail(email);
         res.redirect('/auth/mot_de_passe_oublie_succes');
     } catch (error) {
-        req.session.error = errorMessages.default;
+        req.session.error = authVerif.messages.default;
         res.redirect('/auth/mot_de_passe_oublie');
     }
 }
@@ -229,8 +229,8 @@ function verifyRegistration(req_body) {
         req_body.birthdate = '';
         errorSteps.add(1);
     }
-    if (!authVerif.isIdUserValid(req_body.id_user)) {
-        req_body.id_user = '';
+    if (!authVerif.isIdUserValid(req_body.user_id)) {
+        req_body.user_id = '';
         errorSteps.add(2);
     }
     if (!authVerif.isUsernameValid(req_body.username)) {

@@ -7,8 +7,8 @@
         <link rel="shortcut icon" href="/images/favicon.ico">
         <!-- css -->
         <link href="/css/bootstrap.min.css" rel="stylesheet">
-        <link href="/css/authentification.css" rel="stylesheet">
-        <link href="/css/inscription.css" rel="stylesheet">
+        <link href="/css/auth/authentification.css" rel="stylesheet">
+        <link href="/css/auth/inscription.css" rel="stylesheet">
     </head>
     <body>
         <form autocomplete="off" action="inscription/verification" method="post" id="form">
@@ -59,10 +59,10 @@
                     </div>
 
                     <div id="step2">
-                        <div class="id_user-container">
-                            <label for="id_user">Identifiant :</label><br>
-                            <input type="text" name="id_user" id="id_user"
-                                value="<%= typeof id_user !== 'undefined' ? id_user : '' %>"/>
+                        <div class="user_id-container">
+                            <label for="user_id">Identifiant :</label><br>
+                            <input type="text" name="user_id" id="user_id"
+                                value="<%= typeof user_id !== 'undefined' ? user_id : '' %>"/>
                         </div>
                         <div class="username-container">
                             <label for="username">Pseudo :</label><br>
@@ -102,7 +102,7 @@
         <!-- script -->
         <script src="/js/bootstrap.bundle.min.js"></script>
         <script src="/js/jquery.js"></script>
-        <script src="/js/shared/auth.js"></script>
+        <script src="/js/client_server_shared/auth.js"></script>
         <script src="/js/auth/authentification.js"></script>
         <script src="/js/auth/inscription.js"></script>
     </body>

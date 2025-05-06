@@ -32,6 +32,7 @@
     ├── 📁 css/
     │
     └── 📁 images/
+        └── 📁 profile/
 ```
 
 ## Manuel d'utilisation
