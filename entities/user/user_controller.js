@@ -1,5 +1,5 @@
 const User = require('./user_model');
-const authVerif = require('../../public/js/shared/auth');
+const authVerif = require('../../public/js/client_server_shared/auth');
 
 //#region Profil
 async function getProfile(req, res) {

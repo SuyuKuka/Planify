@@ -1,5 +1,5 @@
 const Auth = require('./auth_model');
-const authVerif = require('../../public/js/shared/auth');
+const authVerif = require('../../public/js/client_server_shared/auth');
 
 //#region Inscription
 function getRegistration(req, res) {
