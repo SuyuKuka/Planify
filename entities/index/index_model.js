@@ -32,50 +32,109 @@ async function prefixSearch(user_id, email) {
     }
 }
 
-// async function getIDWithEmail(email) {
-//     const client = await getPool().connect();
-//     try {
-//         const res = await client.query('SELECT user_id FROM "user" WHERE email = $1', [email]);
-//         console.log(res.rows[0]);
-//         return res.rows[0].user_id;
-//     } catch (error) {
-//         throw error;
-//     } finally {
-//         client.release();
-//     }
-// }
-
-async function createReunion(name, date, time, participants, user_id, email) {
+async function createReunion(name, dateTimePairs, participants, user_id, email) {
     const client = await getPool().connect();
     try {
-        const insertResult = await client.query(
-            'INSERT INTO reunion (user_id, name, date, time) VALUES ($1, $2, $3, $4) RETURNING id',
-            [user_id, name, date, time]
-        );
+        await client.query('BEGIN');
 
-        const reunion_id = insertResult.rows[0].id;
+        const res = await client.query(
+            'INSERT INTO reunion (user_id, name) VALUES ($1, $2) RETURNING id',
+            [user_id, name]
+        );
+        const reunion_id = res.rows[0].id;
 
         await client.query(
             'INSERT INTO participants (reunion_id, email) VALUES ($1, $2)',
             [reunion_id, email]
         );
 
-        for (let index = 0; index < participants.length; index++) {
+        for (const { date, time } of dateTimePairs) {
             await client.query(
-                'INSERT INTO participants (reunion_id, email) VALUES ($1, $2)',
-                [reunion_id, participants[index]]
+                'INSERT INTO proposition_date (reunion_id, date, time) VALUES ($1, $2, $3)',
+                [reunion_id, date, time]
             );
         }
-    } catch (error) {
-        if (error.code === '23505') { 
-            return -1;
-        } else {
-            throw error;
+
+        for (const participant of participants) {
+            if (participant === email) continue;
+            await client.query(
+                'INSERT INTO participants (reunion_id, email) VALUES ($1, $2)',
+                [reunion_id, participant]
+            );
         }
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        if (error.code === '23505') {
+            return -1;
+        }
+        throw error;
     } finally {
         client.release();
     }
 }
 
+async function getReunions(user_id) {
+    const client = await getPool().connect();
+    try {
+        const result = await client.query(`
+            SELECT r.id, r.name, r.user_id, pd.date, pd.time
+            FROM reunion r
+            JOIN participants p ON r.id = p.reunion_id
+            JOIN proposition_date pd ON r.id = pd.reunion_id
+            WHERE p.email = (SELECT email FROM "user" WHERE user_id = $1)
+            ORDER BY pd.date, pd.time
+        `, [user_id]);
 
-module.exports = { getInfo, prefixSearch, createReunion };
+        // Organiser les données par réunion et dates
+        const reunions = result.rows.reduce((acc, row) => {
+            const reunion = acc.find(r => r.id === row.id);
+            if (reunion) {
+                reunion.dates.push({ date: row.date, time: row.time });
+            } else {
+                acc.push({
+                    id: row.id,
+                    name: row.name,
+                    user_id: row.user_id,
+                    dates: [{ date: row.date, time: row.time }]
+                });
+            }
+            return acc;
+        }, []);
+
+        return reunions;
+    } finally {
+        client.release();
+    }
+}
+
+async function getReponses(reunion_id, user_id) {
+    const client = await getPool().connect();
+    try {
+        const result = await client.query(
+            'SELECT TO_CHAR(date, \'YYYY-MM-DD\') AS date, time, response FROM response WHERE reunion_id = $1 AND user_id = $2',
+            [reunion_id, user_id]
+        );
+        return result.rows;
+    } finally {
+        client.release();
+    }
+}
+
+async function sendResponse(reunion_id, user_id, date, time, response) {
+    const client = await getPool().connect();
+    try {
+        const res = await client.query('SELECT * FROM response WHERE reunion_id = $1 AND user_id = $2 AND date = $3 AND time = $4', [reunion_id, user_id, date, time]);
+        if (res.rows.length > 0) {
+            await client.query('UPDATE response SET response = $1 WHERE reunion_id = $2 AND user_id = $3 AND date = $4 AND time = $5', [response, reunion_id, user_id, date, time]);
+            return;
+        }
+        await client.query('INSERT INTO response (reunion_id, user_id, date, time, response) VALUES ($1, $2, $3, $4, $5)', [reunion_id, user_id, date, time, response]);
+    } catch (error) {
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = { getInfo, prefixSearch, createReunion, getReunions, getReponses, sendResponse };

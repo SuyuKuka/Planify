@@ -1,13 +1,15 @@
 -- psql -U postgres -d planify
 DROP DATABASE IF EXISTS planify;
-DROP TABLE IF EXISTS "user" CASCADE;
-DROP TABLE IF EXISTS token CASCADE;
-DROP TABLE IF EXISTS reunion CASCADE;
-DROP TABLE IF EXISTS participants CASCADE;
-
 CREATE DATABASE planify;
 
 \c planify;
+
+DROP TABLE IF EXISTS "user" CASCADE;
+DROP TABLE IF EXISTS token CASCADE;
+DROP TABLE IF EXISTS reunion CASCADE;
+DROP TABLE IF EXISTS proposition_date CASCADE;
+DROP TABLE IF EXISTS participants CASCADE;
+DROP TABLE IF EXISTS response CASCADE;
 
 CREATE TABLE "user" (
     user_id VARCHAR(32) PRIMARY KEY,
@@ -30,13 +32,37 @@ CREATE TABLE reunion (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(32) NOT NULL,
     name VARCHAR(32) NOT NULL,
+    UNIQUE (user_id, name)
+);
+
+CREATE TABLE proposition_date(
+    reunion_id INT NOT NULL,
     date DATE NOT NULL,
     time TIME NOT NULL,
-    UNIQUE (user_id, name, date, time)
+    PRIMARY KEY (reunion_id, date, time),
+    FOREIGN KEY (reunion_id) REFERENCES reunion(id),
+    UNIQUE (reunion_id, date, time)
 );
 
 CREATE TABLE participants (
     reunion_id INT NOT NULL,
     email VARCHAR(32) NOT NULL,
-    FOREIGN KEY (reunion_id) REFERENCES reunion(id)
+    PRIMARY KEY (reunion_id, email),
+    FOREIGN KEY (reunion_id) REFERENCES reunion(id),
+    UNIQUE (reunion_id, email)
 );
+
+CREATE TABLE response (
+    reunion_id INT NOT NULL,
+    user_id VARCHAR(32) NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    response BOOLEAN,
+    PRIMARY KEY (reunion_id, user_id, date, time),
+    FOREIGN KEY (reunion_id) REFERENCES reunion(id),
+    FOREIGN KEY (user_id) REFERENCES "user"(user_id),
+    UNIQUE (reunion_id, user_id, date, time)
+);
+
+INSERT INTO "user" (user_id, name, surname, birthdate, username, email, password, profilepicture) VALUES ('@suyu', 'Michel', 'CHEN', '2004-08-26', 'Suyu', 'michelchen052@gmail.com', '$2b$10$GMxouQxE4fIiz6RXDsHzPOtKml.Ee6DYijs0Nvkpy.x7DcCSepO/i', '/images/profile/default.png');
+INSERT INTO "user" (user_id, name, surname, birthdate, username, email, password, profilepicture) VALUES ('@nophy', 'Vanessa', 'HEJL', '2001-06-06', 'Nophy', 'vanessa.hejl@gmail.com', '$2b$10$GMxouQxE4fIiz6RXDsHzPOtKml.Ee6DYijs0Nvkpy.x7DcCSepO/i', '/images/profile/default.png');
