@@ -120,8 +120,14 @@ addButton.addEventListener('click', () => {
     group.innerHTML = `
         <input type="date" class="form-control mb-2" name="dates[]" required>
         <input type="time" class="form-control mb-2" name="times[]" required>
+        <button type="button" class="btn btn-danger btn-sm remove-datetime">Supprimer</button>
     `;
     container.appendChild(group);
+    
+    const removeButton = group.querySelector('.remove-datetime');
+    removeButton.addEventListener('click', () => {
+        group.remove();
+    });
 });
 
 const reunionButtons = document.querySelectorAll('.reunion-button');
