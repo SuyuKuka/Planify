@@ -67,8 +67,24 @@ function hideOverlay() {
 	});
 	anim.onfinish = () => {
 		overlay.style.display = "none";
+        resetForm();
 	};
 	displayReunion = false;
+}
+
+function resetForm() {
+    const form = document.getElementById('form-reunion');
+    form.reset();
+    const datetimeGroups = document.querySelectorAll('.datetime-group');
+    datetimeGroups.forEach(group => group.remove());
+
+    const group = document.createElement('div');
+    group.className = 'datetime-group';
+    group.innerHTML = `
+        <input type="date" class="form-control mb-2" name="dates[]" required>
+        <input type="time" class="form-control mb-2" name="times[]" required>
+    `;
+    document.getElementById('dates-container').appendChild(group);
 }
 
 createBtn.addEventListener("click", (event) => {
@@ -99,13 +115,13 @@ overlay.addEventListener("click", (event) => {
 const addButton = document.getElementById('add-datetime');
 const container = document.getElementById('dates-container');
 addButton.addEventListener('click', () => {
-	const group = document.createElement('div');
-	group.className = 'datetime-group';
-	group.innerHTML = `
-		<input type="date" class="form-control mb-2" name="dates[]" required>
-		<input type="time" class="form-control mb-2" name="times[]" required>
-	`;
-	container.appendChild(group);
+    const group = document.createElement('div');
+    group.className = 'datetime-group';
+    group.innerHTML = `
+        <input type="date" class="form-control mb-2" name="dates[]" required>
+        <input type="time" class="form-control mb-2" name="times[]" required>
+    `;
+    container.appendChild(group);
 });
 
 const reunionButtons = document.querySelectorAll('.reunion-button');
