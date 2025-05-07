@@ -37,3 +37,13 @@ $("#results").on("mouseover", "li", function () {
 $("#results").on("mouseout", "li", function () {
     $(this).css("background-color", "white");
 });
+
+$(document).on("click", function (e) {
+    if (!$(e.target).closest("#search, #results").length) {
+        $("#results").hide();
+    }
+});
+
+$("#search").on("click", function () {
+    $("#results").show();
+});
