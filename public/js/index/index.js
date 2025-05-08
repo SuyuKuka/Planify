@@ -46,123 +46,120 @@ function createNextButton(value) {
     return createButton('next-calendar', value);
 }
 
+// Overlay
 const overlay = document.getElementById("overlay");
-const createBtn = document.getElementById("create-reunion");
-const closeBtn = document.getElementById("close-overlay");
-let displayReunion = false;
+const overlayReunion = document.getElementById("overlay-reunion");
 
-function showOverlay() {
-	overlay.style.display = "flex";
-	overlay.animate([{ opacity: 0 }, { opacity: 1 }], {
-		duration: 200,
-		fill: "forwards"
-	});
-	displayReunion = true;
+let displayOverlay = false;
+let displayOverlayReunion = false;
+
+function toggleOverlay(show, element, flagSetter, onClose = () => {}) {
+    if (show) {
+        element.style.display = "flex";
+        element.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: "forwards" });
+    } else {
+        const anim = element.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: "forwards" });
+        anim.onfinish = () => {
+            element.style.display = "none";
+            onClose();
+        };
+    }
+    flagSetter(show);
 }
 
-function hideOverlay() {
-	const anim = overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
-		duration: 200,
-		fill: "forwards"
-	});
-	anim.onfinish = () => {
-		overlay.style.display = "none";
-        resetForm();
-	};
-	displayReunion = false;
+function showOverlayReunion() {
+    toggleOverlay(true, overlayReunion, show => displayOverlayReunion = show);
 }
+
+document.addEventListener("click", e => {
+    const target = e.target;
+
+    if (overlay.contains(target) || overlayReunion.contains(target)) return;
+    if (target.id === "create-reunion") {
+        e.stopPropagation();
+        toggleOverlay(!displayOverlay, overlay, show => displayOverlay = show, resetForm);
+        return;
+    }
+
+    if (["reunion-details", "details-button", "details-title"].includes(target.id)) {
+        e.stopPropagation();
+        showOverlayReunion();
+        return;
+    }
+
+    if (displayOverlay) {
+        toggleOverlay(false, overlay, show => displayOverlay = show, resetForm);
+    }
+    if (displayOverlayReunion) {
+        toggleOverlay(false, overlayReunion, show => displayOverlayReunion = show);
+    }
+});
+
+[overlay, overlayReunion].forEach(el =>
+    el.addEventListener("click", e => e.stopPropagation())
+);
+
+$("#close-overlay").on("click", (e) => {
+    e.preventDefault();
+    toggleOverlay(false, overlay, show => displayOverlay = show, resetForm);
+});
+
+$("#close-overlay-reunion").on("click", (e) => {
+    e.preventDefault();
+    toggleOverlay(false, overlayReunion, show => displayOverlayReunion = show);
+});
+
+// Formulaire date/heure
+const container = document.getElementById('dates-container');
+document.getElementById('add-datetime').addEventListener('click', () => {
+    const group = document.createElement('div');
+    group.className = 'datetime-group';
+    group.innerHTML = `
+        <input type="date" class="form-control mb-2" name="dates[]" required>
+        <input type="time" class="form-control mb-2" name="times[]" required>
+        <button type="button" class="btn btn-danger btn-sm remove-datetime">Supprimer</button>`;
+    container.appendChild(group);
+    group.querySelector('.remove-datetime').addEventListener('click', () => group.remove());
+});
 
 function resetForm() {
-    const form = document.getElementById('form-reunion');
-    form.reset();
-    const datetimeGroups = document.querySelectorAll('.datetime-group');
-    datetimeGroups.forEach(group => group.remove());
-
+    document.getElementById('form-reunion').reset();
+    container.innerHTML = '';
     const group = document.createElement('div');
     group.className = 'datetime-group';
     group.innerHTML = `
         <input type="date" class="form-control mb-2" name="dates[]" required>
-        <input type="time" class="form-control mb-2" name="times[]" required>
-    `;
-    document.getElementById('dates-container').appendChild(group);
+        <input type="time" class="form-control mb-2" name="times[]" required>`;
+    container.appendChild(group);
 }
 
-createBtn.addEventListener("click", (event) => {
-	event.stopPropagation();
-	if (!displayReunion) {
-		showOverlay();
-	} else {
-		hideOverlay();
-	}
-});
-
-closeBtn.addEventListener("click", (event) => {
-	event.stopPropagation();
-	hideOverlay();
-});
-
-document.addEventListener("click", (event) => {
-	if (!displayReunion) return;
-	if (!overlay.contains(event.target)) {
-		hideOverlay();
-	}
-});
-
-overlay.addEventListener("click", (event) => {
-	event.stopPropagation();
-});
-
-const addButton = document.getElementById('add-datetime');
-const container = document.getElementById('dates-container');
-addButton.addEventListener('click', () => {
-    const group = document.createElement('div');
-    group.className = 'datetime-group';
-    group.innerHTML = `
-        <input type="date" class="form-control mb-2" name="dates[]" required>
-        <input type="time" class="form-control mb-2" name="times[]" required>
-        <button type="button" class="btn btn-danger btn-sm remove-datetime">Supprimer</button>
-    `;
-    container.appendChild(group);
-    
-    const removeButton = group.querySelector('.remove-datetime');
-    removeButton.addEventListener('click', () => {
-        group.remove();
+// Réunions
+document.querySelectorAll('.reunion-button').forEach(button => {
+    button.addEventListener('click', () => {
+        showReunionInfo(
+            button.dataset.id,
+            button.dataset.name,
+            button.dataset.user_id,
+            JSON.parse(button.dataset.slots)
+        );
     });
-});
-
-const reunionButtons = document.querySelectorAll('.reunion-button');
-reunionButtons.forEach(button => {
-	button.addEventListener('click', function() {
-		const reunionId = this.getAttribute('data-id');
-		const reunionName = this.getAttribute('data-name');
-		const userId = this.getAttribute('data-user_id');
-		const slots = JSON.parse(this.getAttribute('data-slots')); 
-		
-		showReunionInfo(reunionId, reunionName, userId, slots);
-	});
 });
 
 function formatDateTime(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
+    return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
 async function showReunionInfo(reunionId, reunionName, userId, slots) {
-    document.getElementById('right').innerHTML = '';
     const infoDiv = document.getElementById('right');
+    infoDiv.innerHTML = '';
 
     let responses = {};
     try {
         const res = await fetch(`/reponse/${reunionId}/${userId}`);
         const data = await res.json();
-        for (const r of data) {
-			const date = new Date(r.date).toISOString().split('T')[0]; 
-			responses[`${date}_${r.time}`] = r.response;
-		}		
+        for (const { date, time, response } of data) {
+            responses[`${new Date(date).toISOString().split('T')[0]}_${time}`] = response;
+        }
     } catch (err) {
         console.error('Erreur chargement réponses :', err);
     }
@@ -175,106 +172,66 @@ async function showReunionInfo(reunionId, reunionName, userId, slots) {
             </div>
             <button id="close-button" onclick="resetReunionInfo()">&times;</button>
         </div>
-
         <div class="info-reunion" id="info-reunion">
         <p>Proposition de la réunion :</p>
         <div id="reunion-name">Réunion : ${reunionName}<br>(Créer par : ${userId})</div>
-        <div id="reunion-slots">
-        `;
+        <div id="reunion-slots">`;
 
-    if (slots && slots.length > 0) {
-        slots.forEach(slot => {
-            const formattedDate = formatDateTime(slot.date);
+    if (slots?.length) {
+        slotsHtml += slots.map(slot => {
             const date = new Date(slot.date).toISOString().split('T')[0];
-			const key = `${date}_${slot.time}`;
-            const response = responses[key];
-
-            const yesClass = response === true ? 'selected-yes' : '';
-            const noClass = response === false ? 'selected-no' : '';
-
-            slotsHtml += `
-				<div class="slot" data-date="${slot.date}" data-time="${slot.time}" data-response="${response}">
-					<div>${formattedDate} à ${slot.time}</div>
-					<div class="choice">
-						<button class="yes ${yesClass}">Oui</button>
-						<button class="no ${noClass}">Non</button>
-					</div>
-				</div>
-			`;
-        });
+            const key = `${date}_${slot.time}`;
+            const res = responses[key];
+            return `
+                <div class="slot" data-date="${slot.date}" data-time="${slot.time}" data-response="${res}">
+                    <div>${formatDateTime(slot.date)} à ${slot.time}</div>
+                    <div class="choice">
+                        <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
+                        <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
+                    </div>
+                </div>`;
+        }).join('');
     } else {
         slotsHtml += `Aucun créneau proposé.`;
     }
 
-    slotsHtml += '</div></div>';
-    infoDiv.innerHTML = slotsHtml;
+    infoDiv.innerHTML = slotsHtml + '</div></div>';
 
+    document.querySelectorAll('.slot').forEach(slot => {
+        const yesBtn = slot.querySelector('.yes');
+        const noBtn = slot.querySelector('.no');
 
-    const slotDivs = document.querySelectorAll('.slot');
-    slotDivs.forEach(slotDiv => {
-        const yesBtn = slotDiv.querySelector('.yes');
-        const noBtn = slotDiv.querySelector('.no');
-
-        yesBtn.addEventListener('click', async () => {
-            const current = slotDiv.getAttribute('data-response');
-            let response = null;
-
-            if (current === 'true') {
-                slotDiv.setAttribute('data-response', 'null');
-                yesBtn.classList.remove('selected-yes');
-                response = null;
-            } else {
-                slotDiv.setAttribute('data-response', 'true');
-                yesBtn.classList.add('selected-yes');
-                noBtn.classList.remove('selected-no');
-                response = true;
-            }
-
-            await sendResponse(reunionId, userId, slotDiv.dataset.date, slotDiv.dataset.time, response);
-        });
-
-        noBtn.addEventListener('click', async () => {
-            const current = slotDiv.getAttribute('data-response');
-            let response = null;
-
-            if (current === 'false') {
-                slotDiv.setAttribute('data-response', 'null');
-                noBtn.classList.remove('selected-no');
-                response = null;
-            } else {
-                slotDiv.setAttribute('data-response', 'false');
-                noBtn.classList.add('selected-no');
-                yesBtn.classList.remove('selected-yes');
-                response = false;
-            }
-            await sendResponse(reunionId, userId, slotDiv.dataset.date, slotDiv.dataset.time, response);
-        });
+        yesBtn.addEventListener('click', () => handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, true));
+        noBtn.addEventListener('click', () => handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, false));
     });
 }
 
-// Envoi de la réponse au serveur
+async function handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, value) {
+    const current = slot.dataset.response === String(value);
+    const newResponse = current ? null : value;
+    slot.dataset.response = newResponse;
+
+    yesBtn.classList.toggle('selected-yes', newResponse === true);
+    noBtn.classList.toggle('selected-no', newResponse === false);
+
+    await sendResponse(reunionId, userId, slot.dataset.date, slot.dataset.time, newResponse);
+}
+
 async function sendResponse(reunionId, userId, date, time, response) {
     try {
         await fetch('/reponse', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                reunion_id: reunionId,
-                user_id: userId,
-				date: date,
-				time: time,
-                response
-            })
+            body: JSON.stringify({ reunion_id: reunionId, user_id: userId, date, time, response })
         });
     } catch (err) {
-        console.error('Erreur lors de l\'envoi de la réponse :', err);
+        console.error("Erreur lors de l'envoi de la réponse :", err);
         alert("Une erreur est survenue lors de l'enregistrement.");
     }
 }
 
 function resetReunionInfo() {
-    const infoDiv = document.getElementById('right');
-    infoDiv.innerHTML = `<p>Proposition de la réunion :</p><br>
-    <div class="info-reunion" id="info-reunion">Aucune réunion choisie.</div>
-    `;
+    document.getElementById('right').innerHTML = `
+        <p>Proposition de la réunion :</p><br>
+        <div class="info-reunion" id="info-reunion">Aucune réunion choisie.</div>`;
 }

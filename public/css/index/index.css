@@ -18,7 +18,7 @@
 	flex-direction: column;
 }
 
-#close-overlay {
+#close-overlay, #close-overlay-reunion {
 	position: absolute;
 	top: 5px;
 	right: 15px;
