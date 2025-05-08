@@ -186,6 +186,11 @@ async function getProfileParticipants(email) {
 async function removeParticipant(reunion_id, email) {
     const client = await getPool().connect();
     try {
+        const res = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
+        if (res.rows.length === 0) {
+            return -1;
+        }
+        await client.query('DELETE FROM response WHERE reunion_id = $1 AND user_id = $2', [reunion_id, res.rows[0].user_id]);
         await client.query('DELETE FROM participants WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
     } finally {
         client.release();
@@ -195,7 +200,8 @@ async function removeParticipant(reunion_id, email) {
 async function addParticipant(reunion_id, email) {
     const client = await getPool().connect();
     try {
-        if (await client.query('SELECT * FROM participants WHERE reunion_id = $1 AND email = $2', [reunion_id, email]).rows.length > 0) {
+        const res = await client.query('SELECT * FROM participants WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
+        if (res.rows.length > 0) {
             return -1;
         }
         await client.query('INSERT INTO participants (reunion_id, email) VALUES ($1, $2)', [reunion_id, email]);
