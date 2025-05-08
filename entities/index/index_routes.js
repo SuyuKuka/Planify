@@ -18,8 +18,8 @@ router.post('/get-email', controller.postGetEmail);
 router.post('/delete', controller.postDeleteReunion);
 router.post('/leave', controller.postLeaveReunion);
 
-router.post('/profil/:email', controller.postProfileParticipants);
-router.post('/remove/:reunion_id/:email', controller.postDeleteParticipant);
+router.post('/profil', controller.postProfileParticipants);
+router.post('/remove', controller.postDeleteParticipant);
 
 router.post('/add-participant/:reunion_id', controller.postAddParticipant);
 

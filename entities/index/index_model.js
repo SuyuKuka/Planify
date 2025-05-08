@@ -145,7 +145,14 @@ async function sendResponse(reunion_id, user_id, date, time, response) {
 async function getParticipantsLists(reunion_id) {
     const client = await getPool().connect();
     try {
-        const result = await client.query('SELECT email FROM participants WHERE reunion_id = $1', [reunion_id]);
+        const result = await client.query(
+            `SELECT p.email, u.profilepicture
+             FROM participants p
+             LEFT JOIN "user" u ON p.email = u.email
+             WHERE p.reunion_id = $1`,
+            [reunion_id]
+        );
+
         return result.rows;
     } finally {
         client.release();
@@ -198,7 +205,9 @@ async function removeParticipant(reunion_id, email) {
     try {
         const res = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
         if (res.rows.length === 0) {
-            return -1;
+            await client.query('DELETE FROM no_account WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
+            await client.query('DELETE FROM participants WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
+            return;
         }
         await client.query('DELETE FROM response WHERE reunion_id = $1 AND user_id = $2', [reunion_id, res.rows[0].user_id]);
         await client.query('DELETE FROM participants WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);

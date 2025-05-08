@@ -100,13 +100,16 @@ async function postLeaveReunion(req, res) {
 }
 
 async function postProfileParticipants(req, res) {
-    const { email } = req.params;
+    const { email } = req.body;
     const result = await Auth.getProfileParticipants(email);
+    if (result === undefined) {
+        res.sendStatus(404);
+    }
     res.json(result);
 }
 
 async function postDeleteParticipant(req, res) {
-    const { reunion_id, email } = req.params;
+    const { reunion_id, email } = req.body;
     try {
         await Auth.removeParticipant(reunion_id, email);
         res.sendStatus(200);

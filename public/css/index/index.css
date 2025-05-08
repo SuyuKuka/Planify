@@ -36,7 +36,7 @@
 	height: 90%;
 	background: rgb(243, 249, 255); 
 	justify-content: center;
-	align-items: center;
+	/* align-items: center; */
 	z-index: 1;
 	border-radius: 30px;
 	flex-direction: column;
@@ -112,8 +112,12 @@ p {
 	font-weight: 600;
 }
 
-.reunion-item {
+#left p {
 	margin-bottom: 10px;
+}
+
+.reunion-item {
+	margin-bottom: 15px;
 	width: 100%;
 }
 
@@ -131,7 +135,7 @@ p {
 }
 
 #list-reunion {
-	max-height: 300px;
+	max-height: 250px;
 	overflow-y: auto;
 }
 
@@ -221,6 +225,132 @@ p {
 .choice button.selected-no {
     background-color: lightcoral;
     font-weight: bold;
+}
+
+#overlay-reunion h2 {
+	text-align: center;
+}
+
+#overlay-reunion h4 {
+	margin-left: 40px;
+}
+
+#list-participants {
+	max-height: 220px;
+	overflow-y: auto;
+	margin-left: 20px;
+}
+
+#bot-overlay-reunion {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	position: absolute;
+	bottom: 12px;
+	right: 12px;
+}
+
+.list-p {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.pfp {
+	width: 40px;
+	height: 40px;
+	object-fit: cover;
+	border-radius: 50%;
+	margin-top: 20px;
+	margin-right: 5px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.look-participant {
+	border: 1px solid black;
+	border-radius: 10px;
+	padding: 5px;
+	padding-right: 15px;
+	padding-left: 15px;
+	background-color: rgb(253, 253, 253);
+	margin-right: 10px;
+}
+
+.look-participant:hover {
+	background-color: rgb(247, 247, 247);
+}
+
+.look-participant:active {
+	background-color: rgb(230, 230, 230);
+	transform: scale(0.99);
+}
+
+.remove-participant {
+	border: 1px solid black;
+	border-radius: 10px;
+	padding: 5px;
+	padding-right: 15px;
+	padding-left: 15px;
+	background-color: rgb(13, 114, 237);
+	color: white;
+	margin-right: 10px;
+}
+
+.remove-participant:hover {
+	background-color: rgb(0, 102, 255);
+}
+
+.remove-participant:active {
+	background-color: rgb(0, 85, 204);
+	transform: scale(0.99);
+}
+
+#add-participant-title {
+	margin-top: 20px;
+}
+
+#participant-email {
+	margin-left: 2%;
+	width: 94%;
+}
+
+#add-participant {
+	margin-left: 2%;
+	margin-top: 1%;
+	background-color: rgb(17, 199, 17);
+}
+
+#add-participant:hover {
+	background-color: rgb(18, 197, 18);
+
+}
+
+#add-participant:active {
+	background-color: rgb(15, 177, 15);
+	transform: scale(0.99);
+}
+
+#delete-reunion, #leave-reunion {
+	border: 1px black solid;
+	border-radius: 5px;
+	padding: 8px;
+	padding-left: 20px;
+	padding-right: 20px;
+	background: rgb(255, 56, 56);
+	cursor: pointer;
+}
+
+#delete-reunion:hover, #leave-reunion:hover {
+	background-color: rgb(255, 23, 23);
+}
+
+#delete-reunion:active, #leave-reunion:active {
+	transform: scale(0.99);
+	background-color: rgb(240, 28, 28);
 }
 
 /* Ordre selon taille écran */

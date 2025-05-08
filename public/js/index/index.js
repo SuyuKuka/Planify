@@ -224,49 +224,75 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         noBtn.addEventListener('click', () => handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, false));
     });
 
+    const userIdEmail = await getUserEmail(userId);
+    const userIdOrgaEmail = await getUserEmail(userIdOrga);
     try {
         const resPart = await fetch(`/participants/${reunionId}`);
         const participants = await resPart.json();
-        const userIdEmail = await getUserEmail(userId);
-        const userIdOrgaEmail = await getUserEmail(userIdOrga);
         const listContainer = document.getElementById("list-participants");
 
         if (participants.length > 0) {
-            let html = "<h4>Participants :</h4><ul>" +
+            let html = "" +
             participants.map((p) => {
+                if (p.profilepicture === null || p.profilepicture === undefined) {
+                    p.profilepicture = "/images/profile/default.png";
+                }
+
                 if (p.email === userIdEmail) {
-                    return `<li><label class="participant-email">${p.email}</label></li>`;
+                    return `<div class="list-p">
+                                <div class="participant">
+                                    <img src="${p.profilepicture}" class="pfp img-fluid mb-3">
+                                    <label class="participant-email">${p.email}</label>
+                                </div>
+                            </div>
+                            `;
                 } else if (userIdEmail === userIdOrgaEmail) {
-                    return `<li><label class="participant-email">${p.email}</label>
-                                <button class="look-participant">Profil</button>
-                                <button class="remove-participant">Enlever</button>
-                            </li>`;
+                    return `<div class="list-p">
+                                <div class="participant">
+                                    <img src="${p.profilepicture}" class="pfp img-fluid rounded-circle mb-3">
+                                    <label class="participant-email">${p.email}</label>
+                                </div>
+                                <div class="button-container">
+                                    <button class="look-participant">Profil</button>
+                                    <button class="remove-participant">Enlever</button>
+                                </div>
+                            </div>
+                            `;
                 } else {
-                    return `<li><label class="participant-email">${p.email}</label>
-                            <button class="look-participant">Profil</button>
-                        </li>`;
+                    return `<div class="list-p">
+                                <div class="participant">
+                                    <img src="${p.profilepicture}" class="pfp img-fluid rounded-circle mb-3">
+                                    <label class="participant-email">${p.email}</label>
+                                </div>
+                                <div class="button-container">
+                                    <button class="look-participant">Profil</button>
+                                </div>
+                            </div>
+                            `;
                 }
             }).join('') +
             "</ul>";
-
-            if (userIdEmail === userIdOrgaEmail) {
-                html += `
-                <div id="overlay-add-participant" class="overlay">
-                    <div class="form-group">
-                        <h4>Ajouter un participant : </h4>
-                        <input type="email" id="participant-email" placeholder="exemple@domaine.com" class="form-control">
-                        <button id="add-participant" class="btn btn-success">Ajouter</button>
-                    </div>
-                </div>`;
-            }
             listContainer.innerHTML = html;
         } else {
             listContainer.innerHTML = "<p>Aucun participant.</p>";
         }
-
     } catch (err) {
         console.error("Erreur lors de la récupération des participants :", err);
         document.getElementById("list-participants").innerHTML = "<p>Impossible de charger les participants.</p>";
+    }
+
+    if (userId === userIdOrga) {
+        const addParticipantBtn = document.getElementById("add-participants");
+        if (userIdEmail === userIdOrgaEmail) {
+            addParticipantBtn.innerHTML = `
+            <div id="overlay-add-participant" class="overlay">
+                <div class="form-group">
+                    <h4 id="add-participant-title">Ajouter un participant : </h4>
+                    <input type="email" id="participant-email" placeholder="exemple@domaine.com" class="form-control">
+                    <button id="add-participant" class="btn btn-success">Ajouter</button>
+                </div>
+            </div>`;
+        }
     }
 
     showResults(reunionId);
@@ -360,21 +386,35 @@ async function leaveReunion(reunionId) {
 }
 
 function profilParticipant() {
-    document.querySelectorAll('.look-participant').forEach(button => {
-        button.addEventListener('click', async function () {
-            const email = button.parentElement.querySelector('.participant-email').textContent;
+    const participantElements = document.querySelectorAll('.look-participant');
+
+    participantElements.forEach((element) => {
+        element.addEventListener('click', async function () {
+            const email = element.closest('.list-p').querySelector('.participant-email').textContent.trim();
+            console.log(`Email du participant: ${email}`);
+
             const confirmed = confirm(`Vous allez voir le profil de ${email} ?`);
             if (!confirmed) return;
+
             try {
-                const res = await fetch(`/profil/${email}`, {
+                const res = await fetch(`/profil`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
                 });
-                
+
+                if (!res.ok) {
+                    throw new Error('L\'utilisateur est introuvable (probablement invité par email)');
+                }
+
                 const data = await res.json();
-                window.location.href = `user/profil/?id=${data}`;
+                if (data) {
+                    window.location.href = `/user/profil/?id=${data}`;
+                } else {
+                    throw new Error('Profil introuvable');
+                }
             } catch (err) {
-                alert("L'utilisateur n'existe pas.");
+                alert(`Erreur : ${err.message}`);
             }
         });
     });
@@ -383,14 +423,16 @@ function profilParticipant() {
 function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
     document.querySelectorAll('.remove-participant').forEach(button => {
         button.addEventListener('click', async function () {
-            const email = button.parentElement.querySelector('.participant-email').textContent;
+            const email = button.closest('.list-p').querySelector('.participant-email').textContent;
             const confirmed = confirm(`Supprimer le participant ${email} ?`);
             if (!confirmed) return;
 
             try {
-                const res = await fetch(`/remove/${reunionId}/${email}`, {
+                console.log(email);
+                const res = await fetch(`/remove`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reunion_id: reunionId, email })
                 });
 
                 if (res.ok) {

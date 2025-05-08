@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS reunion CASCADE;
 DROP TABLE IF EXISTS proposition_date CASCADE;
 DROP TABLE IF EXISTS participants CASCADE;
 DROP TABLE IF EXISTS response CASCADE;
+DROP TABLE IF EXISTS no_account CASCADE;
 
 CREATE TABLE "user" (
     user_id VARCHAR(32) PRIMARY KEY,
@@ -64,6 +65,17 @@ CREATE TABLE response (
     UNIQUE (reunion_id, user_id, date, time)
 );
 
+CREATE TABLE no_account (
+    reunion_id INT NOT NULL,
+    email VARCHAR(32) NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    response BOOLEAN,
+    PRIMARY KEY (reunion_id, email, date, time),
+    FOREIGN KEY (reunion_id) REFERENCES reunion(id),
+    UNIQUE (reunion_id, email, date, time)
+);
+
 ALTER TABLE proposition_date
 DROP CONSTRAINT proposition_date_reunion_id_fkey,
 ADD CONSTRAINT proposition_date_reunion_id_fkey
@@ -84,6 +96,3 @@ ADD CONSTRAINT response_reunion_id_fkey
 FOREIGN KEY (reunion_id)
 REFERENCES reunion(id)
 ON DELETE CASCADE;
-
-INSERT INTO "user" (user_id, name, surname, birthdate, username, email, password, profilepicture) VALUES ('@suyu', 'Michel', 'CHEN', '2004-08-26', 'Suyu', 'michelchen052@gmail.com', '$2b$10$GMxouQxE4fIiz6RXDsHzPOtKml.Ee6DYijs0Nvkpy.x7DcCSepO/i', '/images/profile/default.png');
-INSERT INTO "user" (user_id, name, surname, birthdate, username, email, password, profilepicture) VALUES ('@nophy', 'Vanessa', 'HEJL', '2001-06-06', 'Nophy', 'vanessa.hejl@gmail.com', '$2b$10$GMxouQxE4fIiz6RXDsHzPOtKml.Ee6DYijs0Nvkpy.x7DcCSepO/i', '/images/profile/default.png');
