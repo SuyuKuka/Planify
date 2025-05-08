@@ -11,6 +11,7 @@ async function getIndex(req, res) {
     if (!result) {
         res.render('index', {
             token,
+            user_id: undefined,
             user_username: undefined,
             vue,
             reunions: undefined
@@ -19,6 +20,7 @@ async function getIndex(req, res) {
         const reunions = await Auth.getReunions(result.user_id);
         res.render('index', {
             token,
+            user_id: result.user_id,
             user_username: result.username,
             vue,
             reunions

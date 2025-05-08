@@ -77,12 +77,17 @@ document.addEventListener("click", e => {
     if (overlay.contains(target) || overlayReunion.contains(target)) return;
     if (target.id === "create-reunion") {
         e.stopPropagation();
+        e.preventDefault();
+        toggleOverlay(false, overlayReunion, show => displayOverlayReunion = show);
         toggleOverlay(!displayOverlay, overlay, show => displayOverlay = show, resetForm);
         return;
     }
 
+    console.log(target.id);
     if (["reunion-details", "details-button", "details-title"].includes(target.id)) {
         e.stopPropagation();
+        e.preventDefault();
+        toggleOverlay(false, overlay, show => displayOverlay = show, resetForm);
         showOverlayReunion();
         return;
     }
@@ -136,12 +141,23 @@ function resetForm() {
 // Réunions
 document.querySelectorAll('.reunion-button').forEach(button => {
     button.addEventListener('click', () => {
+        reunionUserId = button.dataset.user_id
         showReunionInfo(
             button.dataset.id,
             button.dataset.name,
-            button.dataset.user_id,
+            reunionUserId,
             JSON.parse(button.dataset.slots)
         );
+
+        if (reunionUserId === currentUserId) {
+            document.getElementById("edit-reunion").style.display = "inline-block";
+            document.getElementById("delete-reunion").style.display = "inline-block";
+            document.getElementById("quitter-reunion").style.display = "none";
+        } else {
+            document.getElementById("edit-reunion").style.display = "none";
+            document.getElementById("delete-reunion").style.display = "none";
+            document.getElementById("quitter-reunion").style.display = "inline-block";
+        }
     });
 });
 
@@ -168,7 +184,7 @@ async function showReunionInfo(reunionId, reunionName, userId, slots) {
         <div id="top-info">
             <div id="reunion-details">
                 <label id="details-button">&larr;</label>
-                <label id="details-title">Détails</label>
+                <label id="details-title" style="text-decoration: underline;">Détails</label>
             </div>
             <button id="close-button" onclick="resetReunionInfo()">&times;</button>
         </div>

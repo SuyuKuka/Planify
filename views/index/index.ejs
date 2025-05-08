@@ -114,6 +114,14 @@
 				<button id="close-overlay-reunion">&times;</button>
 			</div>
 			<h2>Information sur la reunion</h2>
+			<div id="list-reunion">
+
+			</div>
+			<div id="bot-overlay">
+				<button id="edit-reunion" style="display: none;">Modifier la réunion</button>
+				<button id="delete-reunion" style="display: none;">Supprimer la réunion</button>
+				<button id="quitter-reunion" style="display: none;">Quitter la réunion</button>
+			</div>
 		</div>
 		<!-- script -->
 		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -124,5 +132,7 @@
 			const vueChoisie = vues.includes(vue) ? vue : "semaine";
 		%>
 		<script src="/js/index/<%= vueChoisie %>.js"></script>
+		<% const currentUserId = user_id; %> 
+		<script>const currentUserId = "<%= currentUserId %>";</script>
 	</body>
 </html>
