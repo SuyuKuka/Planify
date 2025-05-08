@@ -17,4 +17,7 @@ router.get('/participants/:reunion_id', controller.getParticipantsLists);
 router.get('/delete/:reunion_id', controller.getDeleteReunion);
 router.get('/leave/:reunion_id', controller.getLeaveReunion);
 
+router.get('/profil/:email', controller.getProfileParticipants);
+router.get('/remove/:reunion_id/:email', controller.getDeleteParticipant);
+
 module.exports = router;

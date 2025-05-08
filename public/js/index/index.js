@@ -229,8 +229,17 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         const listContainer = document.getElementById("list-participants");
         if (participants.length > 0) {
             listContainer.innerHTML = "<h4>Participants :</h4><ul>" +
-                participants.map(p => `<li>${p.email}</li>`).join('') +
-                "</ul>";
+            participants.map((p, index) => {
+                if (index === 0) {
+                    return `<li><label class="participant-email">${p.email}</label></li>`;
+                } else {
+                    return `<li><label class="participant-email">${p.email}</label>
+                            <button class="look-participant">Profil</button>
+                            <button class="remove-participant">Enlever</button>
+                        </li>`;
+                }
+            }).join('') +
+        "</ul>";
         } else {
             listContainer.innerHTML = "<p>Aucun participant.</p>";
         }
@@ -239,27 +248,10 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         document.getElementById("list-participants").innerHTML = "<p>Impossible de charger les participants.</p>";
     }
 
-    document.getElementById('delete-reunion').addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (!confirm("Êtes-vous sûr de vouloir supprimer cette réunion ?")) return;
-        try {
-            window.location.href = `/delete/${reunionId}`;
-        } catch (err) {
-            console.error(err);
-            alert("Erreur réseau.");
-        }
-    });
-
-    document.getElementById('leave-reunion').addEventListener('click', async (e) => {
-        e.preventDefault();
-        if (!confirm("Êtes-vous sûr de vouloir quitter cette réunion ?")) return;
-        try {
-            window.location.href = `/leave/${reunionId}`;
-        } catch (err) {
-            console.error(err);
-            alert("Erreur réseau.");
-        }
-    });
+    deleteReunion(reunionId);
+    leaveReunion(reunionId, userId);
+    profilParticipant();
+    deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots);
 }
 
 async function handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, value) {
@@ -290,4 +282,77 @@ function resetReunionInfo() {
     document.getElementById('right').innerHTML = `
         <p>Proposition de la réunion :</p><br>
         <div class="info-reunion" id="info-reunion">Aucune réunion choisie.</div>`;
+}
+
+async function deleteReunion(reunionId) {
+    document.getElementById('delete-reunion').addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!confirm("Êtes-vous sûr de vouloir supprimer cette réunion ?")) return;
+        try {
+            window.location.href = `/delete/${reunionId}`;
+        } catch (err) {
+            console.error(err);
+            alert("Erreur réseau.");
+        }
+    });
+}
+
+async function leaveReunion(reunionId, userId) {
+    document.getElementById('leave-reunion').addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!confirm("Êtes-vous sûr de vouloir quitter cette réunion ?")) return;
+        try {
+            window.location.href = `/leave/${reunionId}`;
+        } catch (err) {
+            console.error(err);
+            alert("Erreur réseau.");
+        }
+    });
+}
+
+function profilParticipant() {
+    document.querySelectorAll('.look-participant').forEach(button => {
+        button.addEventListener('click', async function () {
+            const email = button.parentElement.querySelector('.participant-email').textContent;
+            const confirmed = confirm(`Vous allez voir le profil de ${email} ?`);
+            if (!confirmed) return;
+            try {
+                const res = await fetch(`/profil/${email}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                
+                const data = await res.json();
+                window.location.href = `user/profil/?id=${data}`;
+            } catch (err) {
+                alert("L'utilisateur n'existe pas.");
+            }
+        });
+    });
+}
+
+function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
+    document.querySelectorAll('.remove-participant').forEach(button => {
+        button.addEventListener('click', async function () {
+            const email = button.parentElement.querySelector('.participant-email').textContent;
+            const confirmed = confirm(`Supprimer le participant ${email} ?`);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`/remove/${reunionId}/${email}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                if (res.ok) {
+                    alert("Participant supprimé.");
+                    showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots);
+                } else {
+                    alert("Erreur lors de la suppression.");
+                }
+            } catch (err) {
+                alert("Erreur réseau.");
+            }
+        });
+    });
 }

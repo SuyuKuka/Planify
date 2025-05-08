@@ -94,4 +94,32 @@ async function getLeaveReunion(req, res) {
     res.redirect('/');
 }
 
-module.exports = { getIndex, getSearchProfil, postCreateReunion, getGetReponses, postSendReponse, getParticipantsLists, getDeleteReunion, getLeaveReunion }; 
+async function getProfileParticipants(req, res) {
+    const { email } = req.params;
+    const result = await Auth.getProfileParticipants(email);
+    res.json(result);
+}
+
+async function getDeleteParticipant(req, res) {
+    const { reunion_id, email } = req.params;
+    try {
+        await Auth.removeParticipant(reunion_id, email);
+        res.sendStatus(200);
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+}
+
+module.exports = { 
+    getIndex, 
+    getSearchProfil, 
+    postCreateReunion, 
+    getGetReponses, 
+    postSendReponse, 
+    getParticipantsLists, 
+    getDeleteReunion, 
+    getLeaveReunion, 
+    getProfileParticipants,
+    getDeleteParticipant 
+}; 

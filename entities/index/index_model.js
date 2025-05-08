@@ -165,4 +165,38 @@ async function leaveReunion(reunion_id, user_id) {
     }
 }
 
-module.exports = { getInfo, prefixSearch, createReunion, getReunions, getReponses, sendResponse, getParticipantsLists, deleteReunion, leaveReunion };
+async function getProfileParticipants(email) {
+    const client = await getPool().connect();
+    try {
+        const result = await client.query('SELECT user_id FROM "user" WHERE email = $1', [email]);
+        if (result.rows.length === 0) {
+            return undefined;
+        }
+        return result.rows[0].user_id;
+    } finally {
+        client.release();
+    }
+}
+
+async function removeParticipant(reunion_id, email) {
+    const client = await getPool().connect();
+    try {
+        await client.query('DELETE FROM participants WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = { 
+    getInfo, 
+    prefixSearch, 
+    createReunion, 
+    getReunions, 
+    getReponses, 
+    sendResponse, 
+    getParticipantsLists, 
+    deleteReunion, 
+    leaveReunion, 
+    getProfileParticipants, 
+    removeParticipant 
+};
