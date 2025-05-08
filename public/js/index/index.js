@@ -149,12 +149,13 @@ document.querySelectorAll('.reunion-button').forEach(button => {
             JSON.parse(button.dataset.slots)
         );
 
+        const tmp = document.getElementById("add-participant");
         if (reunionUserId === currentUserId) {
-            document.getElementById("add-participant").style.display = "inline-block";
+            if (tmp) tmp.style.display = "inline-block";
             document.getElementById("delete-reunion").style.display = "inline-block";
             document.getElementById("leave-reunion").style.display = "none";
         } else {
-            document.getElementById("add-participant").style.display = "none";
+            if (tmp) tmp.style.display = "none";
             document.getElementById("delete-reunion").style.display = "none";
             document.getElementById("leave-reunion").style.display = "inline-block";
         }
@@ -173,8 +174,8 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
     try {
         const res = await fetch(`/reponse/${reunionId}/${userId}`);
         const data = await res.json();
-        for (const { date, time, response } of data) {
-            responses[`${new Date(date).toISOString().split('T')[0]}_${time}`] = response;
+        for (let { date, time, response } of data) {
+            responses[`${date}_${time}`] = response;
         }
     } catch (err) {
         console.error('Erreur chargement réponses :', err);
@@ -195,12 +196,14 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
 
     if (slots?.length) {
         slotsHtml += slots.map(slot => {
-            const date = new Date(slot.date).toISOString().split('T')[0];
+            const tmp = new Date(slot.date); 
+            const date = formatDateTime(tmp);
+
             const key = `${date}_${slot.time}`;
             const res = responses[key];
             return `
-                <div class="slot" data-date="${slot.date}" data-time="${slot.time}" data-response="${res}">
-                    <div>${formatDateTime(slot.date)} à ${slot.time}</div>
+                <div class="slot" data-date="${date}" data-time="${slot.time}" data-response="${res}">
+                    <div>${date} à ${slot.time}</div>
                     <div class="choice">
                         <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
                         <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
@@ -254,6 +257,7 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         document.getElementById("list-participants").innerHTML = "<p>Impossible de charger les participants.</p>";
     }
 
+    showResults(reunionId);
     deleteReunion(reunionId);
     leaveReunion(reunionId);
     profilParticipant();
@@ -279,6 +283,7 @@ async function sendResponse(reunionId, userId, date, time, response) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ reunion_id: reunionId, user_id: userId, date, time, response })
         });
+        showResults(reunionId);
     } catch (err) {
         console.error("Erreur lors de l'envoi de la réponse :", err);
         alert("Une erreur est survenue lors de l'enregistrement.");
@@ -393,9 +398,11 @@ function addParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
             if (res.ok) {
                 alert("Participant ajouté avec succès.");
                 showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots);
-                toggleOverlay(false, document.getElementById('overlay-add-participant'), show => displayOverlay = show);
+                document.getElementById('participant-email').value = '';
+            }  else if (response.status === 400) {
+                alert("L'utilisateur est déjà dans la reunion.");
             } else {
-                alert("Erreur lors de l'ajout.");
+                alert("Erreur serveur. Veuillez réessayer plus tard.");
             }
         } catch (err) {
             console.error("Erreur réseau :", err);
@@ -404,6 +411,55 @@ function addParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
     });
 }
 
-// document.getElementById('add-participant').addEventListener('click', function () {
-//     document.getElementById('participant-email').value = '';
-// });
+async function showResults(reunionId) {
+    const container = document.getElementById("reunion-slots");
+    if (!container) return;
+
+    try {
+        const res = await fetch('/all-responses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reunion_id: reunionId })
+        });
+
+        const results = await res.json();
+        const slotMap = {};
+        results.forEach(({ date, time, response }) => {
+            const key = `${date}_${time}`;
+            if (!slotMap[key]) {
+                slotMap[key] = { oui: 0, non: 0, total: 0 };
+            }
+
+            if (response === true) {
+                slotMap[key].oui++;
+            } else if (response === false) {
+                slotMap[key].non++;
+            } else {
+                slotMap[key].total--;
+            }
+            slotMap[key].total++;
+        });
+
+        container.querySelectorAll(".slot").forEach(slot => {
+            const date = slot.dataset.date;
+            const time = slot.dataset.time;
+            const key = `${date}_${time}`;
+
+            const data = slotMap[key] || { oui: 0, non: 0, total: 0 };
+            const resultDiv = document.createElement("div");
+            resultDiv.className = "resultats";
+            resultDiv.innerHTML = `
+                <small>Oui : ${data.oui} / Non : ${data.non} / Total : ${data.total}</small>
+            `;
+
+            const oldResult = slot.querySelector('.resultats');
+            if (oldResult) oldResult.remove();
+
+            slot.appendChild(resultDiv);
+        });
+    } catch (err) {
+        console.error("Erreur lors du chargement des résultats :", err);
+    }
+}

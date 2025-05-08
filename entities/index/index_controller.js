@@ -69,6 +69,7 @@ async function getGetReponses(req, res) {
 
 async function postSendReponse(req, res) {
     const { reunion_id, user_id, date, time, response } = req.body;
+    console.log(reunion_id, user_id, date, time, response);
     await Auth.sendResponse(reunion_id, user_id, date, time, response);
     res.redirect('/');
 }
@@ -114,12 +115,22 @@ async function postAddParticipant(req, res) {
     const { reunion_id } = req.params;
     const { email } = req.body;
     try {
-        await Auth.addParticipant(reunion_id, email);
-        res.sendStatus(200);
+        const result = await Auth.addParticipant(reunion_id, email);
+        if (result === -1) {
+            res.sendStatus(400);
+        } else {
+            res.sendStatus(200);
+        }
     } catch (err) {
         console.error(err);
         res.sendStatus(500);
     }
+}
+
+async function postGetAllResponses(req, res) {
+    const { reunion_id } = req.body;
+    const result = await Auth.getAllResponses(reunion_id);
+    res.json(result);
 }
 
 module.exports = { 
@@ -133,5 +144,6 @@ module.exports = {
     postLeaveReunion, 
     postProfileParticipants,
     postDeleteParticipant,
-    postAddParticipant
+    postAddParticipant,
+    postGetAllResponses
 }; 

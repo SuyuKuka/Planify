@@ -22,4 +22,6 @@ router.post('/remove/:reunion_id/:email', controller.postDeleteParticipant);
 
 router.post('/add-participant/:reunion_id', controller.postAddParticipant);
 
+router.post('/all-responses', controller.postGetAllResponses); 
+
 module.exports = router;
