@@ -73,4 +73,25 @@ async function postSendReponse(req, res) {
     res.redirect('/');
 }
 
-module.exports = { getIndex, getSearchProfil, postCreateReunion, getGetReponses, postSendReponse }; 
+async function getParticipantsLists(req, res) {
+    const { reunion_id } = req.params;
+    const result = await Auth.getParticipantsLists(reunion_id);
+    res.json(result);
+}
+
+async function getDeleteReunion(req, res) {
+    const { reunion_id } = req.params;
+    console.log(reunion_id);
+    await Auth.deleteReunion(reunion_id);
+    res.redirect('/');
+}
+
+async function getLeaveReunion(req, res) {
+    const { reunion_id } = req.params;
+    const token = req.session.token;
+    const { user_id } = await Auth.getInfo(token);
+    await Auth.leaveReunion(reunion_id, user_id);
+    res.redirect('/');
+}
+
+module.exports = { getIndex, getSearchProfil, postCreateReunion, getGetReponses, postSendReponse, getParticipantsLists, getDeleteReunion, getLeaveReunion }; 

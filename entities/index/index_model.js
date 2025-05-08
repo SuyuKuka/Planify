@@ -137,4 +137,32 @@ async function sendResponse(reunion_id, user_id, date, time, response) {
     }
 }
 
-module.exports = { getInfo, prefixSearch, createReunion, getReunions, getReponses, sendResponse };
+async function getParticipantsLists(reunion_id) {
+    const client = await getPool().connect();
+    try {
+        const result = await client.query('SELECT email FROM participants WHERE reunion_id = $1', [reunion_id]);
+        return result.rows;
+    } finally {
+        client.release();
+    }
+}
+
+async function deleteReunion(reunion_id) {
+    const client = await getPool().connect();
+    try {
+        await client.query('DELETE FROM reunion WHERE id = $1', [reunion_id]);
+    } finally {
+        client.release();
+    }
+}
+
+async function leaveReunion(reunion_id, user_id) {
+    const client = await getPool().connect();
+    try {
+        await client.query('DELETE FROM participants WHERE reunion_id = $1 AND email = (SELECT email FROM "user" WHERE user_id = $2)', [reunion_id, user_id]);
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = { getInfo, prefixSearch, createReunion, getReunions, getReponses, sendResponse, getParticipantsLists, deleteReunion, leaveReunion };

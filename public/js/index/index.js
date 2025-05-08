@@ -145,6 +145,7 @@ document.querySelectorAll('.reunion-button').forEach(button => {
         showReunionInfo(
             button.dataset.id,
             button.dataset.name,
+            currentUserId,
             reunionUserId,
             JSON.parse(button.dataset.slots)
         );
@@ -152,11 +153,11 @@ document.querySelectorAll('.reunion-button').forEach(button => {
         if (reunionUserId === currentUserId) {
             document.getElementById("edit-reunion").style.display = "inline-block";
             document.getElementById("delete-reunion").style.display = "inline-block";
-            document.getElementById("quitter-reunion").style.display = "none";
+            document.getElementById("leave-reunion").style.display = "none";
         } else {
             document.getElementById("edit-reunion").style.display = "none";
             document.getElementById("delete-reunion").style.display = "none";
-            document.getElementById("quitter-reunion").style.display = "inline-block";
+            document.getElementById("leave-reunion").style.display = "inline-block";
         }
     });
 });
@@ -165,7 +166,7 @@ function formatDateTime(dateString) {
     return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-async function showReunionInfo(reunionId, reunionName, userId, slots) {
+async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots) {
     const infoDiv = document.getElementById('right');
     infoDiv.innerHTML = '';
 
@@ -190,7 +191,7 @@ async function showReunionInfo(reunionId, reunionName, userId, slots) {
         </div>
         <div class="info-reunion" id="info-reunion">
         <p>Proposition de la réunion :</p>
-        <div id="reunion-name">Réunion : ${reunionName}<br>(Créer par : ${userId})</div>
+        <div id="reunion-name">Réunion : ${reunionName}<br>(Créer par : ${userIdOrga})</div>
         <div id="reunion-slots">`;
 
     if (slots?.length) {
@@ -219,6 +220,45 @@ async function showReunionInfo(reunionId, reunionName, userId, slots) {
 
         yesBtn.addEventListener('click', () => handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, true));
         noBtn.addEventListener('click', () => handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, false));
+    });
+
+    try {
+        const resPart = await fetch(`/participants/${reunionId}`);
+        const participants = await resPart.json();
+
+        const listContainer = document.getElementById("list-participants");
+        if (participants.length > 0) {
+            listContainer.innerHTML = "<h4>Participants :</h4><ul>" +
+                participants.map(p => `<li>${p.email}</li>`).join('') +
+                "</ul>";
+        } else {
+            listContainer.innerHTML = "<p>Aucun participant.</p>";
+        }
+    } catch (err) {
+        console.error("Erreur lors de la récupération des participants :", err);
+        document.getElementById("list-participants").innerHTML = "<p>Impossible de charger les participants.</p>";
+    }
+
+    document.getElementById('delete-reunion').addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!confirm("Êtes-vous sûr de vouloir supprimer cette réunion ?")) return;
+        try {
+            window.location.href = `/delete/${reunionId}`;
+        } catch (err) {
+            console.error(err);
+            alert("Erreur réseau.");
+        }
+    });
+
+    document.getElementById('leave-reunion').addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!confirm("Êtes-vous sûr de vouloir quitter cette réunion ?")) return;
+        try {
+            window.location.href = `/leave/${reunionId}`;
+        } catch (err) {
+            console.error(err);
+            alert("Erreur réseau.");
+        }
     });
 }
 
