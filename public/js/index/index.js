@@ -152,7 +152,8 @@ function formatDateTime(dateString) {
 }
 
 async function showReunionInfo(reunionId, reunionName, userId, slots) {
-    const infoDiv = document.getElementById('info-reunion');
+    document.getElementById('right').innerHTML = '';
+    const infoDiv = document.getElementById('right');
 
     let responses = {};
     try {
@@ -167,9 +168,19 @@ async function showReunionInfo(reunionId, reunionName, userId, slots) {
     }
 
     let slotsHtml = `
-        <button class="close-button" onclick="resetReunionInfo()">&times;</button>
+        <div id="top-info">
+            <div id="reunion-details">
+                <label id="details-button">&larr;</label>
+                <label id="details-title">Détails</label>
+            </div>
+            <button id="close-button" onclick="resetReunionInfo()">&times;</button>
+        </div>
+
+        <div class="info-reunion" id="info-reunion">
+        <p>Proposition de la réunion :</p>
         <div id="reunion-name">Réunion : ${reunionName}<br>(Créer par : ${userId})</div>
-        <div id="reunion-slots">`;
+        <div id="reunion-slots">
+        `;
 
     if (slots && slots.length > 0) {
         slots.forEach(slot => {
@@ -195,7 +206,7 @@ async function showReunionInfo(reunionId, reunionName, userId, slots) {
         slotsHtml += `Aucun créneau proposé.`;
     }
 
-    slotsHtml += '</div>';
+    slotsHtml += '</div></div>';
     infoDiv.innerHTML = slotsHtml;
 
 
@@ -262,6 +273,8 @@ async function sendResponse(reunionId, userId, date, time, response) {
 }
 
 function resetReunionInfo() {
-    const infoDiv = document.getElementById('info-reunion');
-    infoDiv.innerHTML = 'Aucune réunion choisie.';
+    const infoDiv = document.getElementById('right');
+    infoDiv.innerHTML = `<p>Proposition de la réunion :</p><br>
+    <div class="info-reunion" id="info-reunion">Aucune réunion choisie.</div>
+    `;
 }
