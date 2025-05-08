@@ -227,31 +227,43 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
     try {
         const resPart = await fetch(`/participants/${reunionId}`);
         const participants = await resPart.json();
-
+        const userIdEmail = await getUserEmail(userId);
+        const userIdOrgaEmail = await getUserEmail(userIdOrga);
         const listContainer = document.getElementById("list-participants");
+
         if (participants.length > 0) {
-            listContainer.innerHTML = "<h4>Participants :</h4><ul>" +
-            participants.map((p, index) => {
-                if (index === 0) {
+            let html = "<h4>Participants :</h4><ul>" +
+            participants.map((p) => {
+                if (p.email === userIdEmail) {
                     return `<li><label class="participant-email">${p.email}</label></li>`;
+                } else if (userIdEmail === userIdOrgaEmail) {
+                    return `<li><label class="participant-email">${p.email}</label>
+                                <button class="look-participant">Profil</button>
+                                <button class="remove-participant">Enlever</button>
+                            </li>`;
                 } else {
                     return `<li><label class="participant-email">${p.email}</label>
                             <button class="look-participant">Profil</button>
-                            <button class="remove-participant">Enlever</button>
                         </li>`;
                 }
             }).join('') +
-            "</ul>" + 
-            `<div id="overlay-add-participant" class="overlay">
-				<div class="form-group">
-					<h4>Ajouter un participant : </h4>
-					<input type="email" id="participant-email" placeholder="exemple@domaine.com" class="form-control">
-					<button id="add-participant" class="btn btn-success">Ajouter</button>
-				</div>
-			</div>`;
+            "</ul>";
+
+            if (userIdEmail === userIdOrgaEmail) {
+                html += `
+                <div id="overlay-add-participant" class="overlay">
+                    <div class="form-group">
+                        <h4>Ajouter un participant : </h4>
+                        <input type="email" id="participant-email" placeholder="exemple@domaine.com" class="form-control">
+                        <button id="add-participant" class="btn btn-success">Ajouter</button>
+                    </div>
+                </div>`;
+            }
+            listContainer.innerHTML = html;
         } else {
             listContainer.innerHTML = "<p>Aucun participant.</p>";
         }
+
     } catch (err) {
         console.error("Erreur lors de la récupération des participants :", err);
         document.getElementById("list-participants").innerHTML = "<p>Impossible de charger les participants.</p>";
@@ -263,6 +275,21 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
     profilParticipant();
     deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots);
     addParticipant(reunionId, reunionName, userId, userIdOrga, slots);
+}
+
+async function getUserEmail(userId) {
+    try {
+        const res = await fetch('/get-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId })
+        });
+
+        const data = await res.json();
+        return data;
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 async function handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, value) {

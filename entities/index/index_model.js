@@ -152,6 +152,16 @@ async function getParticipantsLists(reunion_id) {
     }
 }
 
+async function getEmail(user_id) {
+    const client = await getPool().connect();
+    try {
+        const result = await client.query('SELECT email FROM "user" WHERE user_id = $1', [user_id]);
+        return result.rows[0].email;
+    } finally {
+        client.release();
+    }
+}
+
 async function deleteReunion(reunion_id) {
     const client = await getPool().connect();
     try {
@@ -229,6 +239,7 @@ module.exports = {
     getReponses, 
     sendResponse, 
     getParticipantsLists, 
+    getEmail,
     deleteReunion, 
     leaveReunion, 
     getProfileParticipants, 

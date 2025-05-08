@@ -13,6 +13,7 @@ router.get('/reponse/:reunion_id/:user_id', controller.getGetReponses);
 router.post('/reponse', controller.postSendReponse);
 
 router.get('/participants/:reunion_id', controller.getParticipantsLists);
+router.post('/get-email', controller.postGetEmail);
 
 router.post('/delete', controller.postDeleteReunion);
 router.post('/leave', controller.postLeaveReunion);
