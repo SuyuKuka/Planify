@@ -83,7 +83,6 @@ document.addEventListener("click", e => {
         return;
     }
 
-    console.log(target.id);
     if (["reunion-details", "details-button", "details-title"].includes(target.id)) {
         e.stopPropagation();
         e.preventDefault();
@@ -151,11 +150,11 @@ document.querySelectorAll('.reunion-button').forEach(button => {
         );
 
         if (reunionUserId === currentUserId) {
-            document.getElementById("edit-reunion").style.display = "inline-block";
+            document.getElementById("add-participant").style.display = "inline-block";
             document.getElementById("delete-reunion").style.display = "inline-block";
             document.getElementById("leave-reunion").style.display = "none";
         } else {
-            document.getElementById("edit-reunion").style.display = "none";
+            document.getElementById("add-participant").style.display = "none";
             document.getElementById("delete-reunion").style.display = "none";
             document.getElementById("leave-reunion").style.display = "inline-block";
         }
@@ -239,7 +238,14 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
                         </li>`;
                 }
             }).join('') +
-        "</ul>";
+            "</ul>" + 
+            `<div id="overlay-add-participant" class="overlay">
+				<div class="form-group">
+					<h4>Ajouter un participant : </h4>
+					<input type="email" id="participant-email" placeholder="exemple@domaine.com" class="form-control">
+					<button id="add-participant" class="btn btn-success">Ajouter</button>
+				</div>
+			</div>`;
         } else {
             listContainer.innerHTML = "<p>Aucun participant.</p>";
         }
@@ -249,9 +255,10 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
     }
 
     deleteReunion(reunionId);
-    leaveReunion(reunionId, userId);
+    leaveReunion(reunionId);
     profilParticipant();
     deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots);
+    addParticipant(reunionId, reunionName, userId, userIdOrga, slots);
 }
 
 async function handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, value) {
@@ -289,7 +296,12 @@ async function deleteReunion(reunionId) {
         e.preventDefault();
         if (!confirm("Êtes-vous sûr de vouloir supprimer cette réunion ?")) return;
         try {
-            window.location.href = `/delete/${reunionId}`;
+            await fetch('/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reunion_id: reunionId })
+            });
+            window.location.href = "/";
         } catch (err) {
             console.error(err);
             alert("Erreur réseau.");
@@ -297,12 +309,17 @@ async function deleteReunion(reunionId) {
     });
 }
 
-async function leaveReunion(reunionId, userId) {
+async function leaveReunion(reunionId) {
     document.getElementById('leave-reunion').addEventListener('click', async (e) => {
         e.preventDefault();
         if (!confirm("Êtes-vous sûr de vouloir quitter cette réunion ?")) return;
         try {
-            window.location.href = `/leave/${reunionId}`;
+            await fetch('/leave', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reunion_id: reunionId })
+            });
+            window.location.href = "/";
         } catch (err) {
             console.error(err);
             alert("Erreur réseau.");
@@ -318,7 +335,7 @@ function profilParticipant() {
             if (!confirmed) return;
             try {
                 const res = await fetch(`/profil/${email}`, {
-                    method: 'GET',
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                 });
                 
@@ -340,7 +357,7 @@ function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
 
             try {
                 const res = await fetch(`/remove/${reunionId}/${email}`, {
-                    method: 'GET',
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                 });
 
@@ -356,3 +373,37 @@ function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
         });
     });
 }
+
+function addParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
+    document.getElementById('add-participant').addEventListener('click', async function (e) {
+        e.preventDefault();
+        const email = document.getElementById('participant-email').value;
+        if (!email) {
+            alert("Veuillez entrer un email valide.");
+            return;
+        }
+    
+        try {
+            const res = await fetch(`/add-participant/${reunionId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+    
+            if (res.ok) {
+                alert("Participant ajouté avec succès.");
+                showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots);
+                toggleOverlay(false, document.getElementById('overlay-add-participant'), show => displayOverlay = show);
+            } else {
+                alert("Erreur lors de l'ajout.");
+            }
+        } catch (err) {
+            console.error("Erreur réseau :", err);
+            alert("Erreur réseau.");
+        }
+    });
+}
+
+// document.getElementById('add-participant').addEventListener('click', function () {
+//     document.getElementById('participant-email').value = '';
+// });

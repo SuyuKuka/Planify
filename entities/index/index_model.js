@@ -187,6 +187,15 @@ async function removeParticipant(reunion_id, email) {
     }
 }
 
+async function addParticipant(reunion_id, email) {
+    const client = await getPool().connect();
+    try {
+        await client.query('INSERT INTO participants (reunion_id, email) VALUES ($1, $2)', [reunion_id, email]);
+    } finally {
+        client.release();
+    }
+}
+
 module.exports = { 
     getInfo, 
     prefixSearch, 
@@ -198,5 +207,6 @@ module.exports = {
     deleteReunion, 
     leaveReunion, 
     getProfileParticipants, 
-    removeParticipant 
+    removeParticipant,
+    addParticipant
 };

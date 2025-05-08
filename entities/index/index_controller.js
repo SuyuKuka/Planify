@@ -79,31 +79,42 @@ async function getParticipantsLists(req, res) {
     res.json(result);
 }
 
-async function getDeleteReunion(req, res) {
-    const { reunion_id } = req.params;
-    console.log(reunion_id);
+async function postDeleteReunion(req, res) {
+    const { reunion_id } = req.body;
     await Auth.deleteReunion(reunion_id);
     res.redirect('/');
 }
 
-async function getLeaveReunion(req, res) {
-    const { reunion_id } = req.params;
+async function postLeaveReunion(req, res) {
+    const { reunion_id } = req.body;
     const token = req.session.token;
     const { user_id } = await Auth.getInfo(token);
     await Auth.leaveReunion(reunion_id, user_id);
     res.redirect('/');
 }
 
-async function getProfileParticipants(req, res) {
+async function postProfileParticipants(req, res) {
     const { email } = req.params;
     const result = await Auth.getProfileParticipants(email);
     res.json(result);
 }
 
-async function getDeleteParticipant(req, res) {
+async function postDeleteParticipant(req, res) {
     const { reunion_id, email } = req.params;
     try {
         await Auth.removeParticipant(reunion_id, email);
+        res.sendStatus(200);
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+}
+
+async function postAddParticipant(req, res) {
+    const { reunion_id } = req.params;
+    const { email } = req.body;
+    try {
+        await Auth.addParticipant(reunion_id, email);
         res.sendStatus(200);
     } catch (err) {
         console.error(err);
@@ -118,8 +129,9 @@ module.exports = {
     getGetReponses, 
     postSendReponse, 
     getParticipantsLists, 
-    getDeleteReunion, 
-    getLeaveReunion, 
-    getProfileParticipants,
-    getDeleteParticipant 
+    postDeleteReunion, 
+    postLeaveReunion, 
+    postProfileParticipants,
+    postDeleteParticipant,
+    postAddParticipant
 }; 

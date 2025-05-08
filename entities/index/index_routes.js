@@ -14,10 +14,12 @@ router.post('/reponse', controller.postSendReponse);
 
 router.get('/participants/:reunion_id', controller.getParticipantsLists);
 
-router.get('/delete/:reunion_id', controller.getDeleteReunion);
-router.get('/leave/:reunion_id', controller.getLeaveReunion);
+router.post('/delete', controller.postDeleteReunion);
+router.post('/leave', controller.postLeaveReunion);
 
-router.get('/profil/:email', controller.getProfileParticipants);
-router.get('/remove/:reunion_id/:email', controller.getDeleteParticipant);
+router.post('/profil/:email', controller.postProfileParticipants);
+router.post('/remove/:reunion_id/:email', controller.postDeleteParticipant);
+
+router.post('/add-participant/:reunion_id', controller.postAddParticipant);
 
 module.exports = router;
