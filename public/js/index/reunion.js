@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-    console.log(responses);
     listDateTime(reunion_id, temp_id);
     listParticipant()
     profilParticipant();

@@ -71,23 +71,22 @@ function showOverlayReunion() {
     toggleOverlay(true, overlayReunion, show => displayOverlayReunion = show);
 }
 
+let reunionIdSelected;
 document.addEventListener("click", e => {
     const target = e.target;
 
     if (overlay.contains(target) || overlayReunion.contains(target)) return;
     if (target.id === "create-reunion") {
-        e.stopPropagation();
-        e.preventDefault();
         toggleOverlay(false, overlayReunion, show => displayOverlayReunion = show);
         toggleOverlay(!displayOverlay, overlay, show => displayOverlay = show, resetForm);
         return;
     }
 
     if (["reunion-details", "details-button", "details-title"].includes(target.id)) {
-        e.stopPropagation();
-        e.preventDefault();
         toggleOverlay(false, overlay, show => displayOverlay = show, resetForm);
         showOverlayReunion();
+        deleteReunion(reunionIdSelected);
+        leaveReunion(reunionIdSelected);
         return;
     }
 
@@ -104,12 +103,10 @@ document.addEventListener("click", e => {
 );
 
 $("#close-overlay").on("click", (e) => {
-    e.preventDefault();
     toggleOverlay(false, overlay, show => displayOverlay = show, resetForm);
 });
 
 $("#close-overlay-reunion").on("click", (e) => {
-    e.preventDefault();
     toggleOverlay(false, overlayReunion, show => displayOverlayReunion = show);
 });
 
@@ -146,8 +143,7 @@ document.querySelectorAll('.reunion-button').forEach(button => {
             button.dataset.name,
             currentUserId,
             reunionUserId,
-            JSON.parse(button.dataset.slots),
-            button
+            JSON.parse(button.dataset.slots)
         );
 
         const tmp = document.getElementById("add-participant");
@@ -160,14 +156,16 @@ document.querySelectorAll('.reunion-button').forEach(button => {
             document.getElementById("delete-reunion").style.display = "none";
             document.getElementById("leave-reunion").style.display = "inline-block";
         }
+        return button;
     });
 });
+
 
 function formatDateTime(dateString) {
     return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
+async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots) {
     const infoDiv = document.getElementById('right');
     infoDiv.innerHTML = '';
 
@@ -234,8 +232,6 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
     document.querySelectorAll('.slot').forEach(function (slot, e) {
         const yesBtn = slot.querySelector('.yes');
         const noBtn = slot.querySelector('.no');
-
-        console.log(e.target);
 
         yesBtn.addEventListener('click', function() {
             console.log("ifzajifzjaf");
@@ -334,14 +330,13 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         }
     }
 
+    reunionIdSelected = reunionId;
     showResults(reunionId);
-    deleteReunion(reunionId);
-    leaveReunion(reunionId);
     profilParticipant();
-    deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
-    addParticipant(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
-    removeSlot(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
-    addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
+    deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots);
+    addParticipant(reunionId, reunionName, userId, userIdOrga, slots);
+    removeSlot(reunionId, reunionName, userId, userIdOrga, slots);
+    addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots);
 }
 
 async function getUserEmail(userId) {
@@ -392,7 +387,13 @@ function resetReunionInfo() {
 }
 
 async function deleteReunion(reunionId) {
-    document.getElementById('delete-reunion').addEventListener('click', async (e) => {
+    const deleteButton = document.getElementById('delete-reunion');
+    deleteButton.onclick = null;
+
+    const oldClickHandler = deleteButton.onclick;
+    deleteButton.removeEventListener('click', oldClickHandler);
+    
+    deleteButton.addEventListener('click', async (e) => {
         e.preventDefault();
         if (!confirm("Êtes-vous sûr de vouloir supprimer cette réunion ?")) return;
         try {
@@ -401,7 +402,7 @@ async function deleteReunion(reunionId) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ reunion_id: reunionId })
             });
-            window.location.href = "/";
+            window.location.reload();
         } catch (err) {
             console.error(err);
             alert("Erreur réseau.");
@@ -411,7 +412,6 @@ async function deleteReunion(reunionId) {
 
 async function leaveReunion(reunionId) {
     document.getElementById('leave-reunion').addEventListener('click', async (e) => {
-        e.preventDefault();
         if (!confirm("Êtes-vous sûr de vouloir quitter cette réunion ?")) return;
         try {
             await fetch('/leave', {
@@ -461,7 +461,7 @@ function profilParticipant() {
     });
 }
 
-function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
+function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
     document.querySelectorAll('.remove-participant').forEach(button => {
         button.addEventListener('click', async function () {
             const email = button.closest('.list-p').querySelector('.participant-email').textContent;
@@ -477,7 +477,7 @@ function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots, re
 
                 if (res.ok) {
                     alert("Participant supprimé.");
-                    showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
+                    showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots);
                 } else {
                     alert("Erreur lors de la suppression.");
                 }
@@ -488,9 +488,8 @@ function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots, re
     });
 }
 
-function addParticipant(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
+function addParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
     document.getElementById('add-participant').addEventListener('click', async function (e) {
-        e.preventDefault();
         const email = document.getElementById('participant-email').value;
         if (!email) {
             alert("Veuillez entrer un email valide.");
@@ -506,8 +505,7 @@ function addParticipant(reunionId, reunionName, userId, userIdOrga, slots, reuni
     
             if (res.ok) {
                 alert("Participant ajouté avec succès.");
-                showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
-                document.getElementById('participant-email').value = '';
+                window.location.reload();
             }  else if (response.status === 400) {
                 alert("L'utilisateur est déjà dans la reunion.");
             } else {
@@ -573,7 +571,7 @@ async function showResults(reunionId) {
     }
 }
 
-function removeSlot(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
+function removeSlot(reunionId, reunionName, userId, userIdOrga, slots) {
     document.querySelectorAll('.remove-slot').forEach(btn => {
         btn.addEventListener('click', async function (e) {
             const slot = e.target.closest('.slot');
@@ -591,17 +589,14 @@ function removeSlot(reunionId, reunionName, userId, userIdOrga, slots, reunionBu
                 }).catch(err => console.error('Erreur suppression slot :', err));
 
                 if (res.ok) {
-                    alert("Créneau supprimé.");
-
-                    // window.location.reload();
-                    showOverlayReunion();
+                    window.location.reload();
                 }
             }
         });
     });
 }
 
-function addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
+function addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots) {
     document.addEventListener("click", async function (e) {
         if (e.target && e.target.id === "add-datetime-after") {
             const groups = document.querySelectorAll('.datetime-group-after');
@@ -618,9 +613,7 @@ function addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots, reu
                     }).catch(err => console.error('Erreur ajout slot :', err));
 
                     if (res.ok) {
-                        dateInput.value = "";
-                        timeInput.value = "";
-
+                        window.location.reload();
                     } else {
                         alert("Une erreur est survenue lors de l'ajout du créneau.");
                     }

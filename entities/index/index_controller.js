@@ -69,7 +69,6 @@ async function getGetReponses(req, res) {
 
 async function postSendReponse(req, res) {
     const { reunion_id, user_id, date, time, response } = req.body;
-    console.log(reunion_id, user_id, date, time, response);
     await Auth.sendResponse(reunion_id, user_id, date, time, response);
     res.redirect('/');
 }
