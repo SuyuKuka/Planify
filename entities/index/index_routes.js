@@ -25,4 +25,9 @@ router.post('/add-participant/:reunion_id', controller.postAddParticipant);
 
 router.post('/all-responses', controller.postGetAllResponses); 
 
+router.post('/delete-slot', controller.postDeleteSlot);
+router.post('/add-slot', controller.postAddSlot);
+
+router.get('/reunion/:token', controller.getParticipateReunion);
+
 module.exports = router;

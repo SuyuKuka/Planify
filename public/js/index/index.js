@@ -146,7 +146,8 @@ document.querySelectorAll('.reunion-button').forEach(button => {
             button.dataset.name,
             currentUserId,
             reunionUserId,
-            JSON.parse(button.dataset.slots)
+            JSON.parse(button.dataset.slots),
+            button
         );
 
         const tmp = document.getElementById("add-participant");
@@ -166,7 +167,7 @@ function formatDateTime(dateString) {
     return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots) {
+async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
     const infoDiv = document.getElementById('right');
     infoDiv.innerHTML = '';
 
@@ -201,6 +202,20 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
 
             const key = `${date}_${slot.time}`;
             const res = responses[key];
+            if (userId === userIdOrga) {
+                return `
+                    <div class="slot" data-date="${date}" data-time="${slot.time}" data-response="${res}">
+                        <div class="remove-slot">
+                            &times;
+                        </div>
+                        <div>${date} à ${slot.time}</div>
+                        <div class="choice">
+                            <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
+                            <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
+                        </div>
+                    </div>
+                    `;
+            }
             return `
                 <div class="slot" data-date="${date}" data-time="${slot.time}" data-response="${res}">
                     <div>${date} à ${slot.time}</div>
@@ -223,6 +238,18 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         yesBtn.addEventListener('click', () => handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, true));
         noBtn.addEventListener('click', () => handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, false));
     });
+
+    if (userId === userIdOrga) {        
+        infoDiv.innerHTML += `<div class="form-group-after" id="dates-container">
+                                <div class="datetime-group-after">
+                                    <input type="date" name="dates">
+                                    <input type="time" name="times">
+                                </div>
+                            </div>
+                            <button type="button" id="add-datetime-after" class="btn btn-sm btn-outline-secondary mb-3">
+                                + Ajouter une date/heure
+                            </button>`
+    }
 
     const userIdEmail = await getUserEmail(userId);
     const userIdOrgaEmail = await getUserEmail(userIdOrga);
@@ -299,8 +326,10 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
     deleteReunion(reunionId);
     leaveReunion(reunionId);
     profilParticipant();
-    deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots);
-    addParticipant(reunionId, reunionName, userId, userIdOrga, slots);
+    deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
+    addParticipant(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
+    removeSlot(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
+    addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
 }
 
 async function getUserEmail(userId) {
@@ -420,7 +449,7 @@ function profilParticipant() {
     });
 }
 
-function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
+function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
     document.querySelectorAll('.remove-participant').forEach(button => {
         button.addEventListener('click', async function () {
             const email = button.closest('.list-p').querySelector('.participant-email').textContent;
@@ -437,7 +466,7 @@ function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
 
                 if (res.ok) {
                     alert("Participant supprimé.");
-                    showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots);
+                    showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
                 } else {
                     alert("Erreur lors de la suppression.");
                 }
@@ -448,7 +477,7 @@ function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
     });
 }
 
-function addParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
+function addParticipant(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
     document.getElementById('add-participant').addEventListener('click', async function (e) {
         e.preventDefault();
         const email = document.getElementById('participant-email').value;
@@ -466,7 +495,7 @@ function addParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
     
             if (res.ok) {
                 alert("Participant ajouté avec succès.");
-                showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots);
+                showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots, reunionButton);
                 document.getElementById('participant-email').value = '';
             }  else if (response.status === 400) {
                 alert("L'utilisateur est déjà dans la reunion.");
@@ -531,4 +560,63 @@ async function showResults(reunionId) {
     } catch (err) {
         console.error("Erreur lors du chargement des résultats :", err);
     }
+}
+
+function removeSlot(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
+    document.querySelectorAll('.remove-slot').forEach(btn => {
+        btn.addEventListener('click', async function (e) {
+            const slot = e.target.closest('.slot');
+            if (slot) {
+                const date = slot.getAttribute('data-date');
+                const time = slot.getAttribute('data-time');
+
+                const confirmed = confirm(`Supprimer le créneau ${date} à ${time} ?`);
+                if (!confirmed) return;
+                
+                const res = await fetch(`/delete-slot`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reunion_id: reunionId, date, time })
+                }).catch(err => console.error('Erreur suppression slot :', err));
+
+                if (res.ok) {
+                    alert("Créneau supprimé.");
+
+                    // window.location.reload();
+                    showOverlayReunion();
+                }
+            }
+        });
+    });
+}
+
+function addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots, reunionButton) {
+    document.addEventListener("click", async function (e) {
+        if (e.target && e.target.id === "add-datetime-after") {
+            const groups = document.querySelectorAll('.datetime-group-after');
+            for (let group of groups) {
+                const dateInput = group.querySelector('input[type="date"]');
+                const timeInput = group.querySelector('input[type="time"]');
+                const date = dateInput.value;
+                const time = timeInput.value;
+                if (dateInput && timeInput && date && time) {
+                    const res = await fetch(`/add-slot`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reunion_id: reunionId, date: formatDateTime(date), time })
+                    }).catch(err => console.error('Erreur ajout slot :', err));
+
+                    if (res.ok) {
+                        dateInput.value = "";
+                        timeInput.value = "";
+
+                    } else {
+                        alert("Une erreur est survenue lors de l'ajout du créneau.");
+                    }
+                } else {
+                    alert("Veuillez choisir une date et une heure.");
+                }
+            }
+        }
+    });
 }

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Planify</title>
+		<link rel="shortcut icon" href="/images/favicon.ico">
+        <!-- css -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/nav.css" rel="stylesheet">
+        <link href="/css/index/reunion.css" rel="stylesheet">
+	</head>
+	<body>
+        <%- include('../nav') %>
+        <div class="container">
+            <h2>Informations sur la reunion</h2>
+            <h4>Proposition de reunion</h4>
+            <p>Réunion <%= result.name  %>  <br>
+                (Créer par: <%= result.user_id  %>)
+            </p>
+            <div id="list-proposition"><% result.dateTime; result.responses %></div>
+
+            <h4>Participants</h4>
+            <div id="list-participants"><% result.participants %></div>
+        </div>
+		<!-- script -->
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<script src="/js/bootstrap.bundle.min.js"></script>
+	</body>
+</html>

@@ -141,6 +141,38 @@ async function postGetAllResponses(req, res) {
     res.json(result);
 }
 
+async function postDeleteSlot(req, res) {
+    const { reunion_id, date, time } = req.body;
+    try {
+        await Auth.deleteSlot(reunion_id, date, time);
+        res.sendStatus(200);
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+}
+
+async function postAddSlot(req, res) {
+    const { reunion_id, date, time } = req.body;
+    try {
+        await Auth.addSlot(reunion_id, date, time);
+        res.sendStatus(200);
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
+}
+
+async function getParticipateReunion(req, res) {
+    const { token } = req.params;
+    const result = await Auth.participateReunion(token);
+    console.log(result);
+    res.render('index/reunion', { 
+        token : undefined,
+        result
+    });
+}
+
 module.exports = { 
     getIndex, 
     getSearchProfil, 
@@ -154,5 +186,8 @@ module.exports = {
     postProfileParticipants,
     postDeleteParticipant,
     postAddParticipant,
-    postGetAllResponses
+    postGetAllResponses,
+    postDeleteSlot,
+    postAddSlot,
+    getParticipateReunion
 }; 

@@ -68,12 +68,10 @@ CREATE TABLE response (
 CREATE TABLE no_account (
     reunion_id INT NOT NULL,
     email VARCHAR(32) NOT NULL,
-    date DATE NOT NULL,
-    time TIME NOT NULL,
-    response BOOLEAN,
-    PRIMARY KEY (reunion_id, email, date, time),
+    token TEXT NOT NULL,
+    PRIMARY KEY (reunion_id, email),
     FOREIGN KEY (reunion_id) REFERENCES reunion(id),
-    UNIQUE (reunion_id, email, date, time)
+    UNIQUE (reunion_id, email)
 );
 
 ALTER TABLE proposition_date
@@ -86,6 +84,13 @@ ON DELETE CASCADE;
 ALTER TABLE participants
 DROP CONSTRAINT participants_reunion_id_fkey,
 ADD CONSTRAINT participants_reunion_id_fkey
+FOREIGN KEY (reunion_id)
+REFERENCES reunion(id)
+ON DELETE CASCADE;
+
+ALTER TABLE no_account
+DROP CONSTRAINT no_account_reunion_id_fkey,
+ADD CONSTRAINT no_account_reunion_id_fkey
 FOREIGN KEY (reunion_id)
 REFERENCES reunion(id)
 ON DELETE CASCADE;

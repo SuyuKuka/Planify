@@ -50,7 +50,7 @@ h2 {
 	margin-left: 30px;
 	margin-right: 30px;
 	gap: 5px;
-	max-height: 60vh;
+	max-height: 54vh;
 	overflow-y: auto;
 	padding-right: 10px;
 }
@@ -180,13 +180,12 @@ p {
 }
 
 #reunion-name {
-	margin-bottom: 10px;
-	padding-bottom: 10px;
+	margin-bottom: 5px;
 }
 
 #reunion-slots {
 	overflow-y: auto;
-	max-height: 300px;
+	max-height: 242px;
 }
 
 .slot {
@@ -195,11 +194,21 @@ p {
 	display: flex;
 	align-items: center;
 	flex-direction: column;
-	padding-top: 20px;
-	padding-bottom: 20px;
+	padding-top: 18px;
+	padding-bottom: 18px;
 	border: 1px solid black;
 	border-radius: 5px;
+	position: relative;
 	margin-bottom: 10px;
+}
+
+.remove-slot {
+    position: absolute; 
+    top: 0;
+    right: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .yes,
@@ -342,6 +351,7 @@ p {
 	padding-right: 20px;
 	background: rgb(255, 56, 56);
 	cursor: pointer;
+	color: white;
 }
 
 #delete-reunion:hover, #leave-reunion:hover {
@@ -351,6 +361,23 @@ p {
 #delete-reunion:active, #leave-reunion:active {
 	transform: scale(0.99);
 	background-color: rgb(240, 28, 28);
+}
+
+.datetime-group-after {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 5px;
+}
+
+.datetime-group-after input {
+	background-color: white;
+	border: 1px solid black;
+	border-radius: 5px;
+	padding: 3px;
+}
+
+.datetime-group-after input[type="date"] {
+	border-bottom: none;
 }
 
 /* Ordre selon taille écran */

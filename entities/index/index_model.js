@@ -1,4 +1,6 @@
 const { getPool } = require('../../config/database/db');
+const encrypt = require('../../services/encryption/encrypt');
+const mail = require('../../services/mailer/mailer');
 
 async function getInfo(token) {
     const client = await getPool().connect();
@@ -61,6 +63,30 @@ async function createReunion(name, dateTimePairs, participants, user_id, email) 
                 'INSERT INTO participants (reunion_id, email) VALUES ($1, $2)',
                 [reunion_id, participant]
             );
+
+            const noAcc = await client.query('SELECT * FROM "user" WHERE email = $1', [participant]);
+            if (noAcc.rows.length === 0) {
+                const token = encrypt.generateToken();
+
+                const result = await client.query('SELECT * FROM no_account WHERE reunion_id = $1 AND email = $2', [reunion_id, participant]);
+                if (result.rows.length > 0) {
+                    await client.query('UPDATE no_account SET token = $1 WHERE reunion_id = $2 AND email = $3', [token, reunion_id, participant]);
+                    continue;
+                }
+
+                await client.query(
+                    'INSERT INTO no_account (reunion_id, email, token) VALUES ($1, $2, $3)',
+                    [reunion_id, participant, token]
+                );
+
+                await mail.transporter.sendMail({
+                    from: 'programmationwebprojet@gmail.com',
+                    to: participant,
+                    subject: 'Participation à une reunion',
+                    html: `<h1>Bonjour ${participant},</h1><br> L'utilisateur ${email} vous a invité à la reunion ${name}.<br>
+                            Vous pouvez répondre aux créneaux proposés en <a href="http://localhost:8080/reunion/${token}">cliquant ici</a>, sans à avoir de compte`
+                });
+            }
         }
         await client.query('COMMIT');
     } catch (error) {
@@ -219,11 +245,44 @@ async function removeParticipant(reunion_id, email) {
 async function addParticipant(reunion_id, email) {
     const client = await getPool().connect();
     try {
-        const res = await client.query('SELECT * FROM participants WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
+        let res = await client.query('SELECT * FROM participants WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
         if (res.rows.length > 0) {
             return -1;
         }
+
+        res = await client.query('SELECT * FROM no_account WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
+        if (res.rows.length > 0) {
+            return -1;
+        }
+
         await client.query('INSERT INTO participants (reunion_id, email) VALUES ($1, $2)', [reunion_id, email]);
+        const noAcc = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
+        if (noAcc.rows.length === 0) {
+            const token = encrypt.generateToken();
+
+            const result = await client.query('SELECT * FROM no_account WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
+            if (result.rows.length > 0) {
+                await client.query('UPDATE no_account SET token = $1 WHERE reunion_id = $2 AND email = $3', [token, reunion_id, email]);
+                
+            } else {
+                await client.query(
+                    'INSERT INTO no_account (reunion_id, email, token) VALUES ($1, $2, $3)',
+                    [reunion_id, email, token]
+                );
+            }
+
+            const reunion = await client.query('SELECT * FROM reunion WHERE id = $1', [reunion_id]);
+            const name = reunion.rows[0].name;
+            const orga = reunion.rows[0].user_id;
+            
+            await mail.transporter.sendMail({
+                from: 'programmationwebprojet@gmail.com',
+                to: email,
+                subject: 'Participation à une reunion',
+                html: `<h1>Bonjour ${email},</h1><br> L'utilisateur ${orga} vous a invité à la reunion ${name}.<br>
+                        Vous pouvez répondre aux créneaux proposés en <a href="http://localhost:8080/reunion/${token}">cliquant ici</a>, sans à avoir de compte`
+            });
+        }
         return 0;
     } finally {
         client.release();
@@ -235,6 +294,71 @@ async function getAllResponses(reunion_id) {
     try {
         const result = await client.query('SELECT reunion_id, user_id, TO_CHAR(date, \'DD/MM/YYYY\') AS date, time, response FROM response WHERE reunion_id = $1', [reunion_id]);
         return result.rows;
+    } finally {
+        client.release();
+    }
+}
+
+async function deleteSlot(reunion_id, date, time) {
+    const client = await getPool().connect();
+    try {
+        await client.query('DELETE FROM proposition_date WHERE reunion_id = $1 AND date = $2 AND time = $3', [reunion_id, parseDate(date), time]);
+
+        const res = await client.query('SELECT * FROM proposition_date WHERE reunion_id = $1', [reunion_id]);
+        if (res.rows.length === 0) {
+            await client.query('DELETE FROM reunion WHERE id = $1', [reunion_id]);
+        }
+    } finally {
+        client.release();
+    }
+}
+
+async function addSlot(reunion_id, date, time) {
+    const client = await getPool().connect();
+    try {
+        await client.query('INSERT INTO proposition_date (reunion_id, date, time) VALUES ($1, $2, $3)', [reunion_id, parseDate(date), time]);
+    } catch (error) {
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+async function participateReunion(token) {
+    const client = await getPool().connect();
+    try {
+        const noAcc = await client.query('SELECT * FROM no_account WHERE token = $1', [token]);
+        if (noAcc.rows.length === 0) {
+            return -1;
+        } 
+        const reunion_id = noAcc.rows[0].reunion_id;
+
+        const reu = await client.query('SELECT * FROM reunion WHERE id = $1', [reunion_id]);
+        if (reu.rows.length === 0) {
+            return -1;
+        }
+
+        const prop = await client.query('SELECT * FROM proposition_date WHERE reunion_id = $1', [reunion_id]);
+        if (prop.rows.length === 0) {
+            return -1;
+        }
+
+        const parti = await client.query('SELECT * FROM participants WHERE reunion_id = $1', [reunion_id]);
+        if (parti.rows.length === 0) {
+            return -1;
+        }
+
+        const rep = await client.query('SELECT reunion_id, user_id, TO_CHAR(date, \'DD/MM/YYYY\') AS date, time, response FROM response WHERE reunion_id = $1', [reunion_id]);
+        const info = {
+            reunion_id: noAcc.rows[0].reunion_id,
+            email: noAcc.rows[0].email,
+            name: reu.rows[0].name,
+            user_id: reu.rows[0].user_id,
+            dateTime: prop.rows,
+            participants: parti.rows,
+            responses: rep.rows
+        };
+        return info;
     } finally {
         client.release();
     }
@@ -254,5 +378,8 @@ module.exports = {
     getProfileParticipants, 
     removeParticipant,
     addParticipant,
-    getAllResponses
+    getAllResponses,
+    deleteSlot,
+    addSlot,
+    participateReunion
 };
