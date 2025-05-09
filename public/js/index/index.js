@@ -192,7 +192,7 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         </div>
         <div class="info-reunion" id="info-reunion">
         <p>Proposition de la réunion :</p>
-        <div id="reunion-name">Réunion : ${reunionName}<br>(Créer par : ${userIdOrga})</div>
+        <div id="reunion-name">Créer par : ${userIdOrga}</div>
         <div id="reunion-slots">`;
 
     if (slots?.length) {
@@ -231,16 +231,26 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
 
     infoDiv.innerHTML = slotsHtml + '</div></div>';
 
-    document.querySelectorAll('.slot').forEach(slot => {
+    document.querySelectorAll('.slot').forEach(function (slot, e) {
         const yesBtn = slot.querySelector('.yes');
         const noBtn = slot.querySelector('.no');
 
-        yesBtn.addEventListener('click', () => handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, true));
-        noBtn.addEventListener('click', () => handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, false));
+        console.log(e.target);
+
+        yesBtn.addEventListener('click', function() {
+            console.log("ifzajifzjaf");
+            handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, true)
+        });
+
+        noBtn.addEventListener('click', function() {
+            console.log("aaaaadazfza");
+            handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, false)
+        });
     });
 
     if (userId === userIdOrga) {        
         infoDiv.innerHTML += `<div class="form-group-after" id="dates-container">
+                                Dates et heures :
                                 <div class="datetime-group-after">
                                     <input type="date" name="dates">
                                     <input type="time" name="times">
@@ -257,6 +267,8 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         const resPart = await fetch(`/participants/${reunionId}`);
         const participants = await resPart.json();
         const listContainer = document.getElementById("list-participants");
+
+        document.getElementById("reunion-title").innerHTML = "Information sur la reunion<br>" + reunionName;
 
         if (participants.length > 0) {
             let html = "" +
@@ -348,6 +360,7 @@ async function getUserEmail(userId) {
 }
 
 async function handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, value) {
+    console.log("tmp");
     const current = slot.dataset.response === String(value);
     const newResponse = current ? null : value;
     slot.dataset.response = newResponse;
@@ -420,7 +433,6 @@ function profilParticipant() {
     participantElements.forEach((element) => {
         element.addEventListener('click', async function () {
             const email = element.closest('.list-p').querySelector('.participant-email').textContent.trim();
-            console.log(`Email du participant: ${email}`);
 
             const confirmed = confirm(`Vous allez voir le profil de ${email} ?`);
             if (!confirmed) return;
@@ -457,7 +469,6 @@ function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots, re
             if (!confirmed) return;
 
             try {
-                console.log(email);
                 const res = await fetch(`/remove`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -549,7 +560,7 @@ async function showResults(reunionId) {
             const resultDiv = document.createElement("div");
             resultDiv.className = "resultats";
             resultDiv.innerHTML = `
-                <small>Oui : ${data.oui} / Non : ${data.non} / Total : ${data.total}</small>
+                <small>✅ : ${data.oui} / ❌ : ${data.non} / 👥 : ${data.total}</small>
             `;
 
             const oldResult = slot.querySelector('.resultats');

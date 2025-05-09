@@ -2,6 +2,10 @@
     box-sizing: border-box;
 }
 
+body {
+	overflow-y: hidden;
+}
+
 /* OVERLAY */
 
 #overlay {
@@ -36,7 +40,6 @@
 	height: 90%;
 	background: rgb(243, 249, 255); 
 	justify-content: center;
-	/* align-items: center; */
 	z-index: 1;
 	border-radius: 30px;
 	flex-direction: column;
@@ -185,7 +188,7 @@ p {
 
 #reunion-slots {
 	overflow-y: auto;
-	max-height: 242px;
+	max-height: 230px;
 }
 
 .slot {
@@ -195,7 +198,7 @@ p {
 	align-items: center;
 	flex-direction: column;
 	padding-top: 18px;
-	padding-bottom: 18px;
+	padding-bottom: 15px;
 	border: 1px solid black;
 	border-radius: 5px;
 	position: relative;
@@ -237,6 +240,10 @@ p {
 }
 
 #overlay-reunion h2 {
+	text-align: center;
+}
+
+#overlay-reunion h3 {
 	text-align: center;
 }
 

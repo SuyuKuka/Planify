@@ -61,12 +61,12 @@ CREATE TABLE response (
     response BOOLEAN,
     PRIMARY KEY (reunion_id, user_id, date, time),
     FOREIGN KEY (reunion_id) REFERENCES reunion(id),
-    FOREIGN KEY (user_id) REFERENCES "user"(user_id),
     UNIQUE (reunion_id, user_id, date, time)
 );
 
 CREATE TABLE no_account (
     reunion_id INT NOT NULL,
+    profilepicture TEXT NOT NULL,
     email VARCHAR(32) NOT NULL,
     token TEXT NOT NULL,
     PRIMARY KEY (reunion_id, email),

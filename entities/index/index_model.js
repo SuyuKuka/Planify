@@ -75,8 +75,8 @@ async function createReunion(name, dateTimePairs, participants, user_id, email) 
                 }
 
                 await client.query(
-                    'INSERT INTO no_account (reunion_id, email, token) VALUES ($1, $2, $3)',
-                    [reunion_id, participant, token]
+                    'INSERT INTO no_account (reunion_id, profilepicture, email, token) VALUES ($1, $2, $3, $4)',
+                    [reunion_id, "/images/profile/default.png", participant, token]
                 );
 
                 await mail.transporter.sendMail({
@@ -245,31 +245,25 @@ async function removeParticipant(reunion_id, email) {
 async function addParticipant(reunion_id, email) {
     const client = await getPool().connect();
     try {
+        // Check si email est déjà dans la reunion
         let res = await client.query('SELECT * FROM participants WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
         if (res.rows.length > 0) {
             return -1;
         }
 
+        // Check si email sans compte est déjà dans la reunion
         res = await client.query('SELECT * FROM no_account WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
         if (res.rows.length > 0) {
             return -1;
         }
 
+        // Ajout de email
         await client.query('INSERT INTO participants (reunion_id, email) VALUES ($1, $2)', [reunion_id, email]);
+        // Check si l'email appartient a un compte
         const noAcc = await client.query('SELECT * FROM "user" WHERE email = $1', [email]);
         if (noAcc.rows.length === 0) {
+            // Token comme un user_id
             const token = encrypt.generateToken();
-
-            const result = await client.query('SELECT * FROM no_account WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
-            if (result.rows.length > 0) {
-                await client.query('UPDATE no_account SET token = $1 WHERE reunion_id = $2 AND email = $3', [token, reunion_id, email]);
-                
-            } else {
-                await client.query(
-                    'INSERT INTO no_account (reunion_id, email, token) VALUES ($1, $2, $3)',
-                    [reunion_id, email, token]
-                );
-            }
 
             const reunion = await client.query('SELECT * FROM reunion WHERE id = $1', [reunion_id]);
             const name = reunion.rows[0].name;
@@ -338,15 +332,35 @@ async function participateReunion(token) {
             return -1;
         }
 
-        const prop = await client.query('SELECT * FROM proposition_date WHERE reunion_id = $1', [reunion_id]);
-        if (prop.rows.length === 0) {
-            return -1;
-        }
+        const prop = await client.query(`
+            SELECT pd.date, pd.time, r.response
+            FROM proposition_date pd
+            LEFT JOIN response r
+            ON pd.reunion_id = r.reunion_id
+            AND pd.date = r.date
+            AND pd.time = r.time
+            AND r.user_id = $2
+            WHERE pd.reunion_id = $1
+            ORDER BY pd.date, pd.time
+        `, [reunion_id, token]);
 
-        const parti = await client.query('SELECT * FROM participants WHERE reunion_id = $1', [reunion_id]);
-        if (parti.rows.length === 0) {
-            return -1;
-        }
+        const parti = await client.query(
+            `SELECT 
+                participants.email, 
+                "user".profilepicture
+            FROM participants 
+            RIGHT JOIN "user" ON participants.email = "user".email
+            WHERE reunion_id = $1
+
+            UNION
+
+            SELECT 
+                no_account.email,
+                profilepicture
+            FROM no_account
+            WHERE reunion_id = $1`, 
+            [reunion_id]
+        );
 
         const rep = await client.query('SELECT reunion_id, user_id, TO_CHAR(date, \'DD/MM/YYYY\') AS date, time, response FROM response WHERE reunion_id = $1', [reunion_id]);
         const info = {

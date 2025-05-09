@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
 function generateToken() {
-    return crypto.randomBytes(20).toString('hex');
+  return crypto.randomBytes(16).toString('hex');
 }
 
 async function hash(content) {

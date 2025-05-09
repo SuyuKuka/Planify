@@ -45,7 +45,7 @@ async function getProfile(req, res) {
     const { user_id, username, profilepicture } = user;
     res.render('user/profil', {
         token,
-        user_username,
+        user_username: user_username? user_username : undefined,
         user_id, username, profilepicture,
         name : undefined, surname : undefined, email : undefined, birthdate : undefined
     });
