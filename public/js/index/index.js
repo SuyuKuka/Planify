@@ -206,8 +206,8 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
                         <div class="remove-slot">
                             &times;
                         </div>
-                        <div>${date} à ${slot.time}</div>
-                        <div class="choice">
+                        <div style="margin-bottom: 10px;">${date} à ${slot.time}</div>
+                        <div class="choice" style="display: none;">
                             <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
                             <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
                         </div>
@@ -229,17 +229,15 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
 
     infoDiv.innerHTML = slotsHtml + '</div></div>';
 
-    document.querySelectorAll('.slot').forEach(function (slot, e) {
+    document.querySelectorAll('.slot').forEach(function (slot) {
         const yesBtn = slot.querySelector('.yes');
         const noBtn = slot.querySelector('.no');
 
         yesBtn.addEventListener('click', function() {
-            console.log("ifzajifzjaf");
             handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, true)
         });
 
         noBtn.addEventListener('click', function() {
-            console.log("aaaaadazfza");
             handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, false)
         });
     });
@@ -333,10 +331,12 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
     reunionIdSelected = reunionId;
     showResults(reunionId);
     profilParticipant();
-    deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots);
-    addParticipant(reunionId, reunionName, userId, userIdOrga, slots);
-    removeSlot(reunionId, reunionName, userId, userIdOrga, slots);
-    addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots);
+    if(userId === userIdOrga) {
+        deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots);
+        addParticipant(reunionId, reunionName, userId, userIdOrga, slots);
+        removeSlot(reunionId, reunionName, userId, userIdOrga, slots);
+        addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots);
+    }
 }
 
 async function getUserEmail(userId) {

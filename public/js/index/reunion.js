@@ -93,7 +93,7 @@ function listParticipant() {
         container.innerHTML = parsedParticipants
             .map(p => `
                 <div class="participant-email">
-                    <img src="${p.profilepicture}" alt="Photo de profil" class="profile-pic" style="width: 50px; height: 50px; object-fit: cover;" />
+                    <img src="${p.profilepicture}" alt="Photo de profil" class="profile-pic" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" />
                     <p>${p.email}</p>
                     ${email === p.email ? '' : '<button class="look-participant">Profil</button>'}
                 </div>`)

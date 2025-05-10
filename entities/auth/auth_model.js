@@ -43,6 +43,13 @@ async function addUser(data) {
         const insertQuery = 'INSERT INTO "user" (user_id, surname, name, birthdate, username, email, password, profilepicture) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
         const dataList = [user_id, surname, name, birthdate, username, email, hashedPassword, profilepicture];
         await client.query(insertQuery, dataList);
+
+        const user_no_acc = await client.query('SELECT * FROM no_account WHERE email = $1 LIMIT 1', [email]);
+        if (user_no_acc.rowCount > 0) {
+            await client.query('UPDATE response SET user_id = $1 WHERE user_id = $2', [user_id, user_no_acc.rows[0].user_id]);
+            await client.query('UPDATE response SET user_id = $1 WHERE user_id = $2', [user_id, user_no_acc.rows[0].user_id]);
+            await client.query('DELETE FROM no_account WHERE email = $1', [email]);
+        }
     
         // Par sécurité, on retire les potentiels tokens 99.9% impossible
         await destroyOldIDToken(user_id, client);

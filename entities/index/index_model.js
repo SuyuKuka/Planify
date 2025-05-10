@@ -207,6 +207,7 @@ async function deleteReunion(reunion_id) {
 async function leaveReunion(reunion_id, user_id) {
     const client = await getPool().connect();
     try {
+        await client.query('DELETE FROM response WHERE reunion_id = $1 AND user_id = $2', [reunion_id, user_id]);
         await client.query('DELETE FROM participants WHERE reunion_id = $1 AND email = (SELECT email FROM "user" WHERE user_id = $2)', [reunion_id, user_id]);
     } finally {
         client.release();
@@ -273,7 +274,7 @@ async function addParticipant(reunion_id, email) {
                 from: 'programmationwebprojet@gmail.com',
                 to: email,
                 subject: 'Participation à une reunion',
-                html: `<h1>Bonjour ${email},</h1><br> L'utilisateur ${orga} vous a invité à la reunion ${name}.<br>
+                html: `<h3>Bonjour ${email},</h3><br> L'utilisateur ${orga} vous a invité à la reunion ${name}.<br>
                         Vous pouvez répondre aux créneaux proposés en <a href="http://localhost:8080/reunion/${token}">cliquant ici</a>, sans à avoir de compte`
             });
         }
