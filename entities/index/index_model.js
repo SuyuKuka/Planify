@@ -82,9 +82,22 @@ async function createReunion(name, dateTimePairs, participants, user_id, email) 
                 await mail.transporter.sendMail({
                     from: 'programmationwebprojet@gmail.com',
                     to: participant,
-                    subject: 'Participation à une reunion',
-                    html: `<h1>Bonjour ${participant},</h1><br> L'utilisateur ${email} vous a invité à la reunion ${name}.<br>
-                            Vous pouvez répondre aux créneaux proposés en <a href="http://localhost:8080/reunion/${token}">cliquant ici</a>, sans à avoir de compte`
+                    subject: 'Invitation à une réunion',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; color: #333;">
+                            <h2>Bonjour ${participant},</h2>
+                            <p>L'utilisateur <strong>${user_id}</strong> vous a invité à participer à la réunion <strong>${name}</strong>.</p>
+                            <p>Vous pouvez consulter les créneaux proposés et y répondre en cliquant sur le lien ci-dessous. Aucun compte n'est requis pour répondre :</p>
+                            <p>
+                                <a href="http://localhost:8080/reunion/${token}" style="color: #1a73e8; text-decoration: none;">
+                                    👉 Accéder à la réunion
+                                </a>
+                            </p>
+                            <p>Merci,</p>
+                            <p>L'équipe Planify</p>
+                            <img src="https://i.imgur.com/NLYAF2v.png" alt="Logo du site" style="width: 200px; height: 50px;"/>
+                        </div>
+                    `
                 });
             }
         }
@@ -273,10 +286,24 @@ async function addParticipant(reunion_id, email) {
             await mail.transporter.sendMail({
                 from: 'programmationwebprojet@gmail.com',
                 to: email,
-                subject: 'Participation à une reunion',
-                html: `<h3>Bonjour ${email},</h3><br> L'utilisateur ${orga} vous a invité à la reunion ${name}.<br>
-                        Vous pouvez répondre aux créneaux proposés en <a href="http://localhost:8080/reunion/${token}">cliquant ici</a>, sans à avoir de compte`
+                subject: 'Invitation à une réunion',
+                html: `
+                    <div style="font-family: Arial, sans-serif; color: #333;">
+                        <h2>Bonjour ${email},</h2>
+                        <p>L'utilisateur <strong>${orga}</strong> vous a invité à participer à la réunion intitulée <strong>${name}</strong>.</p>
+                        <p>Vous pouvez consulter les créneaux proposés et y répondre en cliquant sur le lien ci-dessous. Aucun compte n'est requis pour répondre :</p>
+                        <p>
+                            <a href="http://localhost:8080/reunion/${token}" style="color: #1a73e8; text-decoration: none;">
+                                👉 Accéder à la réunion
+                            </a>
+                        </p>
+                        <p>Merci,</p>
+                        <p>L'équipe Planify</p>
+                        <img src="https://i.imgur.com/NLYAF2v.png" alt="Logo du site" style="width: 200px; height: 50px;"/>
+                    </div>
+                `
             });
+
         }
         return 0;
     } finally {

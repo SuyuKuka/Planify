@@ -180,6 +180,7 @@ async function postPasswordResetVerif(req, res) {
         }
         res.redirect('/auth/connexion');
     } catch (error) {
+        console.log(error);
         res.redirect('/auth/mot_de_passe_oublie/'); 
     }
 }

@@ -119,10 +119,10 @@ async function sendPasswordForgottenEmail(email) {
     try {
         // Vérifie si l'email spécifié existe dans la db
         const result = await client.query('SELECT user_id FROM "user" WHERE email = $1 LIMIT 1', [email]);
-        if (result.rowCount < 1) {
-            return;
+        if (result.rowCount === 0) {
+            return -1;
         }
-        const user_id = result.user_id;
+        const user_id = result.rows[0].user_id;
         await destroyOldIDToken(user_id, client);
 
         // L'email expire après 5 minutes
@@ -132,8 +132,22 @@ async function sendPasswordForgottenEmail(email) {
             from: 'programmationwebprojet@gmail.com',
             to: email,
             subject: 'Réinitialisation de votre mot de passe',
-            html: `<p>Pour réinitialiser votre mot de passe, cliquez sur le lien suivant :</p>
-                   <a href="http://localhost:8080/auth/mot_de_passe_reinitialisation?token=${token}">Réinitialiser mon mot de passe</a>`
+            html: `
+                <div style="font-family: Arial, sans-serif; color: #333;">
+                    <h2>Réinitialisation de votre mot de passe</h2>
+                    <p>Bonjour ${email},</p>
+                    <p>Vous avez demandé à réinitialiser votre mot de passe. Pour continuer, veuillez cliquer sur le bouton ci-dessous :</p>
+                    <p style="text-align: center;">
+                        <a href="http://localhost:8080/auth/mot_de_passe_reinitialisation?token=${token}" 
+                        style="display: inline-block; padding: 10px 20px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
+                            Réinitialiser mon mot de passe
+                        </a>
+                    </p>
+                    <p>Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer ce message.</p>
+                    <p>Cordialement,<br>L'équipe de Planify</p>
+                    <img src="https://i.imgur.com/NLYAF2v.png" alt="Logo du site" style="width: 200px; height: 50px;"/>
+                </div>
+            `
         });
     } catch (error) {
         console.error(error);
@@ -152,18 +166,22 @@ async function sendPasswordForgottenEmail(email) {
  */
 async function updatePassword(token, password) {
     const client = await getPool().connect();
+    console.log("tokenaaaAAAAaa: " + token);
     try {
         // Retire les anciens tokens
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
         // Vérifie si le token est vrai
         const result = await client.query('SELECT user_id FROM token WHERE token = $1 LIMIT 1', [token]);
-        if (res.rowCount < 1) {
+        if (result.rowCount < 1) {
             return false;
         }
         const user_id = result.rows[0].user_id;
+        console.log(user_id);
         await destroyOldIDToken(user_id, client);
         const hashedPassword = await encrypt.hash(password);
+        console.log(hashedPassword);
         await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [hashedPassword, user_id]);
+        console.log("done");
         return true;
     } catch (error) {
         console.error(error);
@@ -179,8 +197,10 @@ async function updatePassword(token, password) {
 
 async function isIDTokenValid(token) {
     const client = await getPool().connect();
+    console.log("token: " + token);
     try {
         const result = await client.query('SELECT 1 FROM token WHERE token = $1 AND expire_at > NOW() LIMIT 1', [token]);
+        console.log(result.rowCount > 0);
         return result.rowCount > 0;
     } catch (error) {
         console.error(error);
