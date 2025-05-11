@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Planify</title>
+		<link rel="shortcut icon" href="/images/favicon.ico">
+        <!-- css -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/nav.css" rel="stylesheet">
+        <link href="/css/index/reunion.css" rel="stylesheet">
+	</head>
+	<body>
+        <%- include('../nav') %>
+        <div class="container">
+            <h3>Informations sur la reunion<br><%= result.name %></h3>
+            <h4>&nbsp;&nbsp;Proposition de reunion :</h4>
+            <p>
+                Créer par: <%= result.user_id  %>
+            </p>
+            <div id="list-proposition"></div>
+
+            <h4 id="participants-title">&nbsp;&nbsp;Participants :</h4>
+            <div id="list-participants"></div>
+        </div>
+		<!-- script -->
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<script src="/js/bootstrap.bundle.min.js"></script>
+        <script src="/js/index/reunion.js"></script>
+        <script>
+            const slots = `<%- JSON.stringify(result.dateTime) %>`;
+            const responses = `<%- JSON.stringify(result.responses) %>`;
+            const participants = `<%- JSON.stringify(result.participants) %>`;
+            const email = `<%- result.email %>`;
+            const temp_id = `<%= temp_id %>`;
+            const reunion_id = `<%= result.reunion_id %>`;
+        </script>
+	</body>
+</html>

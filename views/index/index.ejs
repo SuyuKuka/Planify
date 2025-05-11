@@ -23,16 +23,32 @@
 		<div class="d-flex vh-100 flex-column">
 			<%- include('../nav') %>
 			<div class="d-flex flex-column flex-sm-row flex-grow-1">
-				<div class="d-flex flex-column bg-primary col-12 col-sm-2">
-					<button>Mon calendrier</button>
-					<!-- https://getbootstrap.com/docs/5.3/components/collapse/ -->
-					<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-						Button with data-bs-target
-					  </button>
-					  <div class="collapse" id="collapseExample">
-						<div class="card card-body">
-						  Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
-						</div>
+				<div class="d-flex flex-column col-12 col-sm-2" id="left">
+					<% if (token !== undefined && token !== null) { %>
+						<button id="create-reunion">
+							Créer une reunion
+						</button>
+					<% } %>
+
+					<p>Liste des reunions :</p>
+					<div id="list-reunion">
+						<% if (reunions !== undefined && reunions !== null) { %>
+							<% if (reunions.length > 0) { %>
+								<% reunions.forEach(r => { %>
+									<div class="reunion-item">
+										<button class="reunion-button" 
+												data-id="<%= r.id %>" 
+												data-name="<%= r.name %>" 
+												data-user_id="<%= r.user_id %>"
+												data-slots="<%= JSON.stringify(r.dates) %>">
+											<%= r.name %>
+										</button>
+									</div>
+								<% }) %>								  
+							<% } %>
+						<% } else { %>
+							Aucune réunion prévue.
+						<% } %>
 					</div>
 				</div>
 				<div class="p-1 bg-warning text-dark col-12 col-sm flex-grow-1" id="calendar">
@@ -44,9 +60,66 @@
 					</div>
 					Centre
 				</div>
-				<div class="p-1 bg-success text-white col-12 col-sm-2">
-					Droite
+				<div class="p-1 col-12 col-sm-2" id="right">
+					<div class="info-reunion" id="info-reunion">
+						<p>Proposition de la réunion :</p><br>
+						Aucune réunion choisie.
+					</div>
 				</div>
+			</div>
+		</div>
+
+		<div id="overlay" class="col-sm-6">
+			<div id="top-overlay">
+				<button id="close-overlay">&times;</button>
+			</div>
+			<h2>Créer une reunion</h2>
+			<form action="/create" method="POST" id="form-reunion">
+				<div class="form-group">
+					<label for="reunion-name">Nom de la reunion :</label>
+					<input type="text" class="form-control" name="name" id="name" placeholder="Nom de la reunion" required>
+				</div>
+				<div class="form-group" id="dates-container">
+					<label>Dates et heures :</label>
+					<div class="datetime-group">
+						<input type="date" class="form-control mb-2" name="dates" required>
+						<input type="time" class="form-control mb-2" name="times" required>
+					</div>
+				</div>
+				<button type="button" id="add-datetime" class="btn btn-sm btn-outline-secondary mb-3">
+					+ Ajouter une autre date/heure
+				</button>				
+				<div class="form-group">
+					<label for="participants">Ajouter des participants (emails séparés par des virgules) :</label>
+					<input type="text" class="form-control" name="participants" id="participants" placeholder="exemple@domaine.com, autre@domaine.com">
+					(Vous pouvez toujours ajouter des participants plus tard)
+				</div>
+				<% if (typeof error !== 'undefined') { %>
+					<div class="error" id="server_error">
+					<label class="error_msg"><%= error %></label>
+					</div>
+				<% } else { %>
+					<div class="error" id="server_error" style="display: none;">
+						<label class="error_msg"></label>
+					</div>
+				<% } %>
+				<div id="bot-overlay">
+					<button type="submit" id="save-reunion">Créer la réunion</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="overlay-reunion" class="col-sm-6">
+			<div id="top-overlay">
+				<button id="close-overlay-reunion">&times;</button>
+			</div>
+			<h3 id="reunion-title">Information sur la reunion<br></h3>
+			<h4>Participants :</h4>
+			<div id="list-participants"></div>
+			<div id="add-participants"></div>
+			<div id="bot-overlay-reunion">
+				<button id="delete-reunion" style="display: none;">Supprimer</button>
+				<button id="leave-reunion" style="display: none;">Quitter</button>
 			</div>
 		</div>
 		<!-- script -->
@@ -58,5 +131,7 @@
 			const vueChoisie = vues.includes(vue) ? vue : "semaine";
 		%>
 		<script src="/js/index/<%= vueChoisie %>.js"></script>
+		<% const currentUserId = user_id; %> 
+		<script>const currentUserId = "<%= currentUserId %>";</script>
 	</body>
 </html>

@@ -98,10 +98,6 @@ $("#email").on('input', function() {
 $("#form").on('submit', (e) => {
     $('#server_error2').css('display', 'none');
     let step2 = true;
-    if (!auth.isIdUserValid(user_id.val())) {
-        user_id.css("border", "2px solid red");
-        step2 = false;
-    }
     if (!auth.isUsernameValid(username.val())) {
         username.css("border", "2px solid red");
         step2 = false;
