@@ -191,8 +191,7 @@ async function postInsertICS(req, res) {
         const { user_id } = await Auth.getInfo(token);
         id = user_id;
     }
-
-    console.log(id);
+    
     const result = await Auth.insertICS(reunion_id, id, ics);
     res.json(result);
 }
