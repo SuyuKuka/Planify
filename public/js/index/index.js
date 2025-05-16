@@ -28,6 +28,8 @@ function joursFevrier() {
 }
 
 const days = [31, joursFevrier(), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 
 function mod(n, m) {
     return ((n % m) + m) % m;

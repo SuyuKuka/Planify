@@ -4,7 +4,7 @@ let prevMonth = days[mod(month - 1, 12)];
 let date = today.getDate();
 
 // Boutons next et previous
-function updateDate(incrementDay) {
+function updateVal(incrementDay) {
     today.setDate(date + incrementDay);
     year = today.getFullYear();
     month = today.getMonth();
@@ -18,14 +18,28 @@ function updateCalendarHeader() {
     $('#calendar > :nth-child(1)').after(createDaysHeader());
 }
 
+function updateDate() {
+    $("#calendar-header > :nth-child(2)").replaceWith(createDate());
+}
+
 $('#previous-calendar').on('click', () => {
-    updateDate(-7);
+    updateVal(-7);
+    updateDate();
     updateCalendarHeader();
 });
 $('#next-calendar').on('click', () => {
-    updateDate(7);
+    updateVal(7);
+    updateDate();
     updateCalendarHeader();
 });
+
+// MOIS
+function createDate() {
+    const date = $(`<span>${months[month]} ${year}</span>`);
+    return date;
+}
+
+$("#calendar-header > :nth-child(1)").after(createDate());
 
 // HEADERS
 const dayNames = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
