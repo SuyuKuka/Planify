@@ -40,3 +40,13 @@ $("#show_password").click(function() {
         $("#show_password").attr('src', '/images/close.png');
     }
 });
+
+$("#show_password_confirm").click(function() {
+    if (new_password.attr('type') === 'password') {
+        new_password.attr('type', 'text');
+        $("#show_password_confirm").attr('src', '/images/open.png');
+    } else {
+        new_password.attr('type', 'password');
+        $("#show_password_confirm").attr('src', '/images/close.png');
+    }
+});

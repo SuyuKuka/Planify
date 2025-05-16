@@ -1,0 +1,83 @@
+body {
+    background-color: rgb(248, 248, 248);
+    height: 100vh;
+}
+
+form {
+    background-color: rgb(215, 249, 255);
+    padding: 40px;
+    border-radius: 10px;
+    margin-left: 50px;
+    margin-right: 50px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 300px;
+    height: 35px;
+    border: 1px solid gray;
+    padding: 15px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+}
+
+input[type="submit"] {
+    background-color: rgb(13, 114, 237);
+    color: white;
+    cursor: pointer;
+    width: 150px;
+    border: 1px solid gray;
+    border-radius: 20px;
+    margin-top: 10px;
+    padding: 9px;
+}
+
+.password-container,
+.password_confirm-container {
+    position: relative;
+    width: fit-content;
+}
+
+.password-container input,
+.password_confirm-container input {
+    padding-right: 40px;
+    box-sizing: border-box;
+}
+
+.password-container img,
+.password_confirm-container img {
+    position: absolute;
+    right: 15px;
+    top: 61%;
+    transform: translateY(-50%);
+    pointer-events: auto;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+#show_password_confirm,
+#show_password {
+    cursor: pointer;
+}
+
+.error_msg {
+    color: red;
+}
+
+#server_error {
+    color: red;
+}
+
+.success_msg {
+    color: rgb(0, 201, 0);
+}
