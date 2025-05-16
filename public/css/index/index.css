@@ -2,25 +2,6 @@
     box-sizing: border-box;
 }
 
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-#calendar {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #fff3cd;
-  color: #212529;
-}
-
-#calendar-header {
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #ffc107;
-}
-
 /* OVERLAY */
 
 #overlay {
