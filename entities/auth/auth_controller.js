@@ -4,6 +4,7 @@ const authVerif = require('../../public/js/client_server_shared/auth');
 //#region Inscription
 function getRegistration(req, res) {
     const { user_id, surname, name, birthdate, username, email, error_step1, error_step2 } = req.session;
+    destroyInfo(req);
 
     res.render('auth/inscription', {
         user_id, surname, name, birthdate, username, email,
@@ -67,10 +68,8 @@ async function postRegistrationVerif(req, res) {
 
 //#region Connexion
 function getConnection(req, res) {
-    if (req.session === undefined || req.session === null) {
-        destroySession(req, res);
-    }
     const { email, error } = req.session;
+    destroyInfo(req);
     res.render('auth/connexion', {
         email, error
     });
@@ -117,6 +116,7 @@ async function postConnectionVerif(req, res) {
 //#region Mot de passe oublié
 
 function getPasswordForgotten(req, res) {
+    destroyInfo(req);
     res.render('auth/mdp_oublie');
 }
 
@@ -157,6 +157,8 @@ async function getPasswordReset(req, res) {
         }
     } catch (error) {
         res.redirect('/auth/mot_de_passe_oublie/');
+    } finally {
+        destroyInfo(req);
     }
 }
 
@@ -207,6 +209,13 @@ function destroySession(req, res) {
             return res.status(500).send('Erreur');
         }
     });
+}
+
+function destroyInfo(req) {
+    req.session.error = undefined;
+    req.session.email = undefined;
+    req.session.error_step1 = undefined;
+    req.session.error_step2 = undefined;
 }
 
 //#endregion
