@@ -35,7 +35,7 @@ async function getSearchProfil(req, res) {
 }
 
 async function postCreateReunion(req, res) {
-    const { name, dates, times, participants } = req.body;
+    const { name, dates, times, durees, participants } = req.body;
     const token = req.session.token;
 
     const participantsArray = [...new Set(
@@ -47,10 +47,12 @@ async function postCreateReunion(req, res) {
     
     const datesArray = Array.isArray(dates) ? dates : [dates];
     const timesArray = Array.isArray(times) ? times : [times];
+    const dureesArray = Array.isArray(durees) ? durees : [durees];
     // Fusionner les dates et heures
     const dateTimePairs = datesArray.map((date, i) => ({
         date,
-        time: timesArray[i] || timesArray[0]
+        time: timesArray[i] || timesArray[0],
+        duree: dureesArray[i] || dureesArray[0]
     }));
 
     const { user_id, email } = await Auth.getInfo(token);
@@ -177,6 +179,23 @@ async function getParticipateReunion(req, res) {
     }
 }
 
+async function postInsertICS(req, res) {
+    const { reunion_id, ics } = req.body;
+    let id;
+    if (req.session.token === undefined) {
+        const { email } = req.body;
+        const tmp = await Auth.getNoAcc(reunion_id, email);
+        id = tmp.token;
+    } else {
+        const token = req.session.token;
+        const { user_id } = await Auth.getInfo(token);
+        id = user_id;
+    }
+    
+    const result = await Auth.insertICS(reunion_id, id, ics);
+    res.json(result);
+}
+
 module.exports = { 
     getIndex, 
     getSearchProfil, 
@@ -193,5 +212,6 @@ module.exports = {
     postGetAllResponses,
     postDeleteSlot,
     postAddSlot,
-    getParticipateReunion
+    getParticipateReunion,
+    postInsertICS
 }; 

@@ -40,6 +40,7 @@ CREATE TABLE proposition_date(
     reunion_id INT NOT NULL,
     date DATE NOT NULL,
     time TIME NOT NULL,
+    duration TIME NOT NULL,
     PRIMARY KEY (reunion_id, date, time),
     FOREIGN KEY (reunion_id) REFERENCES reunion(id),
     UNIQUE (reunion_id, date, time)

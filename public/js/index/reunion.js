@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     listDateTime(reunion_id, temp_id);
     listParticipant()
     profilParticipant();
+    insertICS(reunion_id);
 });
 
 function listDateTime(reunion_id, temp_id) {
@@ -139,4 +140,44 @@ function profilParticipant() {
 
 function formatDateTime(dateString) {
     return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
+
+function insertICS(reunionId) {
+    document.addEventListener("click", function (e) {
+        if (e.target && e.target.id === "subtmit-ics") {
+            const fileInput = document.querySelector('input[name="ics"]');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Veuillez sélectionner un fichier .ics.");
+                return;
+            }
+
+            if (!file.name.endsWith(".ics")) {
+                alert("Seuls les fichiers .ics sont autorisés.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const icsText = event.target.result;
+                try {
+                    const res = await fetch(`/insert-ics`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reunion_id: reunionId, ics: icsText, email })
+                    });
+
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Une erreur est survenue lors de l'ajout de votre calendrier.");
+                    }
+                } catch (err) {
+                    console.error('Erreur calendrier :', err);
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
 }

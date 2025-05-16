@@ -30,4 +30,6 @@ router.post('/add-slot', controller.postAddSlot);
 
 router.get('/reunion/:token', controller.getParticipateReunion);
 
+router.post('/insert-ics', controller.postInsertICS);
+
 module.exports = router;

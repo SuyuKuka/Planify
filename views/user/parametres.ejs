@@ -14,9 +14,9 @@
 		<%- include('../nav') %>
 		<form autocomplete="off" action="/user/parametres/verification" method="POST" id="form">
 			<header class="parametres">
-				<h1>Paramètres</h1>
+				<h2>Mes paramètres</h2>
 			</header>
-			<h3>> Modification des informations de connexion</h3>
+			<h4>&nbsp;&nbsp;&nbsp;&nbsp;Modification des informations de connexion</h4>
 
 			<div>
 				<label for="username">*Pseudo :</label><br>
@@ -49,13 +49,15 @@
 					</div>
 				<% } %>
 			</div>
-			<div>
-				<label for="password">Mot de passe actuel :</label><br>
-				<input type="password" name="password" id="password"/>
+			<div class="password-container">
+				<label for="password">Mot de passe :</label><br>
+				<input type="password" id="password" name="password" />
+				<img id="show_password" src="/images/close.png" alt="Afficher le mot de passe" height="20" width="20" />
 			</div>
-			<div>
+			<div class="password_confirm-container">
 				<label for="new_password">*Nouveau mot de passe :</label><br>
-				<input type="password" name="new_password" id="new_password"/><br>
+				<input type="password" name="new_password" id="new_password"/>
+				<img id="show_password_confirm" src="/images/close.png" alt="Afficher le mot de passe" height="20" width="20" />
 				<% if (typeof passwordChanged !== 'undefined') { %>
                     <div class="success" id="server_error">
                         <label class="success_msg"><%= passwordChanged.msg %></label>
@@ -65,12 +67,8 @@
 						<label class="error_msg"></label>
 					</div>
 				<% } %>
-				<label id="information">*Laissez vide si vous gardez le même champ.</label>
 			</div>
-			<div class="show_password_div">
-                <input type="checkbox" name="show_password" id="show_password"/>
-                <label for="show_password">Afficher les mot de passe</label>
-            </div>
+			<label id="information">*Laissez vide si vous gardez le même champ.</label>
 			<div class="error" id="client_error" style="display: none;">
                 <label class="error_msg">Les données spécifiées ne sont pas valides.</label>
             </div>
@@ -87,12 +85,11 @@
                 <input type="submit" id="enregistrer" value="Enregistrer">
             </div>
 		</form>
-		<div id="vide"></div>
 	</body>
 	<!-- script -->
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="/js/bootstrap.bundle.min.js"></script>
-	<script src="/js/shared/auth.js"></script>
+	<script src="/js/client_server_shared/auth.js"></script>
 	<script src="/js/auth/authentification.js"></script>
 	<script src="/js/user/parametres.js"></script>
 </html>

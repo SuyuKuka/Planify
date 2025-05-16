@@ -118,6 +118,7 @@ document.getElementById('add-datetime').addEventListener('click', () => {
     group.innerHTML = `
         <input type="date" class="form-control mb-2" name="dates[]" required>
         <input type="time" class="form-control mb-2" name="times[]" required>
+        <input type="time" class="form-control mb-2" name="durees[]" required>
         <button type="button" class="btn btn-danger btn-sm remove-datetime">Supprimer</button>`;
     container.appendChild(group);
     group.querySelector('.remove-datetime').addEventListener('click', () => group.remove());
@@ -130,7 +131,8 @@ function resetForm() {
     group.className = 'datetime-group';
     group.innerHTML = `
         <input type="date" class="form-control mb-2" name="dates[]" required>
-        <input type="time" class="form-control mb-2" name="times[]" required>`;
+        <input type="time" class="form-control mb-2" name="times[]" required>
+        <input type="time" class="form-control mb-2" name="durees[]" required>`;
     container.appendChild(group);
 }
 
@@ -165,6 +167,14 @@ function formatDateTime(dateString) {
     return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
+function formatDuree(duree) {
+    const [heures, minutes] = duree.split(":").map(Number);
+    let result = "";
+    if (heures > 0) result += `${heures}h`;
+    if (minutes > 0) result += `${minutes}m`;
+    return result || "0h";
+}
+
 async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots) {
     const infoDiv = document.getElementById('right');
     infoDiv.innerHTML = '';
@@ -197,6 +207,7 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         slotsHtml += slots.map(slot => {
             const tmp = new Date(slot.date); 
             const date = formatDateTime(tmp);
+            const duration = formatDuree(slot.duration);
 
             const key = `${date}_${slot.time}`;
             const res = responses[key];
@@ -206,7 +217,8 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
                         <div class="remove-slot">
                             &times;
                         </div>
-                        <div style="margin-bottom: 10px;">${date} à ${slot.time}</div>
+                        <div>${date} à ${slot.time}</div>
+                        durée : ${duration}
                         <div class="choice" style="display: none;">
                             <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
                             <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
@@ -217,6 +229,7 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
             return `
                 <div class="slot" data-date="${date}" data-time="${slot.time}" data-response="${res}">
                     <div>${date} à ${slot.time}</div>
+                    durée : ${duration}
                     <div class="choice">
                         <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
                         <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
@@ -244,14 +257,23 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
 
     if (userId === userIdOrga) {        
         infoDiv.innerHTML += `<div class="form-group-after" id="dates-container">
-                                Dates et heures :
+                                Dates, heures et durées :
                                 <div class="datetime-group-after">
                                     <input type="date" name="dates">
                                     <input type="time" name="times">
+                                    <input type="time" name="duree">
                                 </div>
                             </div>
                             <button type="button" id="add-datetime-after" class="btn btn-sm btn-outline-secondary mb-3">
                                 + Ajouter une date/heure
+                            </button>`
+    } else {
+        infoDiv.innerHTML += `<div class="form-group-after">
+                                Importer un ICS (réponds automatiquement)
+                                <input type="file" name="ics" class="form-control" accept=".ics" id="ics-file">
+                            </div>
+                            <button type="button" id="subtmit-ics" class="btn btn-sm btn-outline-secondary mb-3">
+                                Envoyer
                             </button>`
     }
 
@@ -334,8 +356,10 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
     if(userId === userIdOrga) {
         deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots);
         addParticipant(reunionId, reunionName, userId, userIdOrga, slots);
-        removeSlot(reunionId, reunionName, userId, userIdOrga, slots);
-        addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots);
+        removeSlot(reunionId);
+        addDateTimeAfter(reunionId);
+    } else {
+        insertICS(reunionId);
     }
 }
 
@@ -355,7 +379,6 @@ async function getUserEmail(userId) {
 }
 
 async function handleResponseChange(slot, yesBtn, noBtn, reunionId, userId, value) {
-    console.log("tmp");
     const current = slot.dataset.response === String(value);
     const newResponse = current ? null : value;
     slot.dataset.response = newResponse;
@@ -571,7 +594,7 @@ async function showResults(reunionId) {
     }
 }
 
-function removeSlot(reunionId, reunionName, userId, userIdOrga, slots) {
+function removeSlot(reunionId) {
     document.querySelectorAll('.remove-slot').forEach(btn => {
         btn.addEventListener('click', async function (e) {
             const slot = e.target.closest('.slot');
@@ -596,7 +619,7 @@ function removeSlot(reunionId, reunionName, userId, userIdOrga, slots) {
     });
 }
 
-function addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots) {
+function addDateTimeAfter(reunionId) {
     document.addEventListener("click", async function (e) {
         if (e.target && e.target.id === "add-datetime-after") {
             const groups = document.querySelectorAll('.datetime-group-after');
@@ -621,6 +644,46 @@ function addDateTimeAfter(reunionId, reunionName, userId, userIdOrga, slots) {
                     alert("Veuillez choisir une date et une heure.");
                 }
             }
+        }
+    });
+}
+
+function insertICS(reunionId) {
+    document.addEventListener("click", function (e) {
+        if (e.target && e.target.id === "subtmit-ics") {
+            const fileInput = document.querySelector('input[name="ics"]');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Veuillez sélectionner un fichier .ics.");
+                return;
+            }
+
+            if (!file.name.endsWith(".ics")) {
+                alert("Seuls les fichiers .ics sont autorisés.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                const icsText = event.target.result;
+                try {
+                    const res = await fetch(`/insert-ics`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reunion_id: reunionId, ics: icsText })
+                    });
+
+                    if (res.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Une erreur est survenue lors de l'ajout de votre calendrier.");
+                    }
+                } catch (err) {
+                    console.error('Erreur calendrier :', err);
+                }
+            };
+            reader.readAsText(file);
         }
     });
 }
