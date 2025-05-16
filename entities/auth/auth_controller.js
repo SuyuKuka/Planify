@@ -152,7 +152,8 @@ async function getPasswordReset(req, res) {
         if (!token || !await Auth.isIDTokenValid(token)) {
             return res.redirect('/auth/mot_de_passe_oublie/'); 
         } else {
-            res.render('auth/mdp_reinitialisation', { token });
+            req.session.token = token;
+            res.render('auth/mdp_reinitialisation');
         }
     } catch (error) {
         res.redirect('/auth/mot_de_passe_oublie/');
@@ -164,14 +165,16 @@ function getPasswordResetVerif(req, res) {
 }
 
 async function postPasswordResetVerif(req, res) {
-    const { token, password } = req.body;
+    const { password } = req.body;
+    const { token } = req.session;
     // Cas le token n'existe pas (passage par l'url)
     if (!token || !authVerif.isPasswordValid(password)) {
         res.redirect('/auth/mot_de_passe_oublie/'); 
     }
     try {
         // Aucun token trouvé
-        if (!await Auth.isIDTokenValid(token)) {
+        const isTokenValid = await Auth.isIDTokenValid(token);
+        if (!isTokenValid) {
             res.status(401).send(authVerif.messages.tokenExpired);
             return;
         }
