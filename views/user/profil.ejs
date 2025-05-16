@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+        <title>Profil - Planify</title>
+        <link rel="shortcut icon" href="/images/favicon.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- css -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/nav.css" rel="stylesheet">
+        <link href="/css/user/profil.css" rel="stylesheet">
+	</head>
+	<body>
+		<%- include('../nav') %>
+        <div class="container-fluid">
+            <% if (email === undefined) { %>
+                <div id="profil_search">
+                    <header class="profil">
+                        <h2>Informations du profil du compte <%= username %></h2>
+                    </header>
+                    <div class="profil">
+                        <img src="<%= profilepicture %>" alt="Photo de profil" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    </div>
+
+                    <h4>&nbsp;&nbsp;&nbsp;&nbsp;Informations de connexion</h4>
+                    <div>
+                        <label for="username">Pseudo :</label><br>
+                        <input type="text" name="username" id="username" value="<%= username %>" class="form-control" disabled="disabled"/>
+                    </div>
+                    <div>
+                        <label for="user_id">Identifiant :</label><br>
+                        <input type="text" name="user_id" id="user_id" value="<%= user_id %>" class="form-control" disabled="disabled"/>
+                    </div>
+                </div>
+            <% } else { %>
+                <form action="/user/profil" method="POST" enctype="multipart/form-data">
+                    <header>
+                        <h2>Mon profil</h2>
+                    </header>
+                
+                    <div class="profil">
+                        <img src="<%= profilepicture %>" alt="Photo de profil" class="img-fluid rounded-circle mb-3" id="profile_picture">
+                        <div>
+                            <input type="file" name="profile_picture" accept="image/*" required>
+                            <button type="submit" id="update_picture">Mettre à jour</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4>&nbsp;&nbsp;&nbsp;&nbsp;Informations de connexion</h4>
+                        <div>
+                            <label for="username" class="form-label">Pseudo :</label>
+                            <input type="text" name="username" id="username" class="form-control" value="<%= username %>" disabled>
+                        </div>
+                    </div>
+            
+                    <div>
+                        <h4>&nbsp;&nbsp;&nbsp;&nbsp;Informations personnelles</h4>
+                        <div>
+                            <div class="data">
+                                <label for="surname" class="form-label">Nom :</label>
+                                <input type="text" name="surname" id="surname" class="form-control" value="<%= surname %>" disabled>
+                            </div>
+                            <div class="data">
+                                <label for="name" class="form-label">Prénom :</label>
+                                <input type="text" name="name" id="name" class="form-control" value="<%= name %>" disabled>
+                            </div>
+                            <div>
+                                <label for="birthdate" class="form-label">Date de naissance :</label>
+                                <input type="date" name="birthdate" id="birthdate" class="form-control" value="<%= birthdate %>" disabled>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            <% } %>
+        </div>
+	</body>
+    <!-- script -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="/js/bootstrap.bundle.min.js"></script>
+</html>

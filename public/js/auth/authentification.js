@@ -1,0 +1,52 @@
+/**
+ * Appelle {@link verificate} sur le champs d'ID inputName.
+ * @param {string} inputName Sans #
+ * @param {function(string): boolean} validationMethod
+ * @returns {JQuery}
+ */
+function createInput(inputName, validationMethod) {
+    const input = $(`#${inputName}`);
+    verificate(input, validationMethod);
+    return input;
+}
+
+/**
+ * Met à jour la bordure d’un champ <input> à chaque saisie,
+ * selon les règles spécifiées.
+ * - Bordure Rouge si invalide
+ * - Bordure par défaut si valide
+ * @param {JQuery} input 
+ * @param {Function} method 
+ */
+function verificate(input, method) {
+    if (input.length == 0) {
+        return;
+    }
+    input.on("input", function() {
+        if (!method(input.val()) || typeof method !== 'function') {
+            input.css("border", "2px solid red");
+        } else {
+            input.css("border", "");
+        }
+    });
+}
+
+$("#show_password").click(function() {
+    if (password.attr('type') === 'password') {
+        password.attr('type', 'text');
+        $("#show_password").attr('src', '/images/open.png');
+    } else {
+        password.attr('type', 'password');
+        $("#show_password").attr('src', '/images/close.png');
+    }
+});
+
+$("#show_password_confirm").click(function() {
+    if (new_password.attr('type') === 'password') {
+        new_password.attr('type', 'text');
+        $("#show_password_confirm").attr('src', '/images/open.png');
+    } else {
+        new_password.attr('type', 'password');
+        $("#show_password_confirm").attr('src', '/images/close.png');
+    }
+});

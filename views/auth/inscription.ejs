@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Inscription - Planify</title>
+        <link rel="shortcut icon" href="/images/favicon.ico">
+        <!-- css -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/auth/authentification.css" rel="stylesheet">
+        <link href="/css/auth/inscription.css" rel="stylesheet">
+    </head>
+    <body>
+        <form autocomplete="off" action="inscription/verification" method="post" id="form">
+            <div class="container">
+                <div class="information">
+                    <a href="/">
+                        <img class="logo" src="/images/logo.png" width="200" height="50">
+                    </a>
+                    <h2>Inscription</h2>
+                    <p>Planifiez mieux, dès maintenant</p>
+                </div>
+
+                <div class="authentification">
+                    <div id="step1">
+                        <div class="surname-container">
+                            <label for="surname">Nom :</label><br>
+                            <input type="text" name="surname" id="surname"
+                                value="<%= typeof surname !== 'undefined' ? surname : '' %>"/>
+                        </div>
+                        <div class="name-container">
+                            <label for="name">Prénom :</label><br>
+                            <input type="text" name="name" id="name"
+                                value="<%= typeof name !== 'undefined' ? name : '' %>"/>
+                        </div>
+                        <div class="birthdate-container">
+                            <label for="birthdate">Date de naissance :</label><br>
+                            <input type="date" name="birthdate" id="birthdate"
+                                min="1900-01-01"
+                                max="<%= new Date().toISOString().split('T')[0] %>"
+                                value="<%= typeof birthdate !== 'undefined' ? birthdate : '' %>"/>
+                        </div>
+                        <div class="error" id="client_error1" style="display: none;">
+                            <label class="error_msg">Les données spécifiées ne sont pas valides.</label>
+                        </div>
+                        <% if (typeof error_step1 !== 'undefined') { %>
+                            <div class="error" id="server_error1">
+                                <label class="error_msg"><%= error_step1.msg %></label>
+                            </div>
+                        <% } else { %>
+                            <div class="error" id="server_error1" style="display: none;">
+                                <label class="error_msg"></label>
+                            </div>
+                        <% } %>
+                        <div class="suivant_div">
+                            <a href="/auth/connexion">Déjà un compte ?</a>
+                            <button type="button" class="button" id="suivant">Suivant</button>
+                        </div>
+                    </div>
+
+                    <div id="step2">
+                        <div class="user_id-container">
+                            <label for="user_id">Identifiant :</label><br>
+                            <input type="text" name="user_id" id="user_id"
+                                value="<%= typeof user_id !== 'undefined' ? user_id : '' %>"/>
+                        </div>
+                        <div class="username-container">
+                            <label for="username">Pseudo :</label><br>
+                            <input type="text" name="username" id="username"
+                                value="<%= typeof username !== 'undefined' ? username : '' %>"/>
+                        </div>
+                        <div class="email-container">
+                            <label for="email">Adresse e-mail :</label><br>
+                            <input type="email" name="email" id="email"
+                                value="<%= typeof email !== 'undefined' ? email : '' %>"/>
+                        </div>
+                        <div class="password-container">
+                            <label for="password">Mot de passe :</label><br>
+                            <input type="password" id="password" name="password" />
+                            <img id="show_password" src="/images/close.png" alt="Afficher le mot de passe" height="20" width="20" />
+                        </div>
+                        <div class="error" id="client_error2" style="display: none;">
+                            <label class="error_msg">Les données spécifiées ne sont pas valides.</label>
+                        </div>
+                        <% if (typeof error_step2 !== 'undefined') { %>
+                            <div class="error" id="server_error2">
+                                <label class="error_msg"><%= error_step2.msg %></label>
+                            </div>
+                        <% } else { %>
+                            <div class="error" id="server_error2" style="display: none;">
+                                <label class="error_msg"></label>
+                            </div>
+                        <% } %>
+                        <div class="submit_div">
+                            <button type="button" class="button" id="retour">Retour</button>
+                            <input type="submit" id="inscription" value="Inscription">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!-- script -->
+        <script src="/js/bootstrap.bundle.min.js"></script>
+        <script src="/js/jquery.js"></script>
+        <script src="/js/client_server_shared/auth.js"></script>
+        <script src="/js/auth/authentification.js"></script>
+        <script src="/js/auth/inscription.js"></script>
+    </body>
+</html>

@@ -1,0 +1,95 @@
+body {
+    background-color: rgb(248, 248, 248);
+}
+
+.container {
+    background-color: blanchedalmond;
+    padding: 40px;
+    border-radius: 10px;
+}
+
+h3 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.slot {
+    background-color: aliceblue;
+    width: 25%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding-top: 18px;
+    padding-bottom: 15px;
+    border: 1px solid black;
+    border-radius: 5px;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.yes,
+.no {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.yes {
+    color: rgb(0, 241, 0);
+}
+
+.no {
+    color: red;
+}
+
+.selected-yes {
+    background-color: lightgreen;
+    font-weight: bold;
+}
+
+.selected-no {
+    background-color: lightcoral;
+    font-weight: bold;
+}
+
+#participants-title {
+    margin-top: 30px;
+}
+
+.participant-email {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.participant-email p {
+    margin-left: 10px;
+    margin-right: 40px;
+    margin-top: 10px;
+}
+
+.participant-email button {
+    border: none;
+    background-color: rgb(28, 100, 255);
+    cursor: pointer;
+    padding: 5px;
+    padding-right: 10px;
+    padding-left: 10px;
+    border-radius: 5px;
+    color: aliceblue;
+}
+
+.participant-email button:hover {
+    background-color: rgb(16, 98, 222);
+}
+
+.participant-email button:active {
+    background-color: rgb(0, 90, 224);
+    transform: scale(0.99);
+}
+
+#ics-file {
+    width: 50%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

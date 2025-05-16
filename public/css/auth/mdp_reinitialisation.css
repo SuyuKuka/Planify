@@ -1,0 +1,36 @@
+.password-container {
+    margin-top: 96px;
+}
+
+.password_confirm-container {
+    margin-top: 20px;
+}
+
+.submit_div {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* media queries */
+
+@media screen and (min-width: 959px) {
+    .submit_div {
+        margin-top: 16%;
+    }
+}
+
+@media screen and (max-width: 959px) {
+    .submit_div {
+        margin-top: 10%;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .password-container {
+        margin-top: 0px;
+    }
+
+    .submit_div {
+        margin-top: 5%;
+    }
+}

@@ -1,0 +1,181 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    overflow-y: auto;
+}
+
+.container {
+    display: flex;
+}
+
+.information {
+    flex: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.information h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.authentification {
+    flex: 2;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.password_confirm-container,
+.password-container {
+    position: relative;
+}
+
+.password_confirm-container img,
+.password-container img {
+    position: absolute;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+button,
+input[type="submit"] {
+    border-radius: 30px;
+    padding: 8px 30px;
+    border: 1px solid gray;
+    cursor: pointer;
+    background-color: rgb(13, 110, 252);
+    color: white;
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+}
+  
+button:hover,
+input[type="submit"]:hover {
+    background-color: rgb(14, 99, 228);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+button:active,
+input[type="submit"]:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.success {
+    color: rgb(0, 206, 0);
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* media queries */
+
+@media screen and (min-width: 959px) {
+    body {
+        background-color: lightgray;
+        min-height: 100vh;
+        justify-content: center;
+    }
+    
+    form {
+        background-color: white;
+        width: 800px;
+        border-radius: 10px; 
+        box-shadow: 0px 2px 4px black;
+        padding: 20px;
+    }
+
+    .container {
+        gap: 22.5%;
+    }
+
+    .password_confirm-container img,
+    .password-container img {
+        top: 55%;
+        right: 6.5%;
+    }
+
+    input[type="date"],
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+        width: 300px;
+        height: 35px;
+        border: 1px solid gray;
+    }
+}
+
+@media screen and (max-width: 959px) {
+    body {
+        background-color: white;
+        min-height: 100vh;
+    }
+
+    form {
+        width: 100%;
+        padding: 20px;
+    }
+
+    .container {
+        gap: 20%;
+    }
+
+    .logo {
+        width: 100%;
+        height: 100%;
+    }
+
+    .password_confirm-container img,
+    .password-container img {
+        top: 55%;
+        right: 4%;
+    }
+
+    input[type="date"],
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+        width: 100%;
+        height: 35px;
+        border: 1px solid gray;
+    }
+
+    .surname-container,
+    .user_id-container,
+    .email-container {
+        margin-top: 0px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    body {
+        min-height: 100svh;
+    }
+
+    .container {
+        flex-direction: column;
+        gap: 0px;
+    }
+
+    .logo {
+        width: 100%;
+        height: 100%;
+    }
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Mot de passe oublié - Planify</title>
+        <link rel="shortcut icon" href="/images/favicon.ico">
+        <!-- css -->
+        <link href="/css/bootstrap.min.css" rel="stylesheet">
+        <link href="/css/auth/authentification.css" rel="stylesheet">
+        <link href="/css/auth/mdp_oublie.css" rel="stylesheet">
+    </head>
+    <body>
+        <form autocomplete="off" action="/auth/mot_de_passe_oublie_succes" method="post" id="form">
+            <div class="container">
+                <div class="information">
+                    <a href="/">
+                        <img class="logo" src="/images/logo.png" width="200" height="50">
+                    </a>
+                    <h2>Mot de passe oublié</h2>
+                    <p>Retrouvez l’accès à votre planning.</p>
+                </div>
+
+                <div class="authentification">
+                    <div class="email-container">
+                        <label for="email">Adresse e-mail :</label><br>
+                        <input type="email" name="email" id="email"/>
+                    </div>
+                    <div class="error" id="client_error" style="display: none;">
+                        <label class="error_msg">Veuillez remplir tous les champs.</label>
+                    </div>
+                    <% if (typeof error !== 'undefined') { %>
+                        <div class="error" id="server_error">
+                            <label class="error_msg"><%= error.msg %></label>
+                        </div>
+                    <% } else { %>
+                        <div class="error" id="server_error" style="display: none;">
+                            <label class="error_msg"></label>
+                        </div>
+                    <% } %>
+                    <div class="submit_div">
+                        <a href="/auth/connexion">Retour à la connexion</a>
+                        <input type="submit" id="oublie" value="Envoyer">
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!-- script -->
+        <script src="/js/jquery.js"></script>
+        <script src="/js/bootstrap.bundle.min.js"></script>
+        <script src="/js/client_server_shared/auth.js"></script>
+        <script src="/js/auth/authentification.js"></script>
+        <script src="/js/auth/mdp_oublie.js"></script>
+    </body>
+</html>
