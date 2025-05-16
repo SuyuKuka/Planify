@@ -1,6 +1,7 @@
+$('#calendar-body').append(createTimeDiv());
 const date = today.getDate();
 
-const daysDiv = $("<div id='#calendar-days'></div>");
+const daysDiv = $("<div class='calendar-days'></div>");
 daysDiv.append(createCurrButton(date));
 
-$('#calendar').append(daysDiv);
+$('#calendar-body').append(daysDiv);

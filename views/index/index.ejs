@@ -7,7 +7,7 @@
 		<link rel="shortcut icon" href="/images/favicon.ico">
         <!-- css -->
 		<script>
-			const vueList = ['jour', 'semaine', 'mois', 'annee'];
+			const vueList = ['semaine'];
 			const url = new URL(window.location.href);
 
 			if (!vueList.includes(url.searchParams.get('vue'))) {
@@ -15,14 +15,21 @@
 				window.history.replaceState({}, '', url);
 			}
 		</script>
+		<%
+			const vues = ["semaine"];
+			const vueChoisie = vues.includes(vue) ? vue : "semaine";
+		%>
+		<link href="/css/index/<%= vueChoisie %>.css" rel="stylesheet">
         <link href="/css/bootstrap.min.css" rel="stylesheet">
         <link href="/css/nav.css" rel="stylesheet">
         <link href="/css/index/index.css" rel="stylesheet">
 	</head>
 	<body>
-		<div class="d-flex vh-100 flex-column">
+		<div class="d-flex flex-column">
 			<%- include('../nav') %>
-			<div class="d-flex flex-column flex-sm-row flex-grow-1">
+			<!-- Côté gauche -->
+			<div class="d-flex flex-column flex-sm-row">
+				<!-- Réunions -->
 				<div class="d-flex flex-column col-12 col-sm-2" id="left">
 					<% if (token !== undefined && token !== null) { %>
 						<button id="create-reunion">
@@ -51,15 +58,19 @@
 						<% } %>
 					</div>
 				</div>
-				<div class="p-1 bg-warning text-dark col-12 col-sm flex-grow-1" id="calendar">
-					<div class="dropdown">
-						<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="vue-dropdown" aria-expanded="false">
-						</button>
-						<ul class="dropdown-menu" id="vue-dropdown-menu">
-						</ul>
+				<!-- Calendrier -->
+				<div id="calendar" class="text-dark bg-warning d-flex flex-column col-12 col-sm">
+					<div id="calendar-header" class="d-flex justify-content-around">
+						<button type="button" class="btn btn-primary" id="previous-calendar"><</button>
+						<div class="calendar-dropdown">
+							<button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" id="vue-dropdown" type="button"></button>
+							<ul class="dropdown-menu" id="vue-dropdown-menu">
+							</ul>
+						</div>
+						<button type="button" class="btn btn-primary" id="next-calendar">></button>
 					</div>
-					Centre
 				</div>
+				<!-- Propositions -->
 				<div class="p-1 col-12 col-sm-2" id="right">
 					<div class="info-reunion" id="info-reunion">
 						<p>Proposition de la réunion :</p><br>
@@ -127,10 +138,6 @@
 		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 		<script src="/js/bootstrap.bundle.min.js"></script>
         <script src="/js/index/index.js"></script>
-		<%
-			const vues = ["jour", "semaine", "mois", "annee"];
-			const vueChoisie = vues.includes(vue) ? vue : "semaine";
-		%>
 		<script src="/js/index/<%= vueChoisie %>.js"></script>
 		<% const currentUserId = user_id; %> 
 		<script>const currentUserId = "<%= currentUserId %>";</script>
