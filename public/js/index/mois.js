@@ -3,7 +3,7 @@ const day = mod(new Date(year, month, 1).getDay() - 1, 7) + 1;
 const prevMonth = days[mod(month - 1, 12)];
 
 const cells = days[month] + (days[month] / 7 >> 0) + 1;
-const daysDiv = $("<div id='#calendar-days'></div>");
+const daysDiv = $("<div class='calendar-days'></div>");
 
 for (let i = 0; i < cells; i++) {
     const val = i - day + 2;

@@ -1,16 +1,19 @@
-const vues = ["jour", "semaine", "mois", "annee"];
+// Vue
+// Change la valeur get de vue si non reconnu ou non présente en 'semaine'
+const vues = ["semaine"];
 const params = new URLSearchParams(document.location.search);
 const vue = params.get("vue");
 if (vue == null || !vues.includes(vue)) {
     params.append("vue", "semaine");
     window.location.search = params.toString();
 }
+// Ajoute toutes formats de vue du calendrier dans le dropdown
 $('#vue-dropdown').append(vue).css('text-transform','capitalize');
 vues.forEach(element => {
-    if (element !== vue) {
-        $('#vue-dropdown-menu').append(
-            `<li><a class="dropdown-item" href="?vue=${element}">${element}</a></li>`).css('text-transform','capitalize');
-    }
+    const elementClass = element !== vue ? "" : "active";
+    $('#vue-dropdown-menu').append(
+        `<li><a class="dropdown-item ${elementClass}" href="?vue=${element}">${element}</a></li>`)
+        .css('text-transform','capitalize');
 });
 
 const today = new Date();
@@ -30,20 +33,17 @@ function mod(n, m) {
     return ((n % m) + m) % m;
 }
 
-function createButton(className, value) {
-    return `<button class='btn ${className}'>${value}</button>`;
+function createTimeDiv() {
+    const timeDiv = $('<div id="timeDiv" class="time-column"></div>');
+    for (let i = 0; i < 24; i++) {
+        const hour = i.toString().padStart(2, '0');
+        timeDiv.append(`<div class="hour-block">${hour}:00</div>`);
+    }
+    return timeDiv;
 }
 
-function createPrevButton(value) {
-    return createButton('prev-calendar', value);
-}
-
-function createCurrButton(value) {
-    return createButton('curr-calendar', value);
-}
-
-function createNextButton(value) {
-    return createButton('next-calendar', value);
+function createButton(value) {
+    return `<button class='btn calendar-day'>${value}</button>`;
 }
 
 // Overlay
@@ -76,7 +76,7 @@ document.addEventListener("click", e => {
     const target = e.target;
 
     if (overlay.contains(target) || overlayReunion.contains(target)) return;
-    if (target.id === "create-reunion") {
+    if (target.id === "create-reunion" || target.classList.contains("period") && document.getElementById("create-reunion")) {
         toggleOverlay(false, overlayReunion, show => displayOverlayReunion = show);
         toggleOverlay(!displayOverlay, overlay, show => displayOverlay = show, resetForm);
         return;
@@ -411,12 +411,7 @@ function resetReunionInfo() {
 
 async function deleteReunion(reunionId) {
     const deleteButton = document.getElementById('delete-reunion');
-    deleteButton.onclick = null;
-
-    const oldClickHandler = deleteButton.onclick;
-    deleteButton.removeEventListener('click', oldClickHandler);
-    
-    deleteButton.addEventListener('click', async (e) => {
+    deleteButton.onclick = async (e) => {
         e.preventDefault();
         if (!confirm("Êtes-vous sûr de vouloir supprimer cette réunion ?")) return;
         try {
@@ -430,11 +425,13 @@ async function deleteReunion(reunionId) {
             console.error(err);
             alert("Erreur réseau.");
         }
-    });
+    };
 }
 
-async function leaveReunion(reunionId) {
-    document.getElementById('leave-reunion').addEventListener('click', async (e) => {
+function leaveReunion(reunionId) {
+    const leaveButton = document.getElementById('leave-reunion');
+    leaveButton.onclick = async (e) => {
+        e.preventDefault();
         if (!confirm("Êtes-vous sûr de vouloir quitter cette réunion ?")) return;
         try {
             await fetch('/leave', {
@@ -447,7 +444,7 @@ async function leaveReunion(reunionId) {
             console.error(err);
             alert("Erreur réseau.");
         }
-    });
+    };
 }
 
 function profilParticipant() {
@@ -512,25 +509,29 @@ function deleteParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
 }
 
 function addParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
-    document.getElementById('add-participant').addEventListener('click', async function (e) {
-        const email = document.getElementById('participant-email').value;
+    const btn = document.getElementById('add-participant');
+    if (!btn) return;
+
+    btn.onclick = async function (e) {
+        e.preventDefault();
+        const email = document.getElementById('participant-email').value.trim();
         if (!email) {
             alert("Veuillez entrer un email valide.");
             return;
         }
-    
+
         try {
             const res = await fetch(`/add-participant/${reunionId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
             });
-    
+
             if (res.ok) {
                 alert("Participant ajouté avec succès.");
                 window.location.reload();
-            }  else if (response.status === 400) {
-                alert("L'utilisateur est déjà dans la reunion.");
+            } else if (res.status === 400) {
+                alert("L'utilisateur est déjà dans la réunion.");
             } else {
                 alert("Erreur serveur. Veuillez réessayer plus tard.");
             }
@@ -538,7 +539,7 @@ function addParticipant(reunionId, reunionName, userId, userIdOrga, slots) {
             console.error("Erreur réseau :", err);
             alert("Erreur réseau.");
         }
-    });
+    };
 }
 
 async function showResults(reunionId) {
