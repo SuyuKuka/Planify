@@ -1,6 +1,8 @@
+const { get } = require('http');
 const { getPool } = require('../../config/database/db');
 const encrypt = require('../../services/encryption/encrypt');
 const mail = require('../../services/mailer/mailer');
+const fs = require('fs');
 
 async function getInfo(token) {
     const client = await getPool().connect();
@@ -50,10 +52,10 @@ async function createReunion(name, dateTimePairs, participants, user_id, email) 
             [reunion_id, email]
         );
 
-        for (const { date, time } of dateTimePairs) {
+        for (const { date, time, duree } of dateTimePairs) {
             await client.query(
-                'INSERT INTO proposition_date (reunion_id, date, time) VALUES ($1, $2, $3)',
-                [reunion_id, date, time]
+                'INSERT INTO proposition_date (reunion_id, date, time, duration) VALUES ($1, $2, $3, $4)',
+                [reunion_id, date, time, duree]
             );
         }
 
@@ -117,7 +119,7 @@ async function getReunions(user_id) {
     const client = await getPool().connect();
     try {
         const result = await client.query(`
-            SELECT r.id, r.name, r.user_id, pd.date, pd.time
+            SELECT r.id, r.name, r.user_id, pd.date, pd.time, pd.duration
             FROM reunion r
             JOIN participants p ON r.id = p.reunion_id
             JOIN proposition_date pd ON r.id = pd.reunion_id
@@ -129,13 +131,13 @@ async function getReunions(user_id) {
         const reunions = result.rows.reduce((acc, row) => {
             const reunion = acc.find(r => r.id === row.id);
             if (reunion) {
-                reunion.dates.push({ date: row.date, time: row.time });
+                reunion.dates.push({ date: row.date, time: row.time, duration: row.duration });
             } else {
                 acc.push({
                     id: row.id,
                     name: row.name,
                     user_id: row.user_id,
-                    dates: [{ date: row.date, time: row.time }]
+                    dates: [{ date: row.date, time: row.time, duration: row.duration }],
                 });
             }
             return acc;
@@ -406,6 +408,108 @@ async function participateReunion(token) {
     }
 }
 
+function parseICSFromString(icsString) {
+    const events = [];
+    const vevents = icsString.split('BEGIN:VEVENT').slice(1);
+    for (const v of vevents) {
+        const dtstartMatch = v.match(/DTSTART(?:;[^:]+)?:([0-9T]+Z?)/);
+        const dtendMatch = v.match(/DTEND(?:;[^:]+)?:([0-9T]+Z?)/);
+
+        if (dtstartMatch && dtendMatch) {
+            const start = parseICSTime(dtstartMatch[1]);
+            const end = parseICSTime(dtendMatch[1]);
+
+            if (start && end) {
+                events.push({ start, end });
+            }
+        }
+    }
+    return events;
+}
+
+function parseICSTime(value) {
+    const match = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?$/);
+    if (!match) return null;
+
+    const [, y, m, d, h, min, s] = match.map(Number);
+    return new Date(Date.UTC(y, m - 1, d, h, min, s));
+}
+
+function isOverlap(start1, end1, start2, end2) {
+    return start1 < end2 && start2 < end1;
+}
+
+function parseDuration(durationStr) {
+    const [h, m, s] = durationStr.split(':').map(Number);
+    return ((h * 60 + m) * 60 + s) * 1000;
+}
+
+function combineDateTime(dateObj, timeStr) {
+    const [h, m, s] = timeStr.split(':').map(Number);
+
+    return new Date(
+        dateObj.getFullYear(),
+        dateObj.getMonth(),
+        dateObj.getDate(),
+        h,
+        m,
+        s
+    );
+}
+
+async function insertICS(reunion_id, user_id, ics) {
+    const client = await getPool().connect();
+    try {
+        const res = await client.query(
+            'SELECT date, time, duration FROM proposition_date WHERE reunion_id = $1',
+            [reunion_id]
+        );
+        if (res.rows.length === 0) return -1;
+
+        const icsEvents = parseICSFromString(ics);
+        const propositions = res.rows.map(({ date, time, duration }) => {
+            const start = combineDateTime(date, time); // Date JS
+            const end = new Date(start.getTime() + parseDuration(duration)); // durée en ms
+            return { date, time, start, end };
+        });
+
+        for (const prop of propositions) {
+            const available = !icsEvents.some(event =>
+                isOverlap(prop.start, prop.end, event.start, event.end)
+            );
+
+            const check = await client.query(
+                'SELECT * FROM response WHERE reunion_id = $1 AND user_id = $2 AND date = $3 AND time = $4',
+                [reunion_id, user_id, prop.date, prop.time]
+            );
+
+            if (check.rows.length > 0) {
+                await client.query(
+                    'UPDATE response SET response = $1 WHERE reunion_id = $2 AND user_id = $3 AND date = $4 AND time = $5',
+                    [available, reunion_id, user_id, prop.date, prop.time]
+                );
+            } else {
+                await client.query(
+                    'INSERT INTO response (reunion_id, user_id, date, time, response) VALUES ($1, $2, $3, $4, $5)',
+                    [reunion_id, user_id, prop.date, prop.time, available]
+                );
+            }
+        }
+    } finally {
+        client.release();
+    }
+}
+
+async function getNoAcc(reunion_id, email) {
+    const client = await getPool().connect();
+    try {
+        const result = await client.query('SELECT * FROM no_account WHERE reunion_id = $1 AND email = $2', [reunion_id, email]);
+        return result.rows[0];
+    } finally {
+        client.release();
+    }
+}
+
 module.exports = { 
     getInfo, 
     prefixSearch, 
@@ -423,5 +527,7 @@ module.exports = {
     getAllResponses,
     deleteSlot,
     addSlot,
-    participateReunion
+    participateReunion,
+    insertICS,
+    getNoAcc
 };

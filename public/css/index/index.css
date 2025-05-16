@@ -383,8 +383,15 @@ p {
 	padding: 3px;
 }
 
-.datetime-group-after input[type="date"] {
+.datetime-group-after input[type="date"],
+.datetime-group-after input[name="times"]
+ {
 	border-bottom: none;
+}
+
+#ics-file {
+	margin-top: 10px;
+	margin-bottom: 10px;
 }
 
 /* Ordre selon taille écran */

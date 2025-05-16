@@ -166,7 +166,6 @@ async function sendPasswordForgottenEmail(email) {
  */
 async function updatePassword(token, password) {
     const client = await getPool().connect();
-    console.log("tokenaaaAAAAaa: " + token);
     try {
         // Retire les anciens tokens
         await client.query('DELETE FROM token WHERE expire_at < NOW()');
@@ -176,12 +175,9 @@ async function updatePassword(token, password) {
             return false;
         }
         const user_id = result.rows[0].user_id;
-        console.log(user_id);
         await destroyOldIDToken(user_id, client);
         const hashedPassword = await encrypt.hash(password);
-        console.log(hashedPassword);
         await client.query('UPDATE "user" SET password = $1 WHERE user_id = $2', [hashedPassword, user_id]);
-        console.log("done");
         return true;
     } catch (error) {
         console.error(error);
@@ -197,10 +193,8 @@ async function updatePassword(token, password) {
 
 async function isIDTokenValid(token) {
     const client = await getPool().connect();
-    console.log("token: " + token);
     try {
         const result = await client.query('SELECT 1 FROM token WHERE token = $1 AND expire_at > NOW() LIMIT 1', [token]);
-        console.log(result.rowCount > 0);
         return result.rowCount > 0;
     } catch (error) {
         console.error(error);
