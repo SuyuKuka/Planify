@@ -1,6 +1,6 @@
 // Vue
 // Change la valeur get de vue si non reconnu ou non présente en 'semaine'
-const vues = ["jour", "semaine", "mois", "annee"];
+const vues = ["semaine"];
 const params = new URLSearchParams(document.location.search);
 const vue = params.get("vue");
 if (vue == null || !vues.includes(vue)) {

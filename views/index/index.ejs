@@ -7,7 +7,7 @@
 		<link rel="shortcut icon" href="/images/favicon.ico">
         <!-- css -->
 		<script>
-			const vueList = ['jour', 'semaine', 'mois', 'annee'];
+			const vueList = ['semaine'];
 			const url = new URL(window.location.href);
 
 			if (!vueList.includes(url.searchParams.get('vue'))) {
@@ -16,7 +16,7 @@
 			}
 		</script>
 		<%
-			const vues = ["jour", "semaine", "mois", "annee"];
+			const vues = ["semaine"];
 			const vueChoisie = vues.includes(vue) ? vue : "semaine";
 		%>
 		<link href="/css/index/<%= vueChoisie %>.css" rel="stylesheet">
