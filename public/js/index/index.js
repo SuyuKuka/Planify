@@ -16,8 +16,8 @@ vues.forEach(element => {
         .css('text-transform','capitalize');
 });
 
-const today = new Date();
-const year = today.getFullYear();
+let today = new Date();
+let year = today.getFullYear();
 
 function estBissextile(annee) {
     return (annee % 4 === 0 && annee % 100 !== 0) || (annee % 400 === 0);

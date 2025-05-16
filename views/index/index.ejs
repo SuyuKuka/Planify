@@ -29,6 +29,7 @@
 			<%- include('../nav') %>
 			<!-- Côté gauche -->
 			<div class="d-flex flex-column flex-sm-row">
+				<!-- Réunions -->
 				<div class="d-flex flex-column col-12 col-sm-2" id="left">
 					<% if (token !== undefined && token !== null) { %>
 						<button id="create-reunion">
@@ -57,15 +58,19 @@
 						<% } %>
 					</div>
 				</div>
+				<!-- Calendrier -->
 				<div id="calendar" class="text-dark bg-warning d-flex flex-column col-12 col-sm">
-					<div id="calendar-header" class="text-center">
+					<div id="calendar-header" class="d-flex justify-content-around">
+						<button type="button" class="btn btn-primary" id="previous-calendar"><</button>
 						<div class="calendar-dropdown">
 							<button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" id="vue-dropdown" type="button"></button>
 							<ul class="dropdown-menu" id="vue-dropdown-menu">
 							</ul>
 						</div>
+						<button type="button" class="btn btn-primary" id="next-calendar">></button>
 					</div>
 				</div>
+				<!-- Propositions -->
 				<div class="p-1 col-12 col-sm-2" id="right">
 					<div class="info-reunion" id="info-reunion">
 						<p>Proposition de la réunion :</p><br>
