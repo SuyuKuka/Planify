@@ -116,7 +116,6 @@ async function updateCalendarSlot(reunionUserId) {
     }
 
     const slots = await response.json();
-    console.log("Slots récupérés :", slots);
 
    slots.forEach(slot => {
         const [day, month, year] = slot.date.split('/').map(Number);
@@ -154,7 +153,6 @@ async function updateCalendarSlot(reunionUserId) {
                 border: '1px solid black',
             });
             column.append(div);
-            console.log(`Ajouté dans #day-column-${customDay} pour la date ${slot.date}`);
         } else {
             console.warn(`Colonne #day-column-${customDay} introuvable`);
         }
