@@ -120,7 +120,7 @@ document.getElementById('add-datetime').addEventListener('click', () => {
     group.innerHTML = `
         <input type="date" class="form-control mb-2" name="dates[]" required>
         <input type="time" class="form-control mb-2" name="times[]" required>
-        <input type="time" class="form-control mb-2" name="durees[]" required>
+        <input type="time" class="form-control mb-2" name="end_times[]" required>
         <button type="button" class="btn btn-danger btn-sm remove-datetime">Supprimer</button>`;
     container.appendChild(group);
     group.querySelector('.remove-datetime').addEventListener('click', () => group.remove());
@@ -134,7 +134,7 @@ function resetForm() {
     group.innerHTML = `
         <input type="date" class="form-control mb-2" name="dates[]" required>
         <input type="time" class="form-control mb-2" name="times[]" required>
-        <input type="time" class="form-control mb-2" name="durees[]" required>`;
+        <input type="time" class="form-control mb-2" name="end_times[]" required>`;
     container.appendChild(group);
 }
 
@@ -169,14 +169,6 @@ function formatDateTime(dateString) {
     return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-function formatDuree(duree) {
-    const [heures, minutes] = duree.split(":").map(Number);
-    let result = "";
-    if (heures > 0) result += `${heures}h`;
-    if (minutes > 0) result += `${minutes}m`;
-    return result || "0h";
-}
-
 async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots) {
     const infoDiv = document.getElementById('right');
     infoDiv.innerHTML = '';
@@ -209,18 +201,19 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         slotsHtml += slots.map(slot => {
             const tmp = new Date(slot.date); 
             const date = formatDateTime(tmp);
-            const duration = formatDuree(slot.duration);
+            const time = slot.time;
+            const end_time = slot.end_time;
 
             const key = `${date}_${slot.time}`;
             const res = responses[key];
             if (userId === userIdOrga) {
                 return `
-                    <div class="slot" data-date="${date}" data-time="${slot.time}" data-duration="${slot.duration}" data-response="${res}">
+                    <div class="slot" data-date="${date}" data-time="${time}" data-end-time="${end_time}" data-response="${res}">
                         <div class="remove-slot">
                             &times;
                         </div>
-                        <div>${date} à ${slot.time}</div>
-                        durée : ${duration}
+                        <div>${date} à ${time}</div>
+                        jusqu'à : ${end_time}
                         <div class="choice" style="display: none;">
                             <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
                             <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
@@ -229,9 +222,9 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
                     `;
             }
             return `
-                <div class="slot" data-date="${date}" data-time="${slot.time}" data-duration="${slot.duration}" data-response="${res}">
-                    <div>${date} à ${slot.time}</div>
-                    durée : ${duration}
+                <div class="slot" data-date="${date}" data-time="${time}" data-end-time="${end_time}" data-response="${res}">
+                    <div>${date} à ${time}</div>
+                    jusqu'à : ${end_time}
                     <div class="choice">
                         <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
                         <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
@@ -259,11 +252,11 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
 
     if (userId === userIdOrga) {        
         infoDiv.innerHTML += `<div class="form-group-after" id="dates-container">
-                                Dates, heures et durées :
+                                Dates et heures :
                                 <div class="datetime-group-after">
                                     <input type="date" name="dates">
                                     <input type="time" name="times">
-                                    <input type="time" name="duree">
+                                    <input type="time" name="end_times">
                                 </div>
                             </div>
                             <button type="button" id="add-datetime-after" class="btn btn-sm btn-outline-secondary mb-3">
@@ -604,15 +597,15 @@ function removeSlot(reunionId) {
             if (slot) {
                 const date = slot.getAttribute('data-date');
                 const time = slot.getAttribute('data-time');
-                const duration = slot.getAttribute('data-duration');
+                const end_time = slot.getAttribute('data-end-time');
 
-                const confirmed = confirm(`Supprimer le créneau ${date} à ${time} d'une durée de ${duration} ?`);
+                const confirmed = confirm(`Supprimer le créneau ${date} de ${time} à ${end_time} ?`);
                 if (!confirmed) return;
                 
                 const res = await fetch(`/delete-slot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reunion_id: reunionId, date, time, duration })
+                    body: JSON.stringify({ reunion_id: reunionId, date, time, end_time })
                 }).catch(err => console.error('Erreur suppression slot :', err));
 
                 if (res.ok) {
@@ -630,15 +623,15 @@ function addDateTimeAfter(reunionId) {
             for (let group of groups) {
                 const dateInput = group.querySelector('input[type="date"]');
                 const timeInput = group.querySelector('input[type="time"]');
-                const durationInput = group.querySelector('input[name="duree"]');
+                const endtimeInput = group.querySelector('input[name="end_time"]');
                 const date = dateInput.value;
                 const time = timeInput.value;
-                const duration = durationInput.value;
+                const endtime = endtimeInput.value;
                 if (dateInput && timeInput && date && time) {
                     const res = await fetch(`/add-slot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reunion_id: reunionId, date: formatDateTime(date), time, duration })
+                    body: JSON.stringify({ reunion_id: reunionId, date: formatDateTime(date), time, endtime })
                     }).catch(err => console.error('Erreur ajout slot :', err));
 
                     if (res.ok) {

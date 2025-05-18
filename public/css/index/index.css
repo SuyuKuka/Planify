@@ -9,6 +9,14 @@ html, body {
   overflow: hidden;
 }
 
+#calendar {
+	background-color: rgb(250, 250, 250);
+}
+
+.period {
+	position: relative;
+}
+
 /* OVERLAY */
 
 #overlay {

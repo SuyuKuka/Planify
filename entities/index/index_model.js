@@ -52,10 +52,10 @@ async function createReunion(name, dateTimePairs, participants, user_id, email) 
             [reunion_id, email]
         );
 
-        for (const { date, time, duree } of dateTimePairs) {
+        for (const { date, time, end_time } of dateTimePairs) {
             await client.query(
-                'INSERT INTO proposition_date (reunion_id, date, time, duration) VALUES ($1, $2, $3, $4)',
-                [reunion_id, date, time, duree]
+                'INSERT INTO proposition_date (reunion_id, date, time, end_time) VALUES ($1, $2, $3, $4)',
+                [reunion_id, date, time, end_time]
             );
         }
 
@@ -119,7 +119,7 @@ async function getReunions(user_id) {
     const client = await getPool().connect();
     try {
         const result = await client.query(`
-            SELECT r.id, r.name, r.user_id, pd.date, pd.time, pd.duration
+            SELECT r.id, r.name, r.user_id, pd.date, pd.time, pd.end_time
             FROM reunion r
             JOIN participants p ON r.id = p.reunion_id
             JOIN proposition_date pd ON r.id = pd.reunion_id
@@ -131,13 +131,13 @@ async function getReunions(user_id) {
         const reunions = result.rows.reduce((acc, row) => {
             const reunion = acc.find(r => r.id === row.id);
             if (reunion) {
-                reunion.dates.push({ date: row.date, time: row.time, duration: row.duration });
+                reunion.dates.push({ date: row.date, time: row.time, end_time: row.end_time });
             } else {
                 acc.push({
                     id: row.id,
                     name: row.name,
                     user_id: row.user_id,
-                    dates: [{ date: row.date, time: row.time, duration: row.duration }],
+                    dates: [{ date: row.date, time: row.time, end_time: row.end_time }],
                 });
             }
             return acc;
@@ -323,10 +323,10 @@ async function getAllResponses(reunion_id) {
     }
 }
 
-async function deleteSlot(reunion_id, date, time, duration) {
+async function deleteSlot(reunion_id, date, time, end_time) {
     const client = await getPool().connect();
     try {
-        await client.query('DELETE FROM proposition_date WHERE reunion_id = $1 AND date = $2 AND time = $3 AND duration = $4', [reunion_id, parseDate(date), time, duration]);
+        await client.query('DELETE FROM proposition_date WHERE reunion_id = $1 AND date = $2 AND time = $3 AND end_time = $4', [reunion_id, parseDate(date), time, end_time]);
 
         const res = await client.query('SELECT * FROM proposition_date WHERE reunion_id = $1', [reunion_id]);
         if (res.rows.length === 0) {
@@ -337,10 +337,10 @@ async function deleteSlot(reunion_id, date, time, duration) {
     }
 }
 
-async function addSlot(reunion_id, date, time, duration) {
+async function addSlot(reunion_id, date, time, end_time) {
     const client = await getPool().connect();
     try {
-        await client.query('INSERT INTO proposition_date (reunion_id, date, time, duration) VALUES ($1, $2, $3, $4)', [reunion_id, parseDate(date), time, duration]);
+        await client.query('INSERT INTO proposition_date (reunion_id, date, time, end_time) VALUES ($1, $2, $3, $4)', [reunion_id, parseDate(date), time, end_time]);
     } catch (error) {
         throw error;
     } finally {
@@ -461,15 +461,15 @@ async function insertICS(reunion_id, user_id, ics) {
     const client = await getPool().connect();
     try {
         const res = await client.query(
-            'SELECT date, time, duration FROM proposition_date WHERE reunion_id = $1',
+            'SELECT date, time, end_time FROM proposition_date WHERE reunion_id = $1',
             [reunion_id]
         );
         if (res.rows.length === 0) return -1;
 
         const icsEvents = parseICSFromString(ics);
-        const propositions = res.rows.map(({ date, time, duration }) => {
+        const propositions = res.rows.map(({ date, time, end_time }) => {
             const start = combineDateTime(date, time); // Date JS
-            const end = new Date(start.getTime() + parseDuration(duration)); // durée en ms
+            const end = new Date(start.getTime() + parseDuration(end_time)); // durée en ms
             return { date, time, start, end };
         });
 

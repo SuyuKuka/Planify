@@ -3,6 +3,17 @@ let day = mod(today.getDay() - 1, 7) + 1;
 let prevMonth = days[mod(month - 1, 12)];
 let date = today.getDate();
 
+function getVal(i) {
+    const val = date + (i) + 1 - day;
+    if (val <= 0) {
+        return prevMonth + val;
+    } else if (val > days[month]) {
+        return val - days[month];
+    } else {
+        return val;
+    }
+}
+
 // Boutons next et previous
 function updateVal(incrementDay) {
     today.setDate(date + incrementDay);
@@ -35,30 +46,41 @@ $('#next-calendar').on('click', () => {
 
 // MOIS
 function createDate() {
-    const date = $(`<span>${months[month]} ${year}</span>`);
-    return date;
+    const monthVal = [month];
+    if (date - day <= 0) {
+        monthVal.push(mod(month - 1, 12));
+    }
+    if (date + 6 - day > days[month]) {
+        monthVal.push(mod(month + 1, 12));
+    }
+
+    let text = '';
+    if (monthVal.length === 1) {
+        text = `${months[monthVal[0]]} ${year}`;
+    } else if (monthVal.length === 2) {
+        text = `${months[monthVal[1]]} - ${months[monthVal[0]]} ${year}`;
+    }
+
+    const h3 = $(`<h3>${text}</h3>`);
+    return h3;
 }
 
 $("#calendar-header > :nth-child(1)").after(createDate());
 
 // HEADERS
 const dayNames = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-function getVal(i) {
-    const val = date + (i) + 1 - day;
-    if (val <= 0) {
-        return prevMonth + val;
-    } else if (val > days[month]) {
-        return val - days[month];
-    } else {
-        return val;
-    }
-}
+
 
 function createDaysHeader() {
     const header = $('<div id="calendar-days-header" class="bg-transparent d-flex"></div>');
     
     // div invisible pour match la colonne temps
-    header.append('<div" style="width: 46px;"></div>');
+    const div = $('<div></div>').css({
+        width: "46px",
+        "background-color": $('#calendar-header').css('background-color')
+    });
+    header.append(div);
+
 
     for (let i = 0; i < 7; i++) {
         const val = getVal(i);
@@ -75,7 +97,7 @@ $('#calendar').append(createDaysHeader());
 function createCalendarColumns() {
     const container = $('<div id="calendar-columns"></div>');
 
-    const timeCol = $('<div id="time" class="text-center bg-light-subtle d-flex flex-column flex-grow-0 period"></div>');
+    const timeCol = $('<div id="time" class="text-center d-flex flex-column flex-grow-0 period"></div>');
     for (let h = 0; h < 24; h++) {
         const hour = h.toString().padStart(2, '0') + ':00';
         timeCol.append(`<span>${hour}</span>`);

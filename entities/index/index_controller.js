@@ -35,7 +35,7 @@ async function getSearchProfil(req, res) {
 }
 
 async function postCreateReunion(req, res) {
-    const { name, dates, times, durees, participants } = req.body;
+    const { name, dates, times, end_times, participants } = req.body;
     const token = req.session.token;
 
     const participantsArray = [...new Set(
@@ -47,12 +47,12 @@ async function postCreateReunion(req, res) {
     
     const datesArray = Array.isArray(dates) ? dates : [dates];
     const timesArray = Array.isArray(times) ? times : [times];
-    const dureesArray = Array.isArray(durees) ? durees : [durees];
+    const endtimesArray = Array.isArray(end_times) ? end_times : [end_times];
     // Fusionner les dates et heures
     const dateTimePairs = datesArray.map((date, i) => ({
         date,
         time: timesArray[i] || timesArray[0],
-        duree: dureesArray[i] || dureesArray[0]
+        end_time: endtimesArray[i] || endtimesArray[0]
     }));
 
     const { user_id, email } = await Auth.getInfo(token);
@@ -144,9 +144,9 @@ async function postGetAllResponses(req, res) {
 }
 
 async function postDeleteSlot(req, res) {
-    const { reunion_id, date, time, duration } = req.body;
+    const { reunion_id, date, time, end_time } = req.body;
     try {
-        await Auth.deleteSlot(reunion_id, date, time, duration);
+        await Auth.deleteSlot(reunion_id, date, time, end_time);
         res.sendStatus(200);
     } catch (err) {
         console.error(err);
@@ -155,9 +155,9 @@ async function postDeleteSlot(req, res) {
 }
 
 async function postAddSlot(req, res) {
-    const { reunion_id, date, time, duration } = req.body;
+    const { reunion_id, date, time, end_time } = req.body;
     try {
-        await Auth.addSlot(reunion_id, date, time, duration);
+        await Auth.addSlot(reunion_id, date, time, end_time);
         res.sendStatus(200);
     } catch (err) {
         console.error(err);
