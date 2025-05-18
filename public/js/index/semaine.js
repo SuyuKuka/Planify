@@ -104,18 +104,18 @@ function createCalendarColumns() {
     }
     container.append(timeCol);
 
-    const classes = [
-        'bg-success',
-        'bg-primary-subtle',
-        'bg-success',
-        'bg-secondary',
-        'bg-success',
-        'bg-light',
-        'bg-success'
-    ];
+    const colors = [
+        'rgba(255, 0, 0, 0.7)',
+        'rgba(255, 127, 0, 0.7)',
+        'rgba(255, 255, 0, 0.7)',
+        'rgba(0, 255, 0, 0.7)',
+        'rgba(0, 0, 255, 0.7)',
+        'rgba(75, 0, 130, 0.7)',
+        'rgba(139, 0, 255, 0.7)',
+    ]
 
-    classes.forEach(bgClass => {
-        const col = $(`<div class="d-flex flex-grow-1 period ${bgClass}"></div>`);
+    colors.forEach(color => {
+        const col = $(`<div class="d-flex flex-grow-1 period" style="background-color : ${color}"></div>`);
         container.append(col);
     });
 

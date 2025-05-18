@@ -623,15 +623,15 @@ function addDateTimeAfter(reunionId) {
             for (let group of groups) {
                 const dateInput = group.querySelector('input[type="date"]');
                 const timeInput = group.querySelector('input[type="time"]');
-                const endtimeInput = group.querySelector('input[name="end_time"]');
+                const endtimeInput = group.querySelector('input[name="end_times"]');
                 const date = dateInput.value;
                 const time = timeInput.value;
                 const endtime = endtimeInput.value;
-                if (dateInput && timeInput && date && time) {
+                if (dateInput && timeInput && endtimeInput && date && time && endtime) {
                     const res = await fetch(`/add-slot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reunion_id: reunionId, date: formatDateTime(date), time, endtime })
+                    body: JSON.stringify({ reunion_id: reunionId, date: formatDateTime(date), time, end_time: endtime })
                     }).catch(err => console.error('Erreur ajout slot :', err));
 
                     if (res.ok) {
@@ -640,7 +640,7 @@ function addDateTimeAfter(reunionId) {
                         alert("Une erreur est survenue lors de l'ajout du créneau.");
                     }
                 } else {
-                    alert("Veuillez choisir une date et une heure.");
+                    alert("Veuillez choisir une date et une heure de début et fin.");
                 }
             }
         }
