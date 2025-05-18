@@ -363,7 +363,7 @@ async function participateReunion(token) {
         }
 
         const prop = await client.query(`
-            SELECT pd.date, pd.time, r.response
+            SELECT pd.date, pd.time, pd.end_time, r.response
             FROM proposition_date pd
             LEFT JOIN response r
             ON pd.reunion_id = r.reunion_id
