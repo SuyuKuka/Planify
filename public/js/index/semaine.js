@@ -58,7 +58,7 @@ function createDaysHeader() {
     const header = $('<div id="calendar-days-header" class="bg-transparent d-flex"></div>');
     
     // div invisible pour match la colonne temps
-    header.append('<div class="bg-warning" style="width: 46px;"></div>');
+    header.append('<div" style="width: 46px;"></div>');
 
     for (let i = 0; i < 7; i++) {
         const val = getVal(i);

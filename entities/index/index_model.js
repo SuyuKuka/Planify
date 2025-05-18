@@ -323,10 +323,10 @@ async function getAllResponses(reunion_id) {
     }
 }
 
-async function deleteSlot(reunion_id, date, time) {
+async function deleteSlot(reunion_id, date, time, duration) {
     const client = await getPool().connect();
     try {
-        await client.query('DELETE FROM proposition_date WHERE reunion_id = $1 AND date = $2 AND time = $3', [reunion_id, parseDate(date), time]);
+        await client.query('DELETE FROM proposition_date WHERE reunion_id = $1 AND date = $2 AND time = $3 AND duration = $4', [reunion_id, parseDate(date), time, duration]);
 
         const res = await client.query('SELECT * FROM proposition_date WHERE reunion_id = $1', [reunion_id]);
         if (res.rows.length === 0) {
@@ -337,10 +337,10 @@ async function deleteSlot(reunion_id, date, time) {
     }
 }
 
-async function addSlot(reunion_id, date, time) {
+async function addSlot(reunion_id, date, time, duration) {
     const client = await getPool().connect();
     try {
-        await client.query('INSERT INTO proposition_date (reunion_id, date, time) VALUES ($1, $2, $3)', [reunion_id, parseDate(date), time]);
+        await client.query('INSERT INTO proposition_date (reunion_id, date, time, duration) VALUES ($1, $2, $3, $4)', [reunion_id, parseDate(date), time, duration]);
     } catch (error) {
         throw error;
     } finally {

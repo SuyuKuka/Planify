@@ -41,9 +41,9 @@ CREATE TABLE proposition_date(
     date DATE NOT NULL,
     time TIME NOT NULL,
     duration TIME NOT NULL,
-    PRIMARY KEY (reunion_id, date, time),
+    PRIMARY KEY (reunion_id, date, time, duration),
     FOREIGN KEY (reunion_id) REFERENCES reunion(id),
-    UNIQUE (reunion_id, date, time)
+    UNIQUE (reunion_id, date, time, duration)
 );
 
 CREATE TABLE participants (

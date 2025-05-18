@@ -215,7 +215,7 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
             const res = responses[key];
             if (userId === userIdOrga) {
                 return `
-                    <div class="slot" data-date="${date}" data-time="${slot.time}" data-response="${res}">
+                    <div class="slot" data-date="${date}" data-time="${slot.time}" data-duration="${slot.duration}" data-response="${res}">
                         <div class="remove-slot">
                             &times;
                         </div>
@@ -229,7 +229,7 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
                     `;
             }
             return `
-                <div class="slot" data-date="${date}" data-time="${slot.time}" data-response="${res}">
+                <div class="slot" data-date="${date}" data-time="${slot.time}" data-duration="${slot.duration}" data-response="${res}">
                     <div>${date} à ${slot.time}</div>
                     durée : ${duration}
                     <div class="choice">
@@ -604,14 +604,15 @@ function removeSlot(reunionId) {
             if (slot) {
                 const date = slot.getAttribute('data-date');
                 const time = slot.getAttribute('data-time');
+                const duration = slot.getAttribute('data-duration');
 
-                const confirmed = confirm(`Supprimer le créneau ${date} à ${time} ?`);
+                const confirmed = confirm(`Supprimer le créneau ${date} à ${time} d'une durée de ${duration} ?`);
                 if (!confirmed) return;
                 
                 const res = await fetch(`/delete-slot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reunion_id: reunionId, date, time })
+                    body: JSON.stringify({ reunion_id: reunionId, date, time, duration })
                 }).catch(err => console.error('Erreur suppression slot :', err));
 
                 if (res.ok) {
@@ -629,13 +630,15 @@ function addDateTimeAfter(reunionId) {
             for (let group of groups) {
                 const dateInput = group.querySelector('input[type="date"]');
                 const timeInput = group.querySelector('input[type="time"]');
+                const durationInput = group.querySelector('input[name="duree"]');
                 const date = dateInput.value;
                 const time = timeInput.value;
+                const duration = durationInput.value;
                 if (dateInput && timeInput && date && time) {
                     const res = await fetch(`/add-slot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reunion_id: reunionId, date: formatDateTime(date), time })
+                    body: JSON.stringify({ reunion_id: reunionId, date: formatDateTime(date), time, duration })
                     }).catch(err => console.error('Erreur ajout slot :', err));
 
                     if (res.ok) {

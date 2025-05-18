@@ -144,9 +144,9 @@ async function postGetAllResponses(req, res) {
 }
 
 async function postDeleteSlot(req, res) {
-    const { reunion_id, date, time } = req.body;
+    const { reunion_id, date, time, duration } = req.body;
     try {
-        await Auth.deleteSlot(reunion_id, date, time);
+        await Auth.deleteSlot(reunion_id, date, time, duration);
         res.sendStatus(200);
     } catch (err) {
         console.error(err);
@@ -155,9 +155,9 @@ async function postDeleteSlot(req, res) {
 }
 
 async function postAddSlot(req, res) {
-    const { reunion_id, date, time } = req.body;
+    const { reunion_id, date, time, duration } = req.body;
     try {
-        await Auth.addSlot(reunion_id, date, time);
+        await Auth.addSlot(reunion_id, date, time, duration);
         res.sendStatus(200);
     } catch (err) {
         console.error(err);
