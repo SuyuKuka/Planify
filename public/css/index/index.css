@@ -17,6 +17,28 @@ html, body {
 	position: relative;
 }
 
+#time > span {
+  height: 50px;
+  padding: 4px;
+}
+
+#calendar-days-header > span {
+  flex: 1 1 0;
+}
+
+#calendar-columns {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  overflow-y: auto;
+  align-content: flex-start;
+}
+
+#calendar {
+  height: 100vh;
+}
+
 /* OVERLAY */
 
 #overlay {
