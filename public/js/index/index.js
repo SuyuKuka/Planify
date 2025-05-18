@@ -48,6 +48,198 @@ function createButton(value) {
     return `<button class='btn calendar-day'>${value}</button>`;
 }
 
+let month = today.getMonth();
+let day = mod(today.getDay() - 1, 7) + 1;
+let prevMonth = days[mod(month - 1, 12)];
+let date = today.getDate();
+
+const diff = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
+const monday = new Date(today.setDate(diff));
+const sunday = new Date(monday);
+sunday.setDate(sunday.getDate() + 6);
+
+function getVal(i) {
+    const val = date + (i) + 1 - day;
+    if (val <= 0) {
+        return prevMonth + val;
+    } else if (val > days[month]) {
+        return val - days[month];
+    } else {
+        return val;
+    }
+}
+
+// Boutons next et previous
+function updateVal(incrementDay) {
+    today.setDate(date + incrementDay);
+    year = today.getFullYear();
+    month = today.getMonth();
+    day = mod(today.getDay() - 1, 7) + 1;
+    prevMonth = days[mod(month - 1, 12)];
+    date = today.getDate();
+}
+
+function updateCalendarHeader() {
+    $('#calendar-days-header').remove();
+    $('#calendar > :nth-child(1)').after(createDaysHeader());
+}
+
+function updateDate() {
+    $("#calendar-header > :nth-child(2)").replaceWith(createDate());
+}
+
+async function updateCalendarSlot(reunionUserId) {
+    $('.proposition-slot').remove();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    let monday = new Date(today.setDate(diff));
+    let sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    monday = formatDateTime(monday);
+    sunday = formatDateTime(sunday);
+
+    let response;
+    try {
+        response = await fetch('/get-slots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reunion_id: reunionUserId, monday, sunday })
+        });
+    } catch (err) {
+        console.error('Erreur fetch :', err);
+        return;
+    }
+
+    if (!response.ok) {
+        console.error('Erreur réponse serveur');
+        return;
+    }
+
+    const slots = await response.json();
+
+   slots.forEach(slot => {
+        const [day, month, year] = slot.date.split('/').map(Number);
+        const slotDate = new Date(year, month - 1, day);
+
+        const getHourAsDecimal = (timeStr) => {
+            const [h, m] = timeStr.split(':').map(Number);
+            return h + m / 60;
+        };
+
+        const startHour = getHourAsDecimal(slot.time);
+        const endHour = getHourAsDecimal(slot.end_time);
+
+        const top = 50 * startHour;
+        const height = 50 * (endHour - startHour);
+
+        const jsDay = slotDate.getDay();
+        const customDay = jsDay === 0 ? 7 : jsDay;
+
+        const column = $(`#day-column-${customDay}`);
+        if (column.length > 0) {
+            const div = $('<div class="proposition-slot">Créneau réservé</div>');
+            div.css({
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "bold",
+                opacity: "0.9",
+                borderRadius: "10px",
+                backgroundColor: 'white',
+                position: 'absolute',
+                width: '100%',
+                top: `${top}px`,
+                height: `${height}px`,
+                border: '1px solid black',
+            });
+            column.append(div);
+        } else {
+            console.warn(`Colonne #day-column-${customDay} introuvable`);
+        }
+    });
+}
+
+// MOIS
+function createDate() {
+    const monthVal = [month];
+    if (date - day <= 0) {
+        monthVal.push(mod(month - 1, 12));
+    }
+    if (date + 6 - day > days[month]) {
+        monthVal.push(mod(month + 1, 12));
+    }
+
+    let text = '';
+    if (monthVal.length === 1) {
+        text = `${months[monthVal[0]]} ${year}`;
+    } else if (monthVal.length === 2) {
+        text = `${months[monthVal[1]]} - ${months[monthVal[0]]} ${year}`;
+    }
+
+    const h3 = $(`<h3>${text}</h3>`);
+    return h3;
+}
+
+$("#calendar-header > :nth-child(1)").after(createDate());
+
+// HEADERS
+const dayNames = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+
+
+function createDaysHeader() {
+    const header = $('<div id="calendar-days-header" class="bg-transparent d-flex"></div>');
+    
+    // div invisible pour match la colonne temps
+    const div = $('<div></div>').css({
+        width: "46px",
+        "background-color": $('#calendar-header').css('background-color')
+    });
+    header.append(div);
+
+
+    for (let i = 0; i < 7; i++) {
+        const val = getVal(i);
+        header.append(`<span class="text-center">${dayNames[i]} ${val}</span>`);
+    }
+
+    // div invisible pour match le scrollbar
+    header.append('<div style="min-width: 16px;"></div>');
+
+    return header;
+}
+$('#calendar').append(createDaysHeader());
+
+function createCalendarColumns() {
+    const container = $('<div id="calendar-columns"></div>');
+
+    const timeCol = $('<div id="time" class="text-center d-flex flex-column flex-grow-0 period"></div>');
+    for (let h = 0; h < 24; h++) {
+        const hour = h.toString().padStart(2, '0') + ':00';
+        timeCol.append(`<span style="border : 1px dashed lightgray">${hour}</span>`);
+    }
+    container.append(timeCol);
+
+    const colors = [
+        'rgba(255, 0, 0, 0.7)',
+        'rgba(255, 127, 0, 0.7)',
+        'rgba(255, 255, 0, 0.7)',
+        'rgba(0, 255, 0, 0.7)',
+        'rgba(0, 0, 255, 0.7)',
+        'rgba(75, 0, 130, 0.7)',
+        'rgba(139, 0, 255, 0.7)',
+    ]
+
+    for (let i = 1; i <= 7; i++) {
+        const col = $(`<div class="d-flex flex-grow-1 period" id="day-column-${i}"
+                style="background-color : ${colors[i % colors.length]}; position: relative;"></div>`);
+        container.append(col);
+    }
+
+    return container;
+}
+
+$('#calendar').append(createCalendarColumns());
+
 // Overlay
 const overlay = document.getElementById("overlay");
 const overlayReunion = document.getElementById("overlay-reunion");
@@ -120,7 +312,7 @@ document.getElementById('add-datetime').addEventListener('click', () => {
     group.innerHTML = `
         <input type="date" class="form-control mb-2" name="dates[]" required>
         <input type="time" class="form-control mb-2" name="times[]" required>
-        <input type="time" class="form-control mb-2" name="durees[]" required>
+        <input type="time" class="form-control mb-2" name="end_times[]" required>
         <button type="button" class="btn btn-danger btn-sm remove-datetime">Supprimer</button>`;
     container.appendChild(group);
     group.querySelector('.remove-datetime').addEventListener('click', () => group.remove());
@@ -134,7 +326,7 @@ function resetForm() {
     group.innerHTML = `
         <input type="date" class="form-control mb-2" name="dates[]" required>
         <input type="time" class="form-control mb-2" name="times[]" required>
-        <input type="time" class="form-control mb-2" name="durees[]" required>`;
+        <input type="time" class="form-control mb-2" name="end_times[]" required>`;
     container.appendChild(group);
 }
 
@@ -149,6 +341,7 @@ document.querySelectorAll('.reunion-button').forEach(button => {
             reunionUserId,
             JSON.parse(button.dataset.slots)
         );
+        updateCalendarSlot(button.dataset.id);
 
         const tmp = document.getElementById("add-participant");
         if (reunionUserId === currentUserId) {
@@ -162,19 +355,25 @@ document.querySelectorAll('.reunion-button').forEach(button => {
         }
         return button;
     });
+
+    $('#previous-calendar').on('click', () => {
+        updateVal(-7);
+        updateDate();
+        updateCalendarHeader();
+        updateCalendarSlot(button.dataset.id);
+    });
+
+    $('#next-calendar').on('click', () => {
+        updateVal(7);
+        updateDate();
+        updateCalendarHeader();
+        updateCalendarSlot(button.dataset.id);
+    });
 });
 
 
 function formatDateTime(dateString) {
     return new Date(dateString).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-}
-
-function formatDuree(duree) {
-    const [heures, minutes] = duree.split(":").map(Number);
-    let result = "";
-    if (heures > 0) result += `${heures}h`;
-    if (minutes > 0) result += `${minutes}m`;
-    return result || "0h";
 }
 
 async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots) {
@@ -201,7 +400,7 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
             <button id="close-button" onclick="resetReunionInfo()">&times;</button>
         </div>
         <div class="info-reunion" id="info-reunion">
-        <p>Proposition de la réunion :</p>
+        <p>Proposition(s) de la réunion :</p>
         <div id="reunion-name">Créer par : ${userIdOrga}</div>
         <div id="reunion-slots">`;
 
@@ -209,18 +408,19 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
         slotsHtml += slots.map(slot => {
             const tmp = new Date(slot.date); 
             const date = formatDateTime(tmp);
-            const duration = formatDuree(slot.duration);
+            const time = slot.time;
+            const end_time = slot.end_time;
 
             const key = `${date}_${slot.time}`;
             const res = responses[key];
             if (userId === userIdOrga) {
                 return `
-                    <div class="slot" data-date="${date}" data-time="${slot.time}" data-response="${res}">
+                    <div class="slot" data-date="${date}" data-time="${time}" data-end-time="${end_time}" data-response="${res}">
                         <div class="remove-slot">
                             &times;
                         </div>
-                        <div>${date} à ${slot.time}</div>
-                        durée : ${duration}
+                        <div>${date} à ${time}</div>
+                        jusqu'à : ${end_time}
                         <div class="choice" style="display: none;">
                             <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
                             <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
@@ -229,9 +429,9 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
                     `;
             }
             return `
-                <div class="slot" data-date="${date}" data-time="${slot.time}" data-response="${res}">
-                    <div>${date} à ${slot.time}</div>
-                    durée : ${duration}
+                <div class="slot" data-date="${date}" data-time="${time}" data-end-time="${end_time}" data-response="${res}">
+                    <div>${date} à ${time}</div>
+                    jusqu'à : ${end_time}
                     <div class="choice">
                         <button class="yes ${res === true ? 'selected-yes' : ''}">Oui</button>
                         <button class="no ${res === false ? 'selected-no' : ''}">Non</button>
@@ -259,11 +459,11 @@ async function showReunionInfo(reunionId, reunionName, userId, userIdOrga, slots
 
     if (userId === userIdOrga) {        
         infoDiv.innerHTML += `<div class="form-group-after" id="dates-container">
-                                Dates, heures et durées :
+                                Dates et heures :
                                 <div class="datetime-group-after">
                                     <input type="date" name="dates">
                                     <input type="time" name="times">
-                                    <input type="time" name="duree">
+                                    <input type="time" name="end_times">
                                 </div>
                             </div>
                             <button type="button" id="add-datetime-after" class="btn btn-sm btn-outline-secondary mb-3">
@@ -407,7 +607,7 @@ async function sendResponse(reunionId, userId, date, time, response) {
 
 function resetReunionInfo() {
     document.getElementById('right').innerHTML = `
-        <p>Proposition de la réunion :</p><br>
+        <p>Proposition(s) de la réunion :</p><br>
         <div class="info-reunion" id="info-reunion">Aucune réunion choisie.</div>`;
 }
 
@@ -604,14 +804,15 @@ function removeSlot(reunionId) {
             if (slot) {
                 const date = slot.getAttribute('data-date');
                 const time = slot.getAttribute('data-time');
+                const end_time = slot.getAttribute('data-end-time');
 
-                const confirmed = confirm(`Supprimer le créneau ${date} à ${time} ?`);
+                const confirmed = confirm(`Supprimer le créneau ${date} de ${time} à ${end_time} ?`);
                 if (!confirmed) return;
                 
                 const res = await fetch(`/delete-slot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reunion_id: reunionId, date, time })
+                    body: JSON.stringify({ reunion_id: reunionId, date, time, end_time })
                 }).catch(err => console.error('Erreur suppression slot :', err));
 
                 if (res.ok) {
@@ -629,13 +830,15 @@ function addDateTimeAfter(reunionId) {
             for (let group of groups) {
                 const dateInput = group.querySelector('input[type="date"]');
                 const timeInput = group.querySelector('input[type="time"]');
+                const endtimeInput = group.querySelector('input[name="end_times"]');
                 const date = dateInput.value;
                 const time = timeInput.value;
-                if (dateInput && timeInput && date && time) {
+                const endtime = endtimeInput.value;
+                if (dateInput && timeInput && endtimeInput && date && time && endtime) {
                     const res = await fetch(`/add-slot`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reunion_id: reunionId, date: formatDateTime(date), time })
+                    body: JSON.stringify({ reunion_id: reunionId, date: formatDateTime(date), time, end_time: endtime })
                     }).catch(err => console.error('Erreur ajout slot :', err));
 
                     if (res.ok) {
@@ -644,7 +847,7 @@ function addDateTimeAfter(reunionId) {
                         alert("Une erreur est survenue lors de l'ajout du créneau.");
                     }
                 } else {
-                    alert("Veuillez choisir une date et une heure.");
+                    alert("Veuillez choisir une date et une heure de début et fin.");
                 }
             }
         }

@@ -15,11 +15,6 @@
 				window.history.replaceState({}, '', url);
 			}
 		</script>
-		<%
-			const vues = ["semaine"];
-			const vueChoisie = vues.includes(vue) ? vue : "semaine";
-		%>
-		<link href="/css/index/<%= vueChoisie %>.css" rel="stylesheet">
         <link href="/css/bootstrap.min.css" rel="stylesheet">
         <link href="/css/nav.css" rel="stylesheet">
         <link href="/css/index/index.css" rel="stylesheet">
@@ -59,21 +54,21 @@
 					</div>
 				</div>
 				<!-- Calendrier -->
-				<div id="calendar" class="text-dark bg-warning d-flex flex-column col-12 col-sm">
+				<div id="calendar" class="text-dark d-flex flex-column col-12 col-sm">
 					<div id="calendar-header" class="d-flex justify-content-around">
-						<button type="button" class="btn btn-primary" id="previous-calendar"><</button>
+						<button type="button" class="btn btn-outline-dark" id="previous-calendar"><</button>
 						<div class="calendar-dropdown">
-							<button class="btn btn-primary dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" id="vue-dropdown" type="button"></button>
+							<button class="btn btn-outline-dark dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" id="vue-dropdown" type="button"></button>
 							<ul class="dropdown-menu" id="vue-dropdown-menu">
 							</ul>
 						</div>
-						<button type="button" class="btn btn-primary" id="next-calendar">></button>
+						<button type="button" class="btn btn-outline-dark" id="next-calendar">></button>
 					</div>
 				</div>
 				<!-- Propositions -->
 				<div class="p-1 col-12 col-sm-2" id="right">
 					<div class="info-reunion" id="info-reunion">
-						<p>Proposition de la réunion :</p><br>
+						<p>Proposition(s) de la réunion :</p><br>
 						Aucune réunion choisie.
 					</div>
 				</div>
@@ -84,18 +79,18 @@
 			<div id="top-overlay">
 				<button id="close-overlay">&times;</button>
 			</div>
-			<h2>Créer une reunion</h2>
-			<form action="/create" method="POST" id="form-reunion">
+			<h2>Créer une réunion</h2>
+			<form action="/create" method="POST" id="form-reunion" autocomplete="off">
 				<div class="form-group">
 					<label for="reunion-name">Nom de la reunion :</label>
 					<input type="text" class="form-control" name="name" id="name" placeholder="Nom de la reunion" required>
 				</div>
 				<div class="form-group" id="dates-container">
-					<label>Dates, heures et durees :</label>
+					<label>Dates et heures :</label>
 					<div class="datetime-group">
 						<input type="date" class="form-control mb-2" name="dates" required>
 						<input type="time" class="form-control mb-2" name="times" required>
-						<input type="time" class="form-control mb-2" name="durees" required>
+						<input type="time" class="form-control mb-2" name="end_times" required>
 					</div>
 				</div>
 				<button type="button" id="add-datetime" class="btn btn-sm btn-outline-secondary mb-3">
@@ -138,7 +133,6 @@
 		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 		<script src="/js/bootstrap.bundle.min.js"></script>
         <script src="/js/index/index.js"></script>
-		<script src="/js/index/<%= vueChoisie %>.js"></script>
 		<% const currentUserId = user_id; %> 
 		<script>const currentUserId = "<%= currentUserId %>";</script>
 	</body>

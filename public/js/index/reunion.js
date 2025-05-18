@@ -18,6 +18,7 @@ function listDateTime(reunion_id, temp_id) {
     container.innerHTML = parsedSlots.map(slot => {
         const date = formatDateTime(slot.date);
         const time = slot.time;
+        const end_time = slot.end_time;
 
         const slotResponses = parsedResponses.filter(r =>
             r.date === date && r.time === time
@@ -31,8 +32,8 @@ function listDateTime(reunion_id, temp_id) {
         const userResponse = slotResponses.find(r => r.user_id === temp_id)?.response;
 
         return `
-            <div class="slot" data-date="${date}" data-time="${time}" data-response="${userResponse}">
-                ${formatDateTime(slot.date)} à ${slot.time}
+            <div class="slot" data-date="${date}" data-time="${time}" data-end-time="${end_time}" data-response="${userResponse}">
+                ${date} à ${time} jusqu'à ${end_time}
                 <div class="choice">
                     <button class="yes ${userResponse === true ? 'selected-yes' : ''}">Oui</button>
                     <button class="no ${userResponse === false ? 'selected-no' : ''}">Non</button>
