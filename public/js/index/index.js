@@ -53,6 +53,11 @@ let day = mod(today.getDay() - 1, 7) + 1;
 let prevMonth = days[mod(month - 1, 12)];
 let date = today.getDate();
 
+const diff = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
+const monday = new Date(today.setDate(diff));
+const sunday = new Date(monday);
+sunday.setDate(sunday.getDate() + 6);
+
 function getVal(i) {
     const val = date + (i) + 1 - day;
     if (val <= 0) {
@@ -83,16 +88,78 @@ function updateDate() {
     $("#calendar-header > :nth-child(2)").replaceWith(createDate());
 }
 
-$('#previous-calendar').on('click', () => {
-    updateVal(-7);
-    updateDate();
-    updateCalendarHeader();
-});
-$('#next-calendar').on('click', () => {
-    updateVal(7);
-    updateDate();
-    updateCalendarHeader();
-});
+async function updateCalendarSlot(reunionUserId) {
+    $('.proposition-slot').remove();
+    const day = today.getDay();
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    let monday = new Date(today.setDate(diff));
+    let sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    monday = formatDateTime(monday);
+    sunday = formatDateTime(sunday);
+
+    let response;
+    try {
+        response = await fetch('/get-slots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reunion_id: reunionUserId, monday, sunday })
+        });
+    } catch (err) {
+        console.error('Erreur fetch :', err);
+        return;
+    }
+
+    if (!response.ok) {
+        console.error('Erreur réponse serveur');
+        return;
+    }
+
+    const slots = await response.json();
+    console.log("Slots récupérés :", slots);
+
+   slots.forEach(slot => {
+        const [day, month, year] = slot.date.split('/').map(Number);
+        const slotDate = new Date(year, month - 1, day);
+
+        const getHourAsDecimal = (timeStr) => {
+            const [h, m] = timeStr.split(':').map(Number);
+            return h + m / 60;
+        };
+
+        const startHour = getHourAsDecimal(slot.time);
+        const endHour = getHourAsDecimal(slot.end_time);
+
+        const top = 50 * startHour;
+        const height = 50 * (endHour - startHour);
+
+        const jsDay = slotDate.getDay();
+        const customDay = jsDay === 0 ? 7 : jsDay;
+
+        const column = $(`#day-column-${customDay}`);
+        if (column.length > 0) {
+            const div = $('<div class="proposition-slot">Créneau réservé</div>');
+            div.css({
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "bold",
+                opacity: "0.9",
+                borderRadius: "10px",
+                backgroundColor: 'white',
+                position: 'absolute',
+                width: '100%',
+                top: `${top}px`,
+                height: `${height}px`,
+                border: '1px solid black',
+            });
+            column.append(div);
+            console.log(`Ajouté dans #day-column-${customDay} pour la date ${slot.date}`);
+        } else {
+            console.warn(`Colonne #day-column-${customDay} introuvable`);
+        }
+    });
+}
 
 // MOIS
 function createDate() {
@@ -150,7 +217,7 @@ function createCalendarColumns() {
     const timeCol = $('<div id="time" class="text-center d-flex flex-column flex-grow-0 period"></div>');
     for (let h = 0; h < 24; h++) {
         const hour = h.toString().padStart(2, '0') + ':00';
-        timeCol.append(`<span>${hour}</span>`);
+        timeCol.append(`<span style="border : 1px dashed lightgray">${hour}</span>`);
     }
     container.append(timeCol);
 
@@ -164,10 +231,11 @@ function createCalendarColumns() {
         'rgba(139, 0, 255, 0.7)',
     ]
 
-    colors.forEach(color => {
-        const col = $(`<div class="d-flex flex-grow-1 period" style="background-color : ${color}"></div>`);
+    for (let i = 1; i <= 7; i++) {
+        const col = $(`<div class="d-flex flex-grow-1 period" id="day-column-${i}"
+                style="background-color : ${colors[i % colors.length]}; position: relative;"></div>`);
         container.append(col);
-    });
+    }
 
     return container;
 }
@@ -275,6 +343,7 @@ document.querySelectorAll('.reunion-button').forEach(button => {
             reunionUserId,
             JSON.parse(button.dataset.slots)
         );
+        updateCalendarSlot(button.dataset.id);
 
         const tmp = document.getElementById("add-participant");
         if (reunionUserId === currentUserId) {
@@ -287,6 +356,20 @@ document.querySelectorAll('.reunion-button').forEach(button => {
             document.getElementById("leave-reunion").style.display = "inline-block";
         }
         return button;
+    });
+
+    $('#previous-calendar').on('click', () => {
+        updateVal(-7);
+        updateDate();
+        updateCalendarHeader();
+        updateCalendarSlot(button.dataset.id);
+    });
+
+    $('#next-calendar').on('click', () => {
+        updateVal(7);
+        updateDate();
+        updateCalendarHeader();
+        updateCalendarSlot(button.dataset.id);
     });
 });
 

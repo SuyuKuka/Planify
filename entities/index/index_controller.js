@@ -63,6 +63,19 @@ async function postCreateReunion(req, res) {
     res.redirect('/');
 }
 
+async function postGetSlots(req, res) {
+    try {
+        const { reunion_id, monday, sunday } = req.body;
+        if (typeof reunion_id !== undefined) {
+            const slots = await Auth.fetchSlotsOfCurrentWeek(reunion_id, monday, sunday);
+            res.json(slots);
+        }
+    } catch (error) {
+        console.error('Erreur récupération slots:', error);
+        res.status(500).json({ error: 'Erreur serveur' });
+    }
+}
+
 async function getGetReponses(req, res) {
     const { reunion_id, user_id } = req.params;
     const result = await Auth.getReponses(reunion_id, user_id);
@@ -198,14 +211,14 @@ async function postInsertICS(req, res) {
 
 module.exports = { 
     getIndex, 
-    getSearchProfil, 
-    postCreateReunion, 
-    getGetReponses, 
-    postSendReponse, 
-    getParticipantsLists, 
+    getSearchProfil,
+    postCreateReunion,
+    getGetReponses,
+    postSendReponse,
+    getParticipantsLists,
     postGetEmail,
-    postDeleteReunion, 
-    postLeaveReunion, 
+    postDeleteReunion,
+    postLeaveReunion,
     postProfileParticipants,
     postDeleteParticipant,
     postAddParticipant,
@@ -213,5 +226,6 @@ module.exports = {
     postDeleteSlot,
     postAddSlot,
     getParticipateReunion,
-    postInsertICS
+    postInsertICS,
+    postGetSlots
 }; 

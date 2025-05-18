@@ -115,6 +115,21 @@ async function createReunion(name, dateTimePairs, participants, user_id, email) 
     }
 }
 
+async function fetchSlotsOfCurrentWeek(reunion_id, monday, sunday) {
+    const client = await getPool().connect();
+    try {
+        const result = await client.query(`
+            SELECT TO_CHAR(date, 'DD/MM/YYYY') AS date, time, end_time FROM proposition_date
+            WHERE date >= $1 AND date <= $2 AND reunion_id = $3
+        `, [monday, sunday, reunion_id]);
+
+        return result.rows;
+    } finally {
+        client.release();
+    }
+}
+
+
 async function getReunions(user_id) {
     const client = await getPool().connect();
     try {
@@ -363,7 +378,7 @@ async function participateReunion(token) {
         }
 
         const prop = await client.query(`
-            SELECT pd.date, pd.time, pd.end_time, r.response
+            SELECT pd.date, pd.time, r.response
             FROM proposition_date pd
             LEFT JOIN response r
             ON pd.reunion_id = r.reunion_id
@@ -529,5 +544,6 @@ module.exports = {
     addSlot,
     participateReunion,
     insertICS,
-    getNoAcc
+    getNoAcc,
+    fetchSlotsOfCurrentWeek
 };
